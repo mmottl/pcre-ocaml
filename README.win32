@@ -1,0 +1,24 @@
+Installation on Win32 port.
+
+Need Cygwin, MSVC, findlib.
+
+Install libpcre:
+
+1) Get pcre library, unpack it;
+2) Copy pcre_make.win32/Makefile.win32 and pcre.h to pcre dir;
+3) cd to pcre dir;
+4) Read 'non-unix-use' and make changes from (1);
+
+5) make -f Makefile.win32
+6) copy pcre.h and libpcre.lib to your INCLUDE and LIB path;
+
+Install ocaml-pcre:
+
+1) cd lib 
+2) make -f Makefile.win32 all
+3) make -f Makefile.win32 opt
+4) make -f Makefile.win32 install
+
+Best regards,
+Artem Prisyaznuk
+tema@sit.kiev.ua

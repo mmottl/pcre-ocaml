@@ -159,7 +159,7 @@ static void raise_with_two_args(value tag, value arg1, value arg2)
   /* Protects tag, arg1 and arg2 from being reclaimed by the garbage
      collector when the exception value is allocated */
   Begin_roots3(tag, arg1, arg2);
-    v_exc = alloc_small(3, 0);
+    v_exc = caml_alloc_small(3, 0);
     Field(v_exc, 0) = tag;
     Field(v_exc, 1) = arg1;
     Field(v_exc, 2) = arg2;
@@ -170,7 +170,7 @@ static void raise_with_two_args(value tag, value arg1, value arg2)
 
 /* Makes OCaml-string from PCRE-version */
 CAMLprim value pcre_version_stub(value unit) {
-  return copy_string((char *) pcre_version());
+  return caml_copy_string((char *) pcre_version());
 }
 
 /* Makes compiled regular expression from compilation options, an optional
@@ -193,13 +193,13 @@ CAMLprim value pcre_compile_stub(value v_opt, value v_tables, value v_pat)
   /* Raises appropriate exception [BadPattern] if the pattern could not
      be compiled */
   if (regexp == NULL) raise_with_two_args(*pcre_exc_BadPattern,
-                                          copy_string((char *) error),
+                                          caml_copy_string((char *) error),
                                           Val_int(error_ofs));
 
   /* Finalized value: GC will do a full cycle every 500 regexp allocations
      (one regexp consumes in average probably less than 100 bytes ->
      maximum of 50000 bytes unreclaimed regexps) */
-  v_rex = alloc_final(4, pcre_dealloc_regexp, 100, 50000);
+  v_rex = caml_alloc_final(4, pcre_dealloc_regexp, 100, 50000);
 
   /* Field[1]: compiled regular expression (Field[0] is finalizing
      function! See above!) */
@@ -252,7 +252,7 @@ CAMLprim value pcre_get_match_limit_stub(value v_rex){
   if (extra == NULL) return None;
   if (extra->flags & PCRE_EXTRA_MATCH_LIMIT) {
     value lim = Val_int(extra->match_limit);
-    value res = alloc_small(1, 0);
+    value res = caml_alloc_small(1, 0);
     Field(res, 0) = lim;
     return res;
   }
@@ -305,7 +305,7 @@ CAMLprim value pcre_firstbyte_stub(value v_rex)
         value v_firstbyte;
         /* Allocates the non-constant constructor [`Char of char] and fills
            in the appropriate value */
-        v_firstbyte = alloc_small(2, 0);
+        v_firstbyte = caml_alloc_small(2, 0);
         Field(v_firstbyte, 0) = var_Char;
         Field(v_firstbyte, 1) = Val_int(firstbyte);
         return v_firstbyte;
@@ -330,7 +330,7 @@ CAMLprim value pcre_firsttable_stub(value v_rex)
     int i;
 
     Begin_roots1(v_rex);
-      v_res_str = alloc_string(32);
+      v_res_str = caml_alloc_string(32);
     End_roots();
 
     ptr = String_val(v_res_str);
@@ -338,7 +338,7 @@ CAMLprim value pcre_firsttable_stub(value v_rex)
 
     Begin_roots1(v_res_str);
       /* Allocates [Some string] from firsttable */
-      v_res = alloc_small(1, 0);
+      v_res = caml_alloc_small(1, 0);
     End_roots();
 
     Field(v_res, 0) = v_res_str;
@@ -361,7 +361,7 @@ CAMLprim value pcre_lastliteral_stub(value v_rex)
                                          "pcre_lastliteral_stub");
   else {
     /* Allocates [Some char] */
-    value v_res = alloc_small(1, 0);
+    value v_res = caml_alloc_small(1, 0);
     Field(v_res, 0) = Val_int(lastliteral);
     return v_res;
   }
@@ -447,7 +447,7 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_ofs,
 
       Begin_roots2(v_rex, v_cof);
         Begin_roots2(v_subj, v_ovec);
-          v_substrings = alloc_small(2, 0);
+          v_substrings = caml_alloc_small(2, 0);
         End_roots();
 
         Field(v_substrings, 0) = v_subj;
@@ -519,7 +519,7 @@ CAMLprim value pcre_maketables_stub(value unit)
   /* GC will do a full cycle every 100 table set allocations
      (one table set consumes 864 bytes -> maximum of 86400 bytes
      unreclaimed table sets) */
-  const value v_res = alloc_final(2, pcre_dealloc_tables, 864, 86400);
+  const value v_res = caml_alloc_final(2, pcre_dealloc_tables, 864, 86400);
   Field(v_res, 1) = (value) pcre_maketables();
   return v_res;
 }

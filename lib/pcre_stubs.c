@@ -481,7 +481,7 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_ofs,
           case PCRE_ERROR_BADUTF8 : raise_constant(*pcre_exc_BadUTF8);
           case PCRE_ERROR_BADUTF8_OFFSET :
             raise_constant(*pcre_exc_BadUTF8Offset);
-          case PCRE_ERROR_CALLOUT : mlraise(cod.v_exn);
+          case PCRE_ERROR_CALLOUT : caml_raise(cod.v_exn);
           default :
             raise_with_string(*pcre_exc_InternalError, "pcre_exec_stub");
         }

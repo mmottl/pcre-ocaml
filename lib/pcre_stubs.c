@@ -165,7 +165,7 @@ static void raise_with_two_args(value tag, value arg1, value arg2)
     Field(v_exc, 2) = arg2;
   End_roots();
 
-  mlraise(v_exc);
+  caml_raise(v_exc);
 }
 
 /* Makes OCaml-string from PCRE-version */

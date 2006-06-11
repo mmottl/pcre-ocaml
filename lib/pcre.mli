@@ -84,6 +84,7 @@ and cflag =
   | `NO_AUTO_CAPTURE (** Disables the use of numbered capturing parentheses *)
   | `AUTO_CALLOUT    (** Automatically inserts callouts with id 255
                          before each pattern item *)
+  | `FIRSTLINE       (** Unanchored patterns must match before/at first NL *)
   ]
 
 val cflags : cflag list -> icflag

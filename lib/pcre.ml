@@ -72,6 +72,7 @@ type cflag =
   | `NO_UTF8_CHECK
   | `NO_AUTO_CAPTURE
   | `AUTO_CALLOUT
+  | `FIRSTLINE
   ]
 
 let int_of_cflag = function
@@ -87,6 +88,7 @@ let int_of_cflag = function
   | `NO_AUTO_CAPTURE -> 0x1000
   | `NO_UTF8_CHECK -> 0x2000
   | `AUTO_CALLOUT -> 0x4000
+  | `FIRSTLINE -> 0x40000
 
 let coll_icflag icflag flag = int_of_cflag flag lor icflag
 let cflags flags = List.fold_left coll_icflag 0 flags
@@ -103,12 +105,14 @@ let cflag_of_int = function
   | 0x0800 -> `UTF8
   | 0x1000 -> `NO_AUTO_CAPTURE
   | 0x2000 -> `NO_UTF8_CHECK
+  | 0x4000 -> `AUTO_CALLOUT
+  | 0x40000 -> `FIRSTLINE
   | _ -> failwith "Pcre.cflag_list: unknown compilation flag"
 
 let all_cflags =
   [
     0x0001; 0x0002; 0x0004; 0x0008; 0x0010; 0x0020;
-    0x0040; 0x0200; 0x0800; 0x1000; 0x2000;
+    0x0040; 0x0200; 0x0800; 0x1000; 0x2000; 0x4000; 0x40000;
   ]
 
 let cflag_list icflags =

@@ -1,3 +1,10 @@
+2006-06-11:  Updated to pcre-5.0!
+
+             New representation for callbacks: they now take only one
+             argument (a record of the callback data).
+
+             Added partial matching and auto callouts.
+
 2006-01-16:  Updated OCamlMakefile.
 
              Removed a superfluous binding.

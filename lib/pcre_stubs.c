@@ -1,7 +1,7 @@
 /*
    PCRE-OCAML - Perl Compatibility Regular Expressions for OCaml
 
-   Copyright (C) 1999-2005  Markus Mottl
+   Copyright (C) 1999-2006  Markus Mottl
    email: markus.mottl@gmail.com
    WWW:   http://www.ocaml.info
 
@@ -43,13 +43,15 @@ typedef const unsigned char *chartables;  /* Type of chartable sets */
 
 /* Contents of callout data */
 struct cod {
-  value v_substrings;  /* Substrings matched so far */
-  value v_cof;         /* Callout function */
-  value v_exn;         /* Possible exception raised by callout function */
+  value *v_substrings_p;  /* Pointer to substrings matched so far */
+  value *v_cof_p;         /* Pointer to callout function */
+  value v_exn;            /* Possible exception raised by callout function */
 };
 
 /* Cache for exceptions */
 static value *pcre_exc_Not_found     = NULL;  /* Exception [Not_found] */
+static value *pcre_exc_Partial       = NULL;  /* Exception [Partial] */
+static value *pcre_exc_BadPartial    = NULL;  /* Exception [BadPartial] */
 static value *pcre_exc_BadPattern    = NULL;  /* Exception [BadPattern] */
 static value *pcre_exc_BadUTF8       = NULL;  /* Exception [BadUTF8] */
 static value *pcre_exc_BadUTF8Offset = NULL;  /* Exception [BadUTF8Offset] */
@@ -75,7 +77,11 @@ static int pcre_callout_handler(pcre_callout_block* cb)
   if (cod != NULL) {
     /* Callout is available */
     value v_res;
-    const value v_substrings = cod->v_substrings;
+
+    /* Set up parameter array */
+    value v_callout_data = caml_alloc_small(6, 0);
+
+    const value v_substrings = *cod->v_substrings_p;
 
     const int capture_top = cb->capture_top;
     int subgroups2 = capture_top << 1;
@@ -84,25 +90,23 @@ static int pcre_callout_handler(pcre_callout_block* cb)
     const int *ovec_src = cb->offset_vector + subgroups2_1;
     long int *ovec_dst = &Field(Field(v_substrings, 1), 0) + subgroups2_1;
 
-    value params[6];
-    value *pptr = &params[0];
-
     /* Copy preliminary substring information */
     while (subgroups2--) {
       *ovec_dst = Val_int(*ovec_src);
       --ovec_src; --ovec_dst;
     }
 
-    /* Set up parameter array */
-    *pptr = v_substrings; ++pptr;
-    *pptr = Val_int(cb->start_match); ++pptr;
-    *pptr = Val_int(cb->current_position); ++pptr;
-    *pptr = Val_int(capture_top); ++pptr;
-    *pptr = Val_int(cb->capture_last); ++pptr;
-    *pptr = Val_int(cb->callout_number);
+    Field(v_callout_data, 0) = Val_int(cb->callout_number);
+    Field(v_callout_data, 1) = v_substrings;
+    Field(v_callout_data, 2) = Val_int(cb->start_match);
+    Field(v_callout_data, 3) = Val_int(cb->current_position);
+    Field(v_callout_data, 4) = Val_int(capture_top);
+    Field(v_callout_data, 5) = Val_int(cb->capture_last);
+    Field(v_callout_data, 6) = Val_int(cb->pattern_position);
+    Field(v_callout_data, 7) = Val_int(cb->next_item_length);
 
     /* Perform callout */
-    v_res = callbackN_exn(cod->v_cof, 6, params);
+    v_res = callback_exn(*cod->v_cof_p, v_callout_data);
 
     if (Is_exception_result(v_res)) {
       /* Callout raised an exception */
@@ -121,6 +125,8 @@ static int pcre_callout_handler(pcre_callout_block* cb)
 CAMLprim value pcre_ocaml_init(value unit)
 {
   pcre_exc_Not_found     = caml_named_value("Pcre.Not_found");
+  pcre_exc_Partial       = caml_named_value("Pcre.Partial");
+  pcre_exc_BadPartial    = caml_named_value("Pcre.BadPartial");
   pcre_exc_BadPattern    = caml_named_value("Pcre.BadPattern");
   pcre_exc_BadUTF8       = caml_named_value("Pcre.BadUTF8");
   pcre_exc_InternalError = caml_named_value("Pcre.InternalError");
@@ -409,7 +415,9 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_ofs,
       if (ret < 0) {
         switch(ret) {
           case PCRE_ERROR_NOMATCH : raise_constant(*pcre_exc_Not_found);
+          case PCRE_ERROR_PARTIAL : raise_constant(*pcre_exc_Partial);
           case PCRE_ERROR_MATCHLIMIT : raise_constant(*pcre_exc_MatchLimit);
+          case PCRE_ERROR_BADPARTIAL : raise_constant(*pcre_exc_BadPartial);
           case PCRE_ERROR_BADUTF8 : raise_constant(*pcre_exc_BadUTF8);
           case PCRE_ERROR_BADUTF8_OFFSET :
             raise_constant(*pcre_exc_BadUTF8Offset);
@@ -440,12 +448,12 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_ofs,
       char *subj = malloc(sizeof(char) * len);
       int *ovec = malloc(sizeof(int) * subgroups3);
       int ret;
-      struct cod cod = { (value) NULL, (value) NULL, (value) NULL };
+      struct cod cod = { (value *) NULL, (value *) NULL, (value) NULL };
       struct pcre_extra new_extra = { PCRE_EXTRA_CALLOUT_DATA, NULL, 0, NULL };
 
       memcpy(subj, ocaml_subj, len);
 
-      Begin_roots2(v_rex, v_cof);
+      Begin_roots3(v_rex, v_cof, v_substrings);
         Begin_roots2(v_subj, v_ovec);
           v_substrings = caml_alloc_small(2, 0);
         End_roots();
@@ -453,8 +461,8 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_ofs,
         Field(v_substrings, 0) = v_subj;
         Field(v_substrings, 1) = v_ovec;
 
-        cod.v_substrings = v_substrings;
-        cod.v_cof = v_cof;
+        cod.v_substrings_p = &v_substrings;
+        cod.v_cof_p = &v_cof;
         new_extra.callout_data = &cod;
 
         if (extra == NULL) {
@@ -477,7 +485,9 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_ofs,
         free(ovec);
         switch(ret) {
           case PCRE_ERROR_NOMATCH : raise_constant(*pcre_exc_Not_found);
+          case PCRE_ERROR_PARTIAL : raise_constant(*pcre_exc_Partial);
           case PCRE_ERROR_MATCHLIMIT : raise_constant(*pcre_exc_MatchLimit);
+          case PCRE_ERROR_BADPARTIAL : raise_constant(*pcre_exc_BadPartial);
           case PCRE_ERROR_BADUTF8 : raise_constant(*pcre_exc_BadUTF8);
           case PCRE_ERROR_BADUTF8_OFFSET :
             raise_constant(*pcre_exc_BadUTF8Offset);

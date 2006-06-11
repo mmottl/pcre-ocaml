@@ -1,7 +1,7 @@
 (*
    PCRE-OCAML - Perl Compatibility Regular Expressions for OCaml
 
-   Copyright (C) 1999-2005  Markus Mottl
+   Copyright (C) 1999-2006  Markus Mottl
    email: markus.mottl@gmail.com
    WWW:   http://www.ocaml.info
 
@@ -26,6 +26,13 @@
 
 
 (** {6 Exceptions} *)
+
+(** [Partial] gets raised when a string matched the pattern partially. *)
+exception Partial
+
+(** [BadPartial] gets raised when a pattern contains items that cannot
+    be used together with partial matching. *)
+exception BadPartial
 
 (** [BadPattern (msg, pos)] gets raised when the regular expression is
     malformed. The reason is in [msg], the position of the error in the
@@ -75,6 +82,8 @@ and cflag =
                          efficiency reasons. WARNING: invalid UTF8
                          strings may cause a crash then! *)
   | `NO_AUTO_CAPTURE (** Disables the use of numbered capturing parentheses *)
+  | `AUTO_CALLOUT    (** Automatically inserts callouts with id 255
+                         before each pattern item *)
   ]
 
 val cflags : cflag list -> icflag
@@ -87,10 +96,11 @@ val cflag_list : icflag -> cflag list
 
 (** Runtime flags *)
 type rflag =
-  [ `ANCHORED   (** Treats pattern as if it were anchored *)
-  | `NOTBOL     (** Beginning of string is not treated as beginning of line *)
-  | `NOTEOL     (** End of string is not treated as end of line *)
-  | `NOTEMPTY   (** Empty strings are not considered to be a valid match *)
+  [ `ANCHORED  (** Treats pattern as if it were anchored *)
+  | `NOTBOL    (** Beginning of string is not treated as beginning of line *)
+  | `NOTEOL    (** End of string is not treated as end of line *)
+  | `NOTEMPTY  (** Empty strings are not considered to be a valid match *)
+  | `PARTIAL   (** Turns on partial matching *)
   ]
 
 val rflags : rflag list -> irflag
@@ -300,31 +310,31 @@ val get_named_substring_ofs : regexp -> string -> substrings -> int * int
 
 (** {6 Callouts} *)
 
+type callout_data =
+  {
+    callout_number : int; (** Callout number *)
+    substrings : substrings; (** Substrings matched so far *)
+    start_match : int;  (** Subject start offset of current match attempt *)
+    current_position : int;  (** Subject offset of current match pointer *)
+    capture_top : int;  (** Number of the highest captured substring so far *)
+    capture_last : int;  (** Number of the most recently captured substring *)
+    pattern_position : int;  (** Offset of next match item in pattern string *)
+    next_item_length : int;  (** Length of next match item in pattern string *)
+  }
+
 (** Type of callout functions *)
-type callout =
-  substrings -> (** Substrings matched so far *)
-  int ->        (** Offset at which current match attempt started in subject *)
-  int ->        (** Offset within the subject of the current match pointer *)
-  int ->        (** Number of the highest captured substring so far *)
-  int ->        (** Number of the most recently captured substring *)
-  int ->        (** Callout number *)
-  unit
-(** Callout functions have the form:
-
-    [callout
-      substrings match_start current_position
-      capture_top capture_last callout_number]
-
-    They are indicated in patterns as "(?Cn)" where "n" is a
-    [callout_number] ranging from 0 to 255. Substrings captured so far
-    are accesible as usual via [substrings]. You will have to consider
+type callout = callout_data -> unit
+(** Callouts are referred to in patterns as "(?Cn)" where "n" is a
+    [callout_number] ranging from 0 to 255.  Substrings captured so far
+    are accessible as usual via [substrings].  You will have to consider
     [capture_top] and [capture_last] to know about the current state of
     valid substrings.
 
     By raising exception [Backtrack] within a callout function, the user
     can force the pattern matching engine to backtrack to other possible
-    solutions. Other exceptions will terminate matching immediately and
-    return control to OCaml. *)
+    solutions.  Other exceptions will terminate matching immediately
+    and return control to OCaml.
+*)
 
 
 (** {6 Matching of patterns and subpattern extraction} *)

@@ -1,7 +1,7 @@
 (*
    PCRE-OCAML - Perl Compatibility Regular Expressions for OCaml
 
-   Copyright (C) 1999-2005  Markus Mottl
+   Copyright (C) 1999-2006  Markus Mottl
    email: markus.mottl@gmail.com
    WWW:   http://www.ocaml.info
 
@@ -25,6 +25,8 @@
 
 (* Public exceptions and their registration with the C runtime *)
 
+exception Partial
+exception BadPartial
 exception BadPattern of string * int
 exception BadUTF8
 exception BadUTF8Offset
@@ -38,6 +40,8 @@ external pcre_ocaml_init : unit -> unit = "pcre_ocaml_init"
 (* Registers exceptions with the C runtime and caches polymorphic variants *)
 let _ =
   Callback.register_exception "Pcre.Not_found" Not_found;
+  Callback.register_exception "Pcre.Partial" Partial;
+  Callback.register_exception "Pcre.BadPartial" BadPartial;
   Callback.register_exception "Pcre.BadPattern" (BadPattern ("", 0));
   Callback.register_exception "Pcre.BadUTF8" BadUTF8;
   Callback.register_exception "Pcre.BadUTF8Offset" BadUTF8Offset;
@@ -55,7 +59,8 @@ type irflag = int
 (* Compilation flags *)
 
 type cflag =
-  [ `CASELESS
+  [
+  | `CASELESS
   | `MULTILINE
   | `DOTALL
   | `EXTENDED
@@ -65,7 +70,9 @@ type cflag =
   | `UNGREEDY
   | `UTF8
   | `NO_UTF8_CHECK
-  | `NO_AUTO_CAPTURE ]
+  | `NO_AUTO_CAPTURE
+  | `AUTO_CALLOUT
+  ]
 
 let int_of_cflag = function
   | `CASELESS -> 0x0001
@@ -79,6 +86,7 @@ let int_of_cflag = function
   | `UTF8 -> 0x0800
   | `NO_AUTO_CAPTURE -> 0x1000
   | `NO_UTF8_CHECK -> 0x2000
+  | `AUTO_CALLOUT -> 0x4000
 
 let coll_icflag icflag flag = int_of_cflag flag lor icflag
 let cflags flags = List.fold_left coll_icflag 0 flags
@@ -113,16 +121,20 @@ let cflag_list icflags =
 (* Runtime flags *)
 
 type rflag =
-  [ `ANCHORED
+  [
+  | `ANCHORED
   | `NOTBOL
   | `NOTEOL
-  | `NOTEMPTY ]
+  | `NOTEMPTY
+  | `PARTIAL
+  ]
 
 let int_of_rflag = function
   | `ANCHORED -> 0x0010
   | `NOTBOL   -> 0x0080
   | `NOTEOL   -> 0x0100
   | `NOTEMPTY -> 0x0400
+  | `PARTIAL -> 0x8000
 
 let coll_irflag irflag flag = int_of_rflag flag lor irflag
 let rflags flags = List.fold_left coll_irflag 0 flags
@@ -132,9 +144,10 @@ let rflag_of_int = function
   | 0x0080 -> `NOTBOL
   | 0x0100 -> `NOTEOL
   | 0x0400 -> `NOTEMPTY
+  | 0x8000 -> `PARTIAL
   | _ -> failwith "Pcre.rflag_list: unknown runtime flag"
 
-let all_rflags = [0x0010; 0x0080; 0x0100; 0x0400]
+let all_rflags = [0x0010; 0x0080; 0x0100; 0x0400; 0x8000]
 
 let rflag_list irflags =
   let coll flag_list flag =
@@ -251,6 +264,20 @@ let def_rex = regexp "\\s+"
 
 type substrings = string * int array
 
+type callout_data =
+  {
+    callout_number : int;
+    substrings : substrings;
+    start_match : int;
+    current_position : int;
+    capture_top : int;
+    capture_last : int;
+    pattern_position : int;
+    next_item_length : int;
+  }
+
+type callout = callout_data -> unit
+
 let get_subject (subj, _) = subj
 
 let num_of_subs (_, ovector) = Array.length ovector / 3
@@ -310,8 +337,6 @@ let get_named_substring rex name substrings =
 
 let get_named_substring_ofs rex name substrings =
   get_substring_ofs substrings (get_stringnumber rex name)
-
-type callout = substrings -> int -> int -> int -> int -> int -> unit
 
 external unsafe_pcre_exec :
   irflag -> regexp -> int -> string ->

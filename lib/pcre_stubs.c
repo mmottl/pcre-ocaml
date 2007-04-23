@@ -106,7 +106,7 @@ static int pcre_callout_handler(pcre_callout_block* cb)
     Field(v_callout_data, 7) = Val_int(cb->next_item_length);
 
     /* Perform callout */
-    v_res = callback_exn(*cod->v_cof_p, v_callout_data);
+    v_res = caml_callback_exn(*cod->v_cof_p, v_callout_data);
 
     if (Is_exception_result(v_res)) {
       /* Callout raised an exception */

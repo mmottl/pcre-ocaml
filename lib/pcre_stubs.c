@@ -240,7 +240,7 @@ CAMLprim value pcre_study_stub(value v_rex)
 CAMLprim value pcre_set_imp_match_limit_stub(value v_rex, value v_lim){
   pcre_extra *extra = (pcre_extra *) Field(v_rex, 2);
   if (extra == NULL) {
-    extra = pcre_malloc(sizeof(pcre_extra));
+    extra = caml_stat_alloc(sizeof(pcre_extra));
     extra->flags = PCRE_EXTRA_MATCH_LIMIT;
     Field(v_rex, 2) = (value) extra;
   }
@@ -445,8 +445,8 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_ofs,
     else {
       value v_cof = Field(v_maybe_cof, 0);
       value v_substrings;
-      char *subj = malloc(sizeof(char) * len);
-      int *ovec = malloc(sizeof(int) * subgroups3);
+      char *subj = caml_stat_alloc(sizeof(char) * len);
+      int *ovec = caml_stat_alloc(sizeof(int) * subgroups3);
       int ret;
       struct cod cod = { (value *) NULL, (value *) NULL, (value) NULL };
       struct pcre_extra new_extra = { PCRE_EXTRA_CALLOUT_DATA, NULL, 0, NULL };

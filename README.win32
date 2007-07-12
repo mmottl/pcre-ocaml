@@ -1,24 +1,41 @@
-Installation on Win32 port.
+1. Read README.win32 in the OCaml distribution and download the third
+   party software for the native windows distribution.  Prepare a shell
+   with the right PATH; typically create a .bat file containing:
 
-Need Cygwin, MSVC, findlib.
+   CALL "C:\Program Files\Microsoft Visual Studio 8\Common7\Tools\vsvars32.bat"
+   CALL "c:\Program Files\Microsoft Platform SDK"\SetEnv.Cmd /SRV32
+   @cmd
 
-Install libpcre:
+   From now on, we assume you use such a shell.
 
-1) Get pcre library, unpack it;
-2) Copy pcre_make.win32/Makefile.win32 and pcre.h to pcre dir;
-3) cd to pcre dir;
-4) Read 'non-unix-use' and make changes from (1);
+2. Go to <http://www.pcre.org/>, download the latest pcre tarball
+   (tested with 7.2), and unpack it (say in pcre-7.2).
 
-5) make -f Makefile.win32
-6) copy pcre.h and libpcre.lib to your INCLUDE and LIB path;
+3. Copy the file make_pcre.ml (in directory pcre_make.win32) to pcre-7.2,
+   and set "lib" to the path where C include files are installed.
+   Then execute:
 
-Install ocaml-pcre:
+     ocaml make_pcre.ml
+     make
 
-1) cd lib 
-2) make -f Makefile.win32 all
-3) make -f Makefile.win32 opt
-4) make -f Makefile.win32 install
+   This will compile and install pcre.
 
-Best regards,
-Artem Prisyaznuk
-tema@sit.kiev.ua
+4. Go to the lib/ subdirectory of the directory where you unpacked
+   pcre-ocaml and type:
+
+     ocaml make_pcre.ml
+     make
+
+   This will compile and install pcre-ocaml.
+
+5. Optionally, go to the any example directory and type
+
+     make
+
+   to compile them.
+
+Enjoy!
+
+Christophe Troestler and Markus Mottl
+
+July 12, 2007

@@ -1,3 +1,9 @@
+2007-07-12:  Improved documentation for Win32 builds, and added some build
+             scripts usable on Windows.
+
+             Thanks to Christophe Troestler
+             <Christophe.Troestler@umh.ac.be> for this contribution!
+
 2007-04-23:  callback_exn -> caml_callback_exn.
 
              Updated OCamlMakefile.

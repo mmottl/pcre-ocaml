@@ -11,31 +11,37 @@
 2. Go to <http://www.pcre.org/>, download the latest pcre tarball
    (tested with 7.2), and unpack it (say in pcre-7.2).
 
-3. Copy the file make_pcre.ml (in directory pcre_make.win32) to pcre-7.2,
-   and set "lib" to the path where C include files are installed.
-   Then execute:
+3. Possibly modify make_pcre.ml (in directory pcre_make.win32) to set
+   the paths to your will.  The default is to install in the pcre/
+   subdirectory of the default OCaml library location and should be
+   fine for most cases.  (The C pcre library is small, you should not
+   worry about having multiple copies on your system.)
+
+4. Copy the file make_pcre.ml to pcre-7.2 and execute:
 
      ocaml make_pcre.ml
      make
 
    This will compile and install pcre.
 
-4. Go to the lib/ subdirectory of the directory where you unpacked
-   pcre-ocaml and type:
+5. Copy make_pcre.ml (yes the same as above!) to the lib/ subdirectory
+   of the directory where you unpacked pcre-ocaml, go into lib/ and
+   type:
 
      ocaml make_pcre.ml
      make
 
    This will compile and install pcre-ocaml.
 
-5. Optionally, go to the any example directory and type
+6. Optionally, go to the any example directory and type
 
      make
 
-   to compile them.
+   to compile the example there.
 
 Enjoy!
 
 Christophe Troestler and Markus Mottl
 
 July 12, 2007
+

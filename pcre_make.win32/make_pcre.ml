@@ -1,9 +1,12 @@
 (* File: make_pcre.ml
+   Time-stamp: <2007-07-17 20:41:18 trch>
    Copyright (C) 2007, Christophe Troestler
 *)
 
+
 (** Run "ocaml make_pcre.ml" in the pcre source directory in order to
-    make a .bat file for compiling and installing pcre.
+    create a make.bat file for compiling and installing pcre.  Then do
+    the same in the lib/ directory of this ocaml-pcre tarball.
 
     To run the .bat file, you need MSVC and the MS SDK to installed
     and in your path.  For that, follow the instructions in the
@@ -63,8 +66,16 @@ let mkdll fh dll def objects =
 
 (* Whether to compile the C-pcre lib or the pcre-ocaml lib *)
 let make =
-  if Sys.file_exists "pcre.h.generic" || Sys.file_exists "pcre.h" then `Pcre
-  else `OCaml
+  if (Sys.file_exists "pcre.h.generic" || Sys.file_exists "pcre.h")
+    && (Sys.file_exists "config.h.generic" || Sys.file_exists "config.h")
+  then `Pcre
+  else if Sys.file_exists "pcre.ml" then `OCaml
+  else (
+    eprintf "\n**ERROR**: You must run this script in the C pcre \
+	source or in the lib\\\n           directory of ocaml-pcre.\n";
+    exit 1
+  )
+
 
 (**************************************************************************)
 
@@ -73,7 +84,7 @@ let make =
 let install fh files dir =
   let dir = Filename.quote dir in
   fprintf fh "mkdir %s \t>NUL\n" dir;
-  List.iter (fun f -> fprintf fh "copy \"%s\" %s\t>NUL\n" f dir) files
+  List.iter (fun f -> fprintf fh "copy \"%s\" %s\n" f dir) files
 
 let make_bat ?(fname="make.bat") body =
   let fh = open_out fname in
@@ -129,9 +140,12 @@ let () =
       let re = Str.regexp "^pcre_.*\\.c$" in
       let dir = Array.to_list(Sys.readdir ".") in
       let sources = List.filter (fun f -> Str.string_match re f 0) dir in
-      List.map (fun f -> Filename.chop_extension f) sources
+      let sources = List.map (fun f -> Filename.chop_extension f) sources in
+      (* "pcre_chartables" will only be created when make.bat is run *)
+      "pcre_chartables" :: sources
     in
     make_bat begin fun fh ->
+      (* Create pcre_chartables.c *)
       output_string fh "\n@REM Make chartables\n";
       fprintf fh "cl /nologo /DSUPPORT_UTF8 /DSUPPORT_UCP \
 	/D_CRT_SECURE_NO_DEPRECATE /I . dftables.c\n";
@@ -211,7 +225,7 @@ EXPORTS
       let inc =
         sprintf "/I \"%s\" /I %s" install_h (Filename.quote ocamllib) in
       let pcre_lib = Filename.concat install_lib pcre_lib in
-      let pcre_dll = Filename.concat install_dll pcre_dll in
+(*       let pcre_dll = Filename.concat install_dll pcre_dll in *)
 
       cc_static fh ~ext:".s.obj" "pcre_stubs" ~flags:inc;
       mklib fh "libpcre_stubs.lib" ["pcre_stubs.s.obj"];
@@ -221,8 +235,9 @@ EXPORTS
 (*         ["pcre_stubs.d.obj"; Filename.concat ocamllib "ocamlrun.lib"; *)
 (*          pcre_dll]; *)
 
-      let caml_sources = "pcre.ml pcre.mli" in
+      let caml_sources = "pcre.ml" in
       let pcre_lib = Filename.quote(Filename.quote pcre_lib) in
+      fprintf fh "ocamlc -c pcre.mli\n";
       fprintf fh "ocamlc -custom -a -o pcre.cma %s -ccopt %s \
 	-cclib -lpcre_stubs\n" caml_sources pcre_lib;
       fprintf fh "ocamlopt -a -o pcre.cmxa %s -ccopt %s \
@@ -231,8 +246,8 @@ EXPORTS
       install fh ["libpcre_stubs.lib";
                   "pcre.mli"; "pcre.cmi"; "pcre.cma"; "pcre.cmxa"; "pcre.lib"]
         (Filename.concat ocamllib "pcre");
-      install fh ["dllpcre_stubs.dll"]
-        (Filename.concat ocamllib "stublibs");
+(*       install fh ["dllpcre_stubs.dll"] *)
+(*         (Filename.concat ocamllib "stublibs"); *)
     end;
     (*
      * Examples compilation scripts
@@ -256,3 +271,4 @@ EXPORTS
       end
     ) ex;
   end
+

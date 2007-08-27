@@ -1,3 +1,8 @@
+2007-07-12:  Improved build scripts for Windows.
+
+             Thanks to Christophe Troestler
+             <Christophe.Troestler@umh.ac.be> for the patch!
+
 2007-07-12:  Improved documentation for Win32 builds, and added some build
              scripts usable on Windows.
 

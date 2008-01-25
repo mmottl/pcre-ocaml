@@ -1,3 +1,13 @@
+2008-01-25:  Added new function:
+
+               * names
+
+             This function returns the names of all named substrings in a
+             regular expression.
+
+             Thanks to Benedikt Grundmann <bgrundmann@janestcapital.com>
+             for the patch!
+
 2007-07-12:  Improved build scripts for Windows.
 
              Thanks to Christophe Troestler

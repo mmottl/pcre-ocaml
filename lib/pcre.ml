@@ -1,7 +1,7 @@
 (*
    PCRE-OCAML - Perl Compatibility Regular Expressions for OCaml
 
-   Copyright (C) 1999-2006  Markus Mottl
+   Copyright (C) 1999-  Markus Mottl
    email: markus.mottl@gmail.com
    WWW:   http://www.ocaml.info
 
@@ -19,9 +19,6 @@
    License along with this library; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 *)
-
-(* $Id: pcre.ml,v 1.23 2006/01/17 00:38:30 mottl Exp $ *)
-
 
 (* Public exceptions and their registration with the C runtime *)
 
@@ -206,6 +203,7 @@ external studysize : regexp -> int = "pcre_studysize_stub"
 external capturecount : regexp -> int = "pcre_capturecount_stub"
 external backrefmax : regexp -> int = "pcre_backrefmax_stub"
 external namecount : regexp -> int = "pcre_namecount_stub"
+external names : regexp -> string array = "pcre_names_stub"
 external nameentrysize : regexp -> int = "pcre_nameentrysize_stub"
 external firstbyte : regexp -> firstbyte_info = "pcre_firstbyte_stub"
 external firsttable : regexp -> string option = "pcre_firsttable_stub"

@@ -1,7 +1,7 @@
 (*
    PCRE-OCAML - Perl Compatibility Regular Expressions for OCaml
 
-   Copyright (C) 1999-2006  Markus Mottl
+   Copyright (C) 1999-  Markus Mottl
    email: markus.mottl@gmail.com
    WWW:   http://www.ocaml.info
 
@@ -19,8 +19,6 @@
    License along with this library; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 *)
-
-(* $Id: pcre.mli,v 1.21 2005/07/07 14:16:43 mottl Exp $ *)
 
 (** Perl Compatibility Regular Expressions *)
 
@@ -170,6 +168,9 @@ external backrefmax : regexp -> int = "pcre_backrefmax_stub"
 
 (** [namecount regexp] @return number of named subpatterns in [regexp]. *)
 external namecount : regexp -> int = "pcre_namecount_stub"
+
+(** [names regex] @return array of names of named substrings in [regexp]. *)
+external names : regexp -> string array = "pcre_names_stub"
 
 (** [nameentrysize regexp] @return size of longest name of named
     subpatterns in [regexp] + 3. *)

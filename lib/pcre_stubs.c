@@ -20,8 +20,6 @@
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-/* $Id: pcre_stubs.c,v 1.23 2005/06/08 23:42:14 mottl Exp $ */
-
 #if defined(_WIN32) && defined(_DLL)
 #  define PCREextern __declspec(dllexport)
 #else
@@ -547,6 +545,36 @@ CAMLprim value pcre_get_stringnumber_stub(value v_rex, value v_name)
                                         String_val(v_name));
   if (ret == PCRE_ERROR_NOSUBSTRING) invalid_argument("Named string not found");
   return Val_int(ret);
+}
+
+/* Returns array of names of named substrings in a regexp */
+CAMLprim value pcre_names_stub(value v_rex)
+{
+  CAMLparam0();
+  CAMLlocal1(v_res);
+  int name_count;
+  int entry_size;
+  const char *tbl_ptr;
+  int i;
+
+  int ret = pcre_fullinfo_stub(v_rex, PCRE_INFO_NAMECOUNT, &name_count);
+  if (ret != 0) raise_with_string(*pcre_exc_InternalError, "pcre_names_stub");
+
+  ret = pcre_fullinfo_stub(v_rex, PCRE_INFO_NAMEENTRYSIZE, &entry_size);
+  if (ret != 0) raise_with_string(*pcre_exc_InternalError, "pcre_names_stub");
+
+  ret = pcre_fullinfo_stub(v_rex, PCRE_INFO_NAMETABLE, &tbl_ptr);
+  if (ret != 0) raise_with_string(*pcre_exc_InternalError, "pcre_names_stub");
+
+  v_res = caml_alloc(name_count, 0);
+
+  for (i = 0; i < name_count; ++i) {
+    value v_name = caml_copy_string(tbl_ptr + 2);
+    Store_field(v_res, i, v_name);
+    tbl_ptr += entry_size;
+  }
+
+  CAMLreturn(v_res);
 }
 
 /* Generic stub for getting integer results from pcre_config */

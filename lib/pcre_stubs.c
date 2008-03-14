@@ -26,6 +26,14 @@
 #  define PCREextern
 #endif
 
+#if __GNUC__ >= 3
+# define inline inline __attribute__ ((always_inline))
+# define __unused __attribute__ ((unused))
+#else
+# define __unused
+# define inline
+#endif
+
 #include <ctype.h>
 #include <string.h>
 
@@ -120,7 +128,7 @@ static int pcre_callout_handler(pcre_callout_block* cb)
 
 /* Fetchs the named OCaml-values + caches them and
    calculates + caches the variant hash values */
-CAMLprim value pcre_ocaml_init(value unit)
+CAMLprim value pcre_ocaml_init(value __unused v_unit)
 {
   pcre_exc_Not_found     = caml_named_value("Pcre.Not_found");
   pcre_exc_Partial       = caml_named_value("Pcre.Partial");
@@ -131,12 +139,12 @@ CAMLprim value pcre_ocaml_init(value unit)
   pcre_exc_MatchLimit    = caml_named_value("Pcre.MatchLimit");
   pcre_exc_Backtrack     = caml_named_value("Pcre.Backtrack");
 
-  var_Start_only         = hash_variant("Start_only");
-  var_ANCHORED           = hash_variant("ANCHORED");
-  var_Char               = hash_variant("Char");
-  var_Not_studied        = hash_variant("Not_studied");
-  var_Studied            = hash_variant("Studied");
-  var_Optimal            = hash_variant("Optimal");
+  var_Start_only         = caml_hash_variant("Start_only");
+  var_ANCHORED           = caml_hash_variant("ANCHORED");
+  var_Char               = caml_hash_variant("Char");
+  var_Not_studied        = caml_hash_variant("Not_studied");
+  var_Studied            = caml_hash_variant("Studied");
+  var_Optimal            = caml_hash_variant("Optimal");
 
   pcre_callout = &pcre_callout_handler;
 
@@ -173,7 +181,8 @@ static void raise_with_two_args(value tag, value arg1, value arg2)
 }
 
 /* Makes OCaml-string from PCRE-version */
-CAMLprim value pcre_version_stub(value unit) {
+CAMLprim value pcre_version_stub(value __unused v_unit)
+{
   return caml_copy_string((char *) pcre_version());
 }
 
@@ -227,7 +236,7 @@ CAMLprim value pcre_study_stub(value v_rex)
   if (! (int) Field(v_rex, 3)) {
     const char *error = NULL;
     pcre_extra *extra = pcre_study((pcre *) Field(v_rex, 1), 0, &error);
-    if (error != NULL) invalid_argument((char *) error);
+    if (error != NULL) caml_invalid_argument((char *) error);
     Field(v_rex, 2) = (value) extra;
     Field(v_rex, 3) = Val_int(1);
   }
@@ -279,7 +288,7 @@ static value pcre_fullinfo_stub(value v_rex, int what, void *where)
     int options; \
     const int ret = pcre_fullinfo_stub(v_rex, PCRE_INFO_##option, &options); \
     if (ret != 0) \
-      raise_with_string(*pcre_exc_InternalError, "pcre_##name##_stub"); \
+      caml_raise_with_string(*pcre_exc_InternalError, "pcre_##name##_stub"); \
     return Val_int(options); \
   }
 
@@ -296,15 +305,15 @@ CAMLprim value pcre_firstbyte_stub(value v_rex)
   int firstbyte;
   const int ret = pcre_fullinfo_stub(v_rex, PCRE_INFO_FIRSTBYTE, &firstbyte);
 
-  if (ret != 0) raise_with_string(*pcre_exc_InternalError,
-                                  "pcre_firstbyte_stub");
+  if (ret != 0) caml_raise_with_string(*pcre_exc_InternalError,
+                                       "pcre_firstbyte_stub");
 
   switch (firstbyte) {
     case -1 : return var_Start_only; break;  /* [`Start_only] */
     case -2 : return var_ANCHORED; break;    /* [`ANCHORED] */
     default :
       if (firstbyte < 0 )  /* Should not happen */
-        raise_with_string(*pcre_exc_InternalError, "pcre_firstbyte_stub");
+        caml_raise_with_string(*pcre_exc_InternalError, "pcre_firstbyte_stub");
       else {
         value v_firstbyte;
         /* Allocates the non-constant constructor [`Char of char] and fills
@@ -324,8 +333,8 @@ CAMLprim value pcre_firsttable_stub(value v_rex)
   int ret =
     pcre_fullinfo_stub(v_rex, PCRE_INFO_FIRSTTABLE, (void *) &ftable);
 
-  if (ret != 0) raise_with_string(*pcre_exc_InternalError,
-                                  "pcre_firsttable_stub");
+  if (ret != 0) caml_raise_with_string(*pcre_exc_InternalError,
+                                       "pcre_firsttable_stub");
 
   if (ftable == NULL) return None;
   else {
@@ -357,12 +366,12 @@ CAMLprim value pcre_lastliteral_stub(value v_rex)
   const int ret = pcre_fullinfo_stub(v_rex, PCRE_INFO_LASTLITERAL,
                                         &lastliteral);
 
-  if (ret != 0) raise_with_string(*pcre_exc_InternalError,
-                                  "pcre_lastliteral_stub");
+  if (ret != 0) caml_raise_with_string(*pcre_exc_InternalError,
+                                       "pcre_lastliteral_stub");
 
   if (lastliteral == -1) return None;
-  if (lastliteral < 0) raise_with_string(*pcre_exc_InternalError,
-                                         "pcre_lastliteral_stub");
+  if (lastliteral < 0) caml_raise_with_string(*pcre_exc_InternalError,
+                                              "pcre_lastliteral_stub");
   else {
     /* Allocates [Some char] */
     value v_res = caml_alloc_small(1, 0);
@@ -388,10 +397,10 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_ofs,
                               value v_subj, value v_subgroups2, value v_ovec,
                               value v_maybe_cof)
 {
-  const int ofs = Int_val(v_ofs), len = string_length(v_subj);
+  const int ofs = Int_val(v_ofs), len = caml_string_length(v_subj);
 
   if (ofs > len || ofs < 0)
-    invalid_argument("Pcre.pcre_exec_stub: illegal offset");
+    caml_invalid_argument("Pcre.pcre_exec_stub: illegal offset");
 
   {
     const pcre *code = (pcre *) Field(v_rex, 1);  /* Compiled pattern */
@@ -412,15 +421,17 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_ofs,
 
       if (ret < 0) {
         switch(ret) {
-          case PCRE_ERROR_NOMATCH : raise_constant(*pcre_exc_Not_found);
-          case PCRE_ERROR_PARTIAL : raise_constant(*pcre_exc_Partial);
-          case PCRE_ERROR_MATCHLIMIT : raise_constant(*pcre_exc_MatchLimit);
-          case PCRE_ERROR_BADPARTIAL : raise_constant(*pcre_exc_BadPartial);
-          case PCRE_ERROR_BADUTF8 : raise_constant(*pcre_exc_BadUTF8);
+          case PCRE_ERROR_NOMATCH : caml_raise_constant(*pcre_exc_Not_found);
+          case PCRE_ERROR_PARTIAL : caml_raise_constant(*pcre_exc_Partial);
+          case PCRE_ERROR_MATCHLIMIT :
+            caml_raise_constant(*pcre_exc_MatchLimit);
+          case PCRE_ERROR_BADPARTIAL :
+            caml_raise_constant(*pcre_exc_BadPartial);
+          case PCRE_ERROR_BADUTF8 : caml_raise_constant(*pcre_exc_BadUTF8);
           case PCRE_ERROR_BADUTF8_OFFSET :
-            raise_constant(*pcre_exc_BadUTF8Offset);
+            caml_raise_constant(*pcre_exc_BadUTF8Offset);
           default :
-            raise_with_string(*pcre_exc_InternalError, "pcre_exec_stub");
+            caml_raise_with_string(*pcre_exc_InternalError, "pcre_exec_stub");
         }
       }
 
@@ -447,7 +458,8 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_ofs,
       int *ovec = caml_stat_alloc(sizeof(int) * subgroups3);
       int ret;
       struct cod cod = { (value *) NULL, (value *) NULL, (value) NULL };
-      struct pcre_extra new_extra = { PCRE_EXTRA_CALLOUT_DATA, NULL, 0, NULL };
+      struct pcre_extra new_extra =
+        { PCRE_EXTRA_CALLOUT_DATA, NULL, 0, NULL, NULL };
 
       memcpy(subj, ocaml_subj, len);
 
@@ -471,6 +483,7 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_ofs,
           new_extra.flags = PCRE_EXTRA_CALLOUT_DATA | extra->flags;
           new_extra.study_data = extra->study_data;
           new_extra.match_limit = extra->match_limit;
+          new_extra.tables = extra->tables;
 
           ret = pcre_exec(code, &new_extra, subj, len, ofs, opt, ovec,
                           subgroups3);
@@ -482,16 +495,18 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_ofs,
       if (ret < 0) {
         free(ovec);
         switch(ret) {
-          case PCRE_ERROR_NOMATCH : raise_constant(*pcre_exc_Not_found);
-          case PCRE_ERROR_PARTIAL : raise_constant(*pcre_exc_Partial);
-          case PCRE_ERROR_MATCHLIMIT : raise_constant(*pcre_exc_MatchLimit);
-          case PCRE_ERROR_BADPARTIAL : raise_constant(*pcre_exc_BadPartial);
-          case PCRE_ERROR_BADUTF8 : raise_constant(*pcre_exc_BadUTF8);
+          case PCRE_ERROR_NOMATCH : caml_raise_constant(*pcre_exc_Not_found);
+          case PCRE_ERROR_PARTIAL : caml_raise_constant(*pcre_exc_Partial);
+          case PCRE_ERROR_MATCHLIMIT :
+            caml_raise_constant(*pcre_exc_MatchLimit);
+          case PCRE_ERROR_BADPARTIAL :
+            caml_raise_constant(*pcre_exc_BadPartial);
+          case PCRE_ERROR_BADUTF8 : caml_raise_constant(*pcre_exc_BadUTF8);
           case PCRE_ERROR_BADUTF8_OFFSET :
-            raise_constant(*pcre_exc_BadUTF8Offset);
+            caml_raise_constant(*pcre_exc_BadUTF8Offset);
           case PCRE_ERROR_CALLOUT : caml_raise(cod.v_exn);
           default :
-            raise_with_string(*pcre_exc_InternalError, "pcre_exec_stub");
+            caml_raise_with_string(*pcre_exc_InternalError, "pcre_exec_stub");
         }
       }
 
@@ -514,7 +529,7 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_ofs,
 
 /* Byte-code hook for pcre_exec_stub
    Needed, because there are more than 5 arguments */
-CAMLprim value pcre_exec_stub_bc(value *argv, int argn)
+CAMLprim value pcre_exec_stub_bc(value *argv, int __unused argn)
 {
   return pcre_exec_stub(argv[0], argv[1], argv[2], argv[3],
                         argv[4], argv[5], argv[6]);
@@ -522,7 +537,7 @@ CAMLprim value pcre_exec_stub_bc(value *argv, int argn)
 
 /* Generates a new set of chartables for the current locale (see man
    page of PCRE */
-CAMLprim value pcre_maketables_stub(value unit)
+CAMLprim value pcre_maketables_stub(value __unused v_unit)
 {
   /* GC will do a full cycle every 100 table set allocations
      (one table set consumes 864 bytes -> maximum of 86400 bytes
@@ -543,7 +558,9 @@ CAMLprim value pcre_get_stringnumber_stub(value v_rex, value v_name)
 {
   const int ret = pcre_get_stringnumber((pcre *) Field(v_rex, 1),
                                         String_val(v_name));
-  if (ret == PCRE_ERROR_NOSUBSTRING) invalid_argument("Named string not found");
+  if (ret == PCRE_ERROR_NOSUBSTRING)
+    caml_invalid_argument("Named string not found");
+
   return Val_int(ret);
 }
 
@@ -558,13 +575,16 @@ CAMLprim value pcre_names_stub(value v_rex)
   int i;
 
   int ret = pcre_fullinfo_stub(v_rex, PCRE_INFO_NAMECOUNT, &name_count);
-  if (ret != 0) raise_with_string(*pcre_exc_InternalError, "pcre_names_stub");
+  if (ret != 0)
+    caml_raise_with_string(*pcre_exc_InternalError, "pcre_names_stub");
 
   ret = pcre_fullinfo_stub(v_rex, PCRE_INFO_NAMEENTRYSIZE, &entry_size);
-  if (ret != 0) raise_with_string(*pcre_exc_InternalError, "pcre_names_stub");
+  if (ret != 0)
+    caml_raise_with_string(*pcre_exc_InternalError, "pcre_names_stub");
 
   ret = pcre_fullinfo_stub(v_rex, PCRE_INFO_NAMETABLE, &tbl_ptr);
-  if (ret != 0) raise_with_string(*pcre_exc_InternalError, "pcre_names_stub");
+  if (ret != 0)
+    caml_raise_with_string(*pcre_exc_InternalError, "pcre_names_stub");
 
   v_res = caml_alloc(name_count, 0);
 
@@ -588,21 +608,21 @@ static int pcre_config_int(int what)
 /* Some stubs for config-functions */
 
 /* Returns boolean indicating UTF8-support */
-CAMLprim value pcre_config_utf8_stub(value unit)
+CAMLprim value pcre_config_utf8_stub(value __unused v_unit)
 { return Val_bool(pcre_config_int(PCRE_CONFIG_UTF8)); }
 
 /* Returns character used as newline */
-CAMLprim value pcre_config_newline_stub(value unit)
+CAMLprim value pcre_config_newline_stub(value __unused v_unit)
 { return Val_int(pcre_config_int(PCRE_CONFIG_NEWLINE)); }
 
 /* Returns number of bytes used for internal linkage of regular expressions */
-CAMLprim value pcre_config_link_size_stub(value unit)
+CAMLprim value pcre_config_link_size_stub(value __unused v_unit)
 { return Val_int(pcre_config_int(PCRE_CONFIG_LINK_SIZE)); }
 
 /* Returns default limit for calls to internal matching function */
-CAMLprim value pcre_config_match_limit_stub(value unit)
+CAMLprim value pcre_config_match_limit_stub(value __unused v_unit)
 { return Val_int(pcre_config_int(PCRE_CONFIG_MATCH_LIMIT)); }
 
 /* Returns boolean indicating use of stack recursion */
-CAMLprim value pcre_config_stackrecurse_stub(value unit)
+CAMLprim value pcre_config_stackrecurse_stub(value __unused v_unit)
 { return Val_bool(pcre_config_int(PCRE_CONFIG_STACKRECURSE)); }

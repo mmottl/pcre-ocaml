@@ -299,7 +299,7 @@ let get_substring (_, ovector as substrings) str_num =
   let offset, start = get_offset_start ovector str_num in
   get_substring_aux substrings offset start
 
-let get_substring_ofs (subj, ovector) str_num =
+let get_substring_ofs (_subj, ovector) str_num =
   let offset, start = get_offset_start ovector str_num in
   if start < 0 then raise Not_found
   else start, Array.unsafe_get ovector (offset + 1)
@@ -488,7 +488,7 @@ let calc_trans_lst subgroups2 ovector subj templ subst_lst =
   let prefix_len = Array.unsafe_get ovector 0 in
   let last = Array.unsafe_get ovector 1 in
   let coll (res_len, trans_lst as accu) =
-    let return_lst (str, ix, len as el) =
+    let return_lst (_str, _ix, len as el) =
       if len = 0 then accu else res_len + len, el :: trans_lst in
     function
     | SubstString (ix, len) -> return_lst (templ, ix, len)

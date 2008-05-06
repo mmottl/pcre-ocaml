@@ -1,3 +1,5 @@
+2008-05-06:  Fixed build problem with newer versions of PCRE.
+
 2008-03-14:  Synced with Jane Street tree.
 
 2008-01-25:  Added new function:

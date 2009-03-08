@@ -1,3 +1,10 @@
+2009-03-08:  Fixed build problem on Mac OS X with macports.
+
+             Thanks to Ralph Douglass <ralph@grayskies.net> for the
+             initial patch.
+
+             Update OCamlMakefile.
+
 2008-05-06:  Fixed build problem with newer versions of PCRE.
 
 2008-03-14:  Synced with Jane Street tree.

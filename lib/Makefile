@@ -10,6 +10,4 @@ all:
 install: libinstall
 uninstall: libuninstall
 
-clean:: clean-doc
-
 -include $(OCAMLMAKEFILE)

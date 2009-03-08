@@ -15,6 +15,10 @@ doc:
 	@cd lib && $(MAKE) $@
 	ln -sf lib/doc
 
+.PHONY: htdoc
+htdoc:
+	@cd lib && $(MAKE) $@
+
 .PHONY:	install
 install:
 	@cd lib && $(MAKE) $@

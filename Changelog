@@ -5,6 +5,8 @@
 
              Update OCamlMakefile.
 
+	     Improved Godi-distribution.
+
 2008-05-06:  Fixed build problem with newer versions of PCRE.
 
 2008-03-14:  Synced with Jane Street tree.

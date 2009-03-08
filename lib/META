@@ -1,5 +1,5 @@
 name="pcre"
-version="5.16.3"
+version="5.16.4"
 description="Perl Compatibility Regular Expressions"
 requires=""
 archive(byte)="pcre.cma"

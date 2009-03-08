@@ -1,9 +1,9 @@
 OCAMLMAKEFILE = ../OCamlMakefile
 
-SOURCES := pcre.mli pcre.ml pcre_stubs.c
-CFLAGS  := -O2 $(shell pcre-config --cflags)
-CLIBS   := $(shell pcre-config --libs | sed -e 's/-l//g')
-RESULT  := pcre
+SOURCES      := pcre.mli pcre.ml pcre_stubs.c
+CFLAGS       := -O2 $(shell pcre-config --cflags)
+OCAMLLDFLAGS := -cclib "$(shell pcre-config --libs)"
+RESULT       := pcre
 
 all:
 

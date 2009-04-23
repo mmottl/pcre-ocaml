@@ -1,3 +1,8 @@
+2009-04-23:  Fixed build problem on MinGW.
+
+             Thanks to Gerd Stolpmann <gerd@gerd-stolpmann.de> for
+             the patch!
+
 2009-03-08:  Fixed build problem on Mac OS X with macports.
 
              Thanks to Ralph Douglass <ralph@grayskies.net> for the

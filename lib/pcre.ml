@@ -22,28 +22,25 @@
 
 (* Public exceptions and their registration with the C runtime *)
 
-exception Partial
-exception BadPartial
-exception BadPattern of string * int
-exception BadUTF8
-exception BadUTF8Offset
-exception InternalError of string
-exception MatchLimit
+type error =
+  | Partial
+  | BadPartial
+  | BadPattern of string * int
+  | BadUTF8
+  | BadUTF8Offset
+  | MatchLimit
+  | RecursionLimit
+  | InternalError of string
+
+exception Error of error
 exception Backtrack
 
 (* Puts exceptions into global C-variables for fast retrieval *)
 external pcre_ocaml_init : unit -> unit = "pcre_ocaml_init"
 
 (* Registers exceptions with the C runtime and caches polymorphic variants *)
-let _ =
-  Callback.register_exception "Pcre.Not_found" Not_found;
-  Callback.register_exception "Pcre.Partial" Partial;
-  Callback.register_exception "Pcre.BadPartial" BadPartial;
-  Callback.register_exception "Pcre.BadPattern" (BadPattern ("", 0));
-  Callback.register_exception "Pcre.BadUTF8" BadUTF8;
-  Callback.register_exception "Pcre.BadUTF8Offset" BadUTF8Offset;
-  Callback.register_exception "Pcre.InternalError" (InternalError "");
-  Callback.register_exception "Pcre.MatchLimit" MatchLimit;
+let () =
+  Callback.register_exception "Pcre.Error" (Error (InternalError ""));
   Callback.register_exception "Pcre.Backtrack" Backtrack;
   pcre_ocaml_init ()
 
@@ -541,8 +538,8 @@ let replace ?(iflags = 0) ?flags ?(rex = def_rex) ?pat
       let postfix_len = max (subj_len - cur_pos) 0 in
       let left = pos + full_len in
       let res = String.create (left + postfix_len) in
-      let _ = String.unsafe_blit subj 0 res 0 pos in
-      let _ = String.unsafe_blit subj cur_pos res left postfix_len in
+      String.unsafe_blit subj 0 res 0 pos;
+      String.unsafe_blit subj cur_pos res left postfix_len;
       let inner_coll ofs (templ, ix, len) =
         String.unsafe_blit templ ix res ofs len; ofs + len in
       let coll ofs (res_len, trans_lst) =
@@ -590,8 +587,8 @@ let qreplace ?(iflags = 0) ?flags ?(rex = def_rex) ?pat
       let postfix_len = max (subj_len - cur_pos) 0 in
       let left = pos + full_len in
       let res = String.create (left + postfix_len) in
-      let _ = String.unsafe_blit subj 0 res 0 pos in
-      let _ = String.unsafe_blit subj cur_pos res left postfix_len in
+      String.unsafe_blit subj 0 res 0 pos;
+      String.unsafe_blit subj cur_pos res left postfix_len;
       let coll ofs = function
         | Some (substr, ix, len) ->
             let new_ofs = ofs - len in
@@ -637,8 +634,8 @@ let substitute_substrings ?(iflags = 0) ?flags ?(rex = def_rex) ?pat
       let postfix_len = max (subj_len - cur_pos) 0 in
       let left = pos + full_len in
       let res = String.create (left + postfix_len) in
-      let _ = String.unsafe_blit subj 0 res 0 pos in
-      let _ = String.unsafe_blit subj cur_pos res left postfix_len in
+      String.unsafe_blit subj 0 res 0 pos;
+      String.unsafe_blit subj cur_pos res left postfix_len;
       let coll ofs (templ, ix, len) =
         let new_ofs = ofs - len in
         String.unsafe_blit templ ix res new_ofs len;

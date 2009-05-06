@@ -25,33 +25,28 @@
 
 (** {6 Exceptions} *)
 
-(** [Partial] gets raised when a string matched the pattern partially. *)
-exception Partial
+type error =
+  | Partial  (** String only matched the pattern partially *)
+  | BadPartial  (** Pattern contains items that cannot be used together
+                    with partial matching. *)
+  | BadPattern of string * int  (** [BadPattern (msg, pos)] regular
+                                    expression is malformed.  The reason
+                                    is in [msg], the position of the
+                                    error in the pattern in [pos]. *)
+  | BadUTF8  (** UTF8 string being matched is invalid *)
+  | BadUTF8Offset  (** Gets raised when a UTF8 string being matched with
+                       offset is invalid. *)
+  | MatchLimit  (** Maximum allowed number of match attempts with
+                    backtracking or recursion is reached during matching.
+                    ALL FUNCTIONS CALLING THE MATCHING ENGINE MAY RAISE
+                    IT!!! *)
+  | RecursionLimit
+  | InternalError of string
+      (** [InternalError msg] C-library exhibits unknown/undefined
+          behaviour.  The reason is in [msg]. *)
 
-(** [BadPartial] gets raised when a pattern contains items that cannot
-    be used together with partial matching. *)
-exception BadPartial
-
-(** [BadPattern (msg, pos)] gets raised when the regular expression is
-    malformed. The reason is in [msg], the position of the error in the
-    pattern in [pos]. *)
-exception BadPattern of string * int
-
-(** [BadUTF8] gets raised when a UTF8 string being matched is invalid. *)
-exception BadUTF8
-
-(** [BadUTF8Offset] gets raised when a UTF8 string being matched with offset
-    is invalid. *)
-exception BadUTF8Offset
-
-(** [MatchLimit] gets raised when the maximum allowed number of match
-    attempts with backtracking or recursion is reached during matching.
-    ALL FUNCTIONS CALLING THE MATCHING ENGINE MAY RAISE IT!!! *)
-exception MatchLimit
-
-(** [InternalError msg] gets raised when the C-library exhibits undefined
-    behaviour. The reason is in [msg]. *)
-exception InternalError of string
+(** Exception indicating PCRE errors. *)
+exception Error of error
 
 (** [Backtrack] used in callout functions to force backtracking. *)
 exception Backtrack

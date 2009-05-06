@@ -1,7 +1,7 @@
 /*
    PCRE-OCAML - Perl Compatibility Regular Expressions for OCaml
 
-   Copyright (C) 1999-2006  Markus Mottl
+   Copyright (C) 1999-  Markus Mottl
    email: markus.mottl@gmail.com
    WWW:   http://www.ocaml.info
 
@@ -36,6 +36,7 @@
 
 #include <ctype.h>
 #include <string.h>
+#include <stdio.h>
 
 #include <caml/mlvalues.h>
 #include <caml/alloc.h>
@@ -45,7 +46,6 @@
 
 #include <pcre.h>
 
-
 /* Error codes as defined for pcre 7.9, undefined in pcre 4.5 */
 #ifndef PCRE_ERROR_PARTIAL
 #define PCRE_ERROR_PARTIAL        (-12)
@@ -53,37 +53,9 @@
 #ifndef PCRE_ERROR_BADPARTIAL
 #define PCRE_ERROR_BADPARTIAL     (-13)
 #endif
-#ifndef PCRE_ERROR_INTERNAL
-#define PCRE_ERROR_INTERNAL       (-14)
-#endif
-#ifndef PCRE_ERROR_BADCOUNT
-#define PCRE_ERROR_BADCOUNT       (-15)
-#endif
-#ifndef PCRE_ERROR_DFA_UITEM
-#define PCRE_ERROR_DFA_UITEM      (-16)
-#endif
-#ifndef PCRE_ERROR_DFA_UCOND
-#define PCRE_ERROR_DFA_UCOND      (-17)
-#endif
-#ifndef PCRE_ERROR_DFA_UMLIMIT
-#define PCRE_ERROR_DFA_UMLIMIT    (-18)
-#endif
-#ifndef PCRE_ERROR_DFA_WSSIZE
-#define PCRE_ERROR_DFA_WSSIZE     (-19)
-#endif
-#ifndef PCRE_ERROR_DFA_RECURSE
-#define PCRE_ERROR_DFA_RECURSE    (-20)
-#endif
 #ifndef PCRE_ERROR_RECURSIONLIMIT
 #define PCRE_ERROR_RECURSIONLIMIT (-21)
 #endif
-#ifndef PCRE_ERROR_NULLWSLIMIT
-#define PCRE_ERROR_NULLWSLIMIT    (-22)  /* No longer actually used */
-#endif
-#ifndef PCRE_ERROR_BADNEWLINE
-#define PCRE_ERROR_BADNEWLINE     (-23)
-#endif
-
 
 typedef const unsigned char *chartables;  /* Type of chartable sets */
 
@@ -95,14 +67,7 @@ struct cod {
 };
 
 /* Cache for exceptions */
-static value *pcre_exc_Not_found     = NULL;  /* Exception [Not_found] */
-static value *pcre_exc_Partial       = NULL;  /* Exception [Partial] */
-static value *pcre_exc_BadPartial    = NULL;  /* Exception [BadPartial] */
-static value *pcre_exc_BadPattern    = NULL;  /* Exception [BadPattern] */
-static value *pcre_exc_BadUTF8       = NULL;  /* Exception [BadUTF8] */
-static value *pcre_exc_BadUTF8Offset = NULL;  /* Exception [BadUTF8Offset] */
-static value *pcre_exc_InternalError = NULL;  /* Exception [InternalError] */
-static value *pcre_exc_MatchLimit    = NULL;  /* Exception [MatchLimit] */
+static value *pcre_exc_Error         = NULL;  /* Exception [Error] */
 static value *pcre_exc_Backtrack     = NULL;  /* Exception [Backtrack] */
 
 /* Cache for polymorphic variants */
@@ -170,21 +135,15 @@ static int pcre_callout_handler(pcre_callout_block* cb)
    calculates + caches the variant hash values */
 CAMLprim value pcre_ocaml_init(value __unused v_unit)
 {
-  pcre_exc_Not_found     = caml_named_value("Pcre.Not_found");
-  pcre_exc_Partial       = caml_named_value("Pcre.Partial");
-  pcre_exc_BadPartial    = caml_named_value("Pcre.BadPartial");
-  pcre_exc_BadPattern    = caml_named_value("Pcre.BadPattern");
-  pcre_exc_BadUTF8       = caml_named_value("Pcre.BadUTF8");
-  pcre_exc_InternalError = caml_named_value("Pcre.InternalError");
-  pcre_exc_MatchLimit    = caml_named_value("Pcre.MatchLimit");
-  pcre_exc_Backtrack     = caml_named_value("Pcre.Backtrack");
+  pcre_exc_Error     = caml_named_value("Pcre.Error");
+  pcre_exc_Backtrack = caml_named_value("Pcre.Backtrack");
 
-  var_Start_only         = caml_hash_variant("Start_only");
-  var_ANCHORED           = caml_hash_variant("ANCHORED");
-  var_Char               = caml_hash_variant("Char");
-  var_Not_studied        = caml_hash_variant("Not_studied");
-  var_Studied            = caml_hash_variant("Studied");
-  var_Optimal            = caml_hash_variant("Optimal");
+  var_Start_only  = caml_hash_variant("Start_only");
+  var_ANCHORED    = caml_hash_variant("ANCHORED");
+  var_Char        = caml_hash_variant("Char");
+  var_Not_studied = caml_hash_variant("Not_studied");
+  var_Studied     = caml_hash_variant("Studied");
+  var_Optimal     = caml_hash_variant("Optimal");
 
   pcre_callout = &pcre_callout_handler;
 
@@ -203,28 +162,61 @@ static void pcre_dealloc_regexp(value v_rex)
   if (extra != NULL) (pcre_free)(extra);
 }
 
-/* Raises exceptions which take two arguments */
-static void raise_with_two_args(value tag, value arg1, value arg2)
-{
-  value v_exc;
-
-  /* Protects tag, arg1 and arg2 from being reclaimed by the garbage
-     collector when the exception value is allocated */
-  Begin_roots3(tag, arg1, arg2);
-    v_exc = caml_alloc_small(3, 0);
-    Field(v_exc, 0) = tag;
-    Field(v_exc, 1) = arg1;
-    Field(v_exc, 2) = arg2;
-  End_roots();
-
-  caml_raise(v_exc);
-}
-
 /* Makes OCaml-string from PCRE-version */
 CAMLprim value pcre_version_stub(value __unused v_unit)
 {
   return caml_copy_string((char *) pcre_version());
 }
+
+
+/* Raising exceptions */
+
+static inline void raise_pcre_error(value v_arg) Noreturn;
+static inline void raise_partial() Noreturn;
+static inline void raise_bad_partial() Noreturn;
+static inline void raise_bad_utf8() Noreturn;
+static inline void raise_bad_utf8_offset() Noreturn;
+static inline void raise_match_limit() Noreturn;
+static inline void raise_recursion_limit() Noreturn;
+static inline void raise_bad_pattern(const char *msg, int pos) Noreturn;
+static inline void raise_internal_error(char *msg) Noreturn;
+
+static inline void raise_pcre_error(value v_arg)
+{ caml_raise_with_arg(*pcre_exc_Error, v_arg); }
+
+static inline void raise_partial() { raise_pcre_error(Val_int(0)); }
+static inline void raise_bad_partial() { raise_pcre_error(Val_int(1)); }
+static inline void raise_bad_utf8() { raise_pcre_error(Val_int(2)); }
+static inline void raise_bad_utf8_offset() { raise_pcre_error(Val_int(3)); }
+static inline void raise_match_limit() { raise_pcre_error(Val_int(4)); }
+static inline void raise_recursion_limit() { raise_pcre_error(Val_int(5)); }
+
+static inline void raise_bad_pattern(const char *msg, int pos)
+{
+  CAMLparam0();
+  CAMLlocal1(v_msg);
+  value v_arg;
+  v_msg = caml_copy_string(msg);
+  v_arg = caml_alloc_small(2, 0);
+  Field(v_arg, 0) = v_msg;
+  Field(v_arg, 1) = Val_int(pos);
+  raise_pcre_error(v_arg);
+  CAMLnoreturn;
+}
+
+static inline void raise_internal_error(char *msg)
+{
+  CAMLparam0();
+  CAMLlocal1(v_msg);
+  value v_arg;
+  v_msg = caml_copy_string(msg);
+  v_arg = caml_alloc_small(1, 1);
+  Field(v_arg, 0) = v_msg;
+  raise_pcre_error(v_arg);
+  CAMLnoreturn;
+}
+
+/* PCRE pattern compilation */
 
 /* Makes compiled regular expression from compilation options, an optional
    value of chartables and the pattern string */
@@ -243,11 +235,9 @@ CAMLprim value pcre_compile_stub(value v_opt, value v_tables, value v_pat)
   pcre *regexp = pcre_compile(String_val(v_pat), Int_val(v_opt), &error,
                               &error_ofs, tables);
 
-  /* Raises appropriate exception [BadPattern] if the pattern could not
-     be compiled */
-  if (regexp == NULL) raise_with_two_args(*pcre_exc_BadPattern,
-                                          caml_copy_string((char *) error),
-                                          Val_int(error_ofs));
+  /* Raises appropriate exception with [BadPattern] if the pattern
+     could not be compiled */
+  if (regexp == NULL) raise_bad_pattern(error, error_ofs);
 
   /* Finalized value: GC will do a full cycle every 500 regexp allocations
      (one regexp consumes in average probably less than 100 bytes ->
@@ -327,8 +317,7 @@ static value pcre_fullinfo_stub(value v_rex, int what, void *where)
   { \
     int options; \
     const int ret = pcre_fullinfo_stub(v_rex, PCRE_INFO_##option, &options); \
-    if (ret != 0) \
-      caml_raise_with_string(*pcre_exc_InternalError, "pcre_##name##_stub"); \
+    if (ret != 0) raise_internal_error("pcre_##name##_stub"); \
     return Val_int(options); \
   }
 
@@ -345,15 +334,14 @@ CAMLprim value pcre_firstbyte_stub(value v_rex)
   int firstbyte;
   const int ret = pcre_fullinfo_stub(v_rex, PCRE_INFO_FIRSTBYTE, &firstbyte);
 
-  if (ret != 0) caml_raise_with_string(*pcre_exc_InternalError,
-                                       "pcre_firstbyte_stub");
+  if (ret != 0) raise_internal_error("pcre_firstbyte_stub");
 
   switch (firstbyte) {
     case -1 : return var_Start_only; break;  /* [`Start_only] */
     case -2 : return var_ANCHORED; break;    /* [`ANCHORED] */
     default :
       if (firstbyte < 0 )  /* Should not happen */
-        caml_raise_with_string(*pcre_exc_InternalError, "pcre_firstbyte_stub");
+        raise_internal_error("pcre_firstbyte_stub");
       else {
         value v_firstbyte;
         /* Allocates the non-constant constructor [`Char of char] and fills
@@ -373,8 +361,7 @@ CAMLprim value pcre_firsttable_stub(value v_rex)
   int ret =
     pcre_fullinfo_stub(v_rex, PCRE_INFO_FIRSTTABLE, (void *) &ftable);
 
-  if (ret != 0) caml_raise_with_string(*pcre_exc_InternalError,
-                                       "pcre_firsttable_stub");
+  if (ret != 0) raise_internal_error("pcre_firsttable_stub");
 
   if (ftable == NULL) return None;
   else {
@@ -406,12 +393,10 @@ CAMLprim value pcre_lastliteral_stub(value v_rex)
   const int ret = pcre_fullinfo_stub(v_rex, PCRE_INFO_LASTLITERAL,
                                         &lastliteral);
 
-  if (ret != 0) caml_raise_with_string(*pcre_exc_InternalError,
-                                       "pcre_lastliteral_stub");
+  if (ret != 0) raise_internal_error("pcre_lastliteral_stub");
 
   if (lastliteral == -1) return None;
-  if (lastliteral < 0) caml_raise_with_string(*pcre_exc_InternalError,
-                                              "pcre_lastliteral_stub");
+  if (lastliteral < 0) raise_internal_error("pcre_lastliteral_stub");
   else {
     /* Allocates [Some char] */
     value v_res = caml_alloc_small(1, 0);
@@ -429,8 +414,6 @@ CAMLprim value pcre_study_stat_stub(value v_rex)
 
   return var_Not_studied;  /* otherwise [`Not_studied] */
 }
-
-
 
 /* Executes a pattern match with runtime options, a regular expression, a
    string offset, a string length, a subject string, a number of subgroup
@@ -462,84 +445,28 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_ofs,
         pcre_exec(code, extra, ocaml_subj, len, ofs, opt, ovec, subgroups3);
 
       if (ret < 0) {
-	switch(ret) {
+        switch(ret) {
 
-	  /* Dedicated exceptions */
-	  case PCRE_ERROR_NOMATCH : /* -1 */
-	    caml_raise_constant(*pcre_exc_Not_found);
-	  case PCRE_ERROR_PARTIAL : /* -12 */
-	    caml_raise_constant(*pcre_exc_Partial);
-	  case PCRE_ERROR_MATCHLIMIT : /* -8 */
-	    caml_raise_constant(*pcre_exc_MatchLimit);
-	  case PCRE_ERROR_BADPARTIAL : /* -13 */
-	    caml_raise_constant(*pcre_exc_BadPartial);
-	  case PCRE_ERROR_BADUTF8 : /* -10 */
-	    caml_raise_constant(*pcre_exc_BadUTF8);
-	  case PCRE_ERROR_BADUTF8_OFFSET : /* -11 */
-	    caml_raise_constant(*pcre_exc_BadUTF8Offset);
-	  
-	  /* Other cases: exception Pcre.InternalError */
-	  case PCRE_ERROR_NULL : /* -2 */
-	    caml_raise_with_string(*pcre_exc_InternalError,
-				   "pcre_exec_stub: PCRE_ERROR_NULL");
-	  case PCRE_ERROR_BADOPTION : /* -3 */
-	    caml_raise_with_string(*pcre_exc_InternalError,
-				   "pcre_exec_stub: PCRE_ERROR_BADOPTION");
-	  case PCRE_ERROR_BADMAGIC : /* -4 */
-	    caml_raise_with_string(*pcre_exc_InternalError,
-				   "pcre_exec_stub: PCRE_ERROR_BADMAGIC");
-	  case PCRE_ERROR_UNKNOWN_NODE : /* -5 */
-	    caml_raise_with_string(*pcre_exc_InternalError,
-				   "pcre_exec_stub: PCRE_ERROR_UNKNOWN_NODE");
-	  case PCRE_ERROR_NOMEMORY : /* -6 */
-	    caml_raise_with_string(*pcre_exc_InternalError,
-				   "pcre_exec_stub: PCRE_ERROR_NOMEMORY");
-	  case PCRE_ERROR_NOSUBSTRING : /* -7 */
-	    caml_raise_with_string(*pcre_exc_InternalError,
-				   "pcre_exec_stub: PCRE_ERROR_NOSUBSTRING");
-	  case PCRE_ERROR_CALLOUT : /* -9 */
-	    caml_raise_with_string(*pcre_exc_InternalError,
-				   "pcre_exec_stub: PCRE_ERROR_CALLOUT");
-	  case PCRE_ERROR_INTERNAL : /* -14 */
-	    caml_raise_with_string(*pcre_exc_InternalError,
-				   "pcre_exec_stub: PCRE_ERROR_INTERNAL");
-	  case PCRE_ERROR_BADCOUNT : /* -15 */
-	    caml_raise_with_string(*pcre_exc_InternalError,
-				   "pcre_exec_stub: PCRE_ERROR_BADCOUNT");
-	  case PCRE_ERROR_RECURSIONLIMIT : /* -21 */
-	    caml_raise_with_string(*pcre_exc_InternalError,
-				  "pcre_exec_stub: PCRE_ERROR_RECURSIONLIMIT");
-	  case PCRE_ERROR_BADNEWLINE : /* -23 */
-	    caml_raise_with_string(*pcre_exc_InternalError,
-				   "pcre_exec_stub: PCRE_ERROR_BADNEWLINE");
-
-	  /* A few extra cases in prevision of PCRE versions > 7.9 */
-	  case -24 :
-	    caml_raise_with_string(*pcre_exc_InternalError, 
-				   "pcre_exec_stub: -24");
-	  case -25 :
-	    caml_raise_with_string(*pcre_exc_InternalError, 
-				   "pcre_exec_stub: -25");
-	  case -26 :
-	    caml_raise_with_string(*pcre_exc_InternalError, 
-				   "pcre_exec_stub: -26");
-	  case -27 :
-	    caml_raise_with_string(*pcre_exc_InternalError, 
-				   "pcre_exec_stub: -27");
-	  case -28 :
-	    caml_raise_with_string(*pcre_exc_InternalError, 
-				   "pcre_exec_stub: -28");
-	  case -29 :
-	    caml_raise_with_string(*pcre_exc_InternalError, 
-				   "pcre_exec_stub: -29");
-	  case -30 :
-	    caml_raise_with_string(*pcre_exc_InternalError, 
-				   "pcre_exec_stub: -30");
-
-	/* Fallback: this indicates a serious bug if PCRE version <= 7.9,
-	   or possibly a new error code for more recent versions of PCRE */
-	  default :
-	    caml_raise_with_string(*pcre_exc_InternalError, "pcre_exec_stub");
+          /* Dedicated exceptions */
+          case PCRE_ERROR_NOMATCH : /* -1 */
+            caml_raise_not_found();
+          case PCRE_ERROR_PARTIAL : /* -12 */
+            raise_partial();
+          case PCRE_ERROR_MATCHLIMIT : /* -8 */
+            raise_match_limit();
+          case PCRE_ERROR_BADPARTIAL : /* -13 */
+            raise_bad_partial();
+          case PCRE_ERROR_BADUTF8 : /* -10 */
+            raise_bad_utf8();
+          case PCRE_ERROR_BADUTF8_OFFSET : /* -11 */
+            raise_bad_utf8_offset();
+          /* Unknown error */
+          default : {
+            char err_buf[100];
+            snprintf(err_buf, 100,
+                     "pcre_exec_stub: unhandled PCRE error code: %d", ret);
+            raise_internal_error(err_buf);
+          }
         }
       }
 
@@ -610,18 +537,19 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_ofs,
       if (ret < 0) {
         free(ovec);
         switch(ret) {
-          case PCRE_ERROR_NOMATCH : caml_raise_constant(*pcre_exc_Not_found);
-          case PCRE_ERROR_PARTIAL : caml_raise_constant(*pcre_exc_Partial);
-          case PCRE_ERROR_MATCHLIMIT :
-            caml_raise_constant(*pcre_exc_MatchLimit);
-          case PCRE_ERROR_BADPARTIAL :
-            caml_raise_constant(*pcre_exc_BadPartial);
-          case PCRE_ERROR_BADUTF8 : caml_raise_constant(*pcre_exc_BadUTF8);
-          case PCRE_ERROR_BADUTF8_OFFSET :
-            caml_raise_constant(*pcre_exc_BadUTF8Offset);
+          case PCRE_ERROR_NOMATCH : caml_raise_not_found();
+          case PCRE_ERROR_PARTIAL : raise_partial();
+          case PCRE_ERROR_MATCHLIMIT : raise_match_limit();
+          case PCRE_ERROR_BADPARTIAL : raise_bad_partial();
+          case PCRE_ERROR_BADUTF8 : raise_bad_utf8();
+          case PCRE_ERROR_BADUTF8_OFFSET : raise_bad_utf8_offset();
           case PCRE_ERROR_CALLOUT : caml_raise(cod.v_exn);
-          default :
-            caml_raise_with_string(*pcre_exc_InternalError, "pcre_exec_stub");
+          default : {
+            char err_buf[100];
+            snprintf(err_buf, 100,
+                     "pcre_exec_stub(callout): unhandled PCRE error code: %d", ret);
+            raise_internal_error(err_buf);
+          }
         }
       }
 
@@ -690,16 +618,13 @@ CAMLprim value pcre_names_stub(value v_rex)
   int i;
 
   int ret = pcre_fullinfo_stub(v_rex, PCRE_INFO_NAMECOUNT, &name_count);
-  if (ret != 0)
-    caml_raise_with_string(*pcre_exc_InternalError, "pcre_names_stub");
+  if (ret != 0) raise_internal_error("pcre_names_stub: namecount");
 
   ret = pcre_fullinfo_stub(v_rex, PCRE_INFO_NAMEENTRYSIZE, &entry_size);
-  if (ret != 0)
-    caml_raise_with_string(*pcre_exc_InternalError, "pcre_names_stub");
+  if (ret != 0) raise_internal_error("pcre_names_stub: nameentrysize");
 
   ret = pcre_fullinfo_stub(v_rex, PCRE_INFO_NAMETABLE, &tbl_ptr);
-  if (ret != 0)
-    caml_raise_with_string(*pcre_exc_InternalError, "pcre_names_stub");
+  if (ret != 0) raise_internal_error("pcre_names_stub: nametable");
 
   v_res = caml_alloc(name_count, 0);
 

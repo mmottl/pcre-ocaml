@@ -45,6 +45,46 @@
 
 #include <pcre.h>
 
+
+/* Error codes as defined for pcre 7.9, undefined in pcre 4.5 */
+#ifndef PCRE_ERROR_PARTIAL
+#define PCRE_ERROR_PARTIAL        (-12)
+#endif
+#ifndef PCRE_ERROR_BADPARTIAL
+#define PCRE_ERROR_BADPARTIAL     (-13)
+#endif
+#ifndef PCRE_ERROR_INTERNAL
+#define PCRE_ERROR_INTERNAL       (-14)
+#endif
+#ifndef PCRE_ERROR_BADCOUNT
+#define PCRE_ERROR_BADCOUNT       (-15)
+#endif
+#ifndef PCRE_ERROR_DFA_UITEM
+#define PCRE_ERROR_DFA_UITEM      (-16)
+#endif
+#ifndef PCRE_ERROR_DFA_UCOND
+#define PCRE_ERROR_DFA_UCOND      (-17)
+#endif
+#ifndef PCRE_ERROR_DFA_UMLIMIT
+#define PCRE_ERROR_DFA_UMLIMIT    (-18)
+#endif
+#ifndef PCRE_ERROR_DFA_WSSIZE
+#define PCRE_ERROR_DFA_WSSIZE     (-19)
+#endif
+#ifndef PCRE_ERROR_DFA_RECURSE
+#define PCRE_ERROR_DFA_RECURSE    (-20)
+#endif
+#ifndef PCRE_ERROR_RECURSIONLIMIT
+#define PCRE_ERROR_RECURSIONLIMIT (-21)
+#endif
+#ifndef PCRE_ERROR_NULLWSLIMIT
+#define PCRE_ERROR_NULLWSLIMIT    (-22)  /* No longer actually used */
+#endif
+#ifndef PCRE_ERROR_BADNEWLINE
+#define PCRE_ERROR_BADNEWLINE     (-23)
+#endif
+
+
 typedef const unsigned char *chartables;  /* Type of chartable sets */
 
 /* Contents of callout data */
@@ -390,6 +430,8 @@ CAMLprim value pcre_study_stat_stub(value v_rex)
   return var_Not_studied;  /* otherwise [`Not_studied] */
 }
 
+
+
 /* Executes a pattern match with runtime options, a regular expression, a
    string offset, a string length, a subject string, a number of subgroup
    offsets, an offset vector and an optional callout function */
@@ -420,18 +462,84 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_ofs,
         pcre_exec(code, extra, ocaml_subj, len, ofs, opt, ovec, subgroups3);
 
       if (ret < 0) {
-        switch(ret) {
-          case PCRE_ERROR_NOMATCH : caml_raise_constant(*pcre_exc_Not_found);
-          case PCRE_ERROR_PARTIAL : caml_raise_constant(*pcre_exc_Partial);
-          case PCRE_ERROR_MATCHLIMIT :
-            caml_raise_constant(*pcre_exc_MatchLimit);
-          case PCRE_ERROR_BADPARTIAL :
-            caml_raise_constant(*pcre_exc_BadPartial);
-          case PCRE_ERROR_BADUTF8 : caml_raise_constant(*pcre_exc_BadUTF8);
-          case PCRE_ERROR_BADUTF8_OFFSET :
-            caml_raise_constant(*pcre_exc_BadUTF8Offset);
-          default :
-            caml_raise_with_string(*pcre_exc_InternalError, "pcre_exec_stub");
+	switch(ret) {
+
+	  /* Dedicated exceptions */
+	  case PCRE_ERROR_NOMATCH : /* -1 */
+	    caml_raise_constant(*pcre_exc_Not_found);
+	  case PCRE_ERROR_PARTIAL : /* -12 */
+	    caml_raise_constant(*pcre_exc_Partial);
+	  case PCRE_ERROR_MATCHLIMIT : /* -8 */
+	    caml_raise_constant(*pcre_exc_MatchLimit);
+	  case PCRE_ERROR_BADPARTIAL : /* -13 */
+	    caml_raise_constant(*pcre_exc_BadPartial);
+	  case PCRE_ERROR_BADUTF8 : /* -10 */
+	    caml_raise_constant(*pcre_exc_BadUTF8);
+	  case PCRE_ERROR_BADUTF8_OFFSET : /* -11 */
+	    caml_raise_constant(*pcre_exc_BadUTF8Offset);
+	  
+	  /* Other cases: exception Pcre.InternalError */
+	  case PCRE_ERROR_NULL : /* -2 */
+	    caml_raise_with_string(*pcre_exc_InternalError,
+				   "pcre_exec_stub: PCRE_ERROR_NULL");
+	  case PCRE_ERROR_BADOPTION : /* -3 */
+	    caml_raise_with_string(*pcre_exc_InternalError,
+				   "pcre_exec_stub: PCRE_ERROR_BADOPTION");
+	  case PCRE_ERROR_BADMAGIC : /* -4 */
+	    caml_raise_with_string(*pcre_exc_InternalError,
+				   "pcre_exec_stub: PCRE_ERROR_BADMAGIC");
+	  case PCRE_ERROR_UNKNOWN_NODE : /* -5 */
+	    caml_raise_with_string(*pcre_exc_InternalError,
+				   "pcre_exec_stub: PCRE_ERROR_UNKNOWN_NODE");
+	  case PCRE_ERROR_NOMEMORY : /* -6 */
+	    caml_raise_with_string(*pcre_exc_InternalError,
+				   "pcre_exec_stub: PCRE_ERROR_NOMEMORY");
+	  case PCRE_ERROR_NOSUBSTRING : /* -7 */
+	    caml_raise_with_string(*pcre_exc_InternalError,
+				   "pcre_exec_stub: PCRE_ERROR_NOSUBSTRING");
+	  case PCRE_ERROR_CALLOUT : /* -9 */
+	    caml_raise_with_string(*pcre_exc_InternalError,
+				   "pcre_exec_stub: PCRE_ERROR_CALLOUT");
+	  case PCRE_ERROR_INTERNAL : /* -14 */
+	    caml_raise_with_string(*pcre_exc_InternalError,
+				   "pcre_exec_stub: PCRE_ERROR_INTERNAL");
+	  case PCRE_ERROR_BADCOUNT : /* -15 */
+	    caml_raise_with_string(*pcre_exc_InternalError,
+				   "pcre_exec_stub: PCRE_ERROR_BADCOUNT");
+	  case PCRE_ERROR_RECURSIONLIMIT : /* -21 */
+	    caml_raise_with_string(*pcre_exc_InternalError,
+				  "pcre_exec_stub: PCRE_ERROR_RECURSIONLIMIT");
+	  case PCRE_ERROR_BADNEWLINE : /* -23 */
+	    caml_raise_with_string(*pcre_exc_InternalError,
+				   "pcre_exec_stub: PCRE_ERROR_BADNEWLINE");
+
+	  /* A few extra cases in prevision of PCRE versions > 7.9 */
+	  case -24 :
+	    caml_raise_with_string(*pcre_exc_InternalError, 
+				   "pcre_exec_stub: -24");
+	  case -25 :
+	    caml_raise_with_string(*pcre_exc_InternalError, 
+				   "pcre_exec_stub: -25");
+	  case -26 :
+	    caml_raise_with_string(*pcre_exc_InternalError, 
+				   "pcre_exec_stub: -26");
+	  case -27 :
+	    caml_raise_with_string(*pcre_exc_InternalError, 
+				   "pcre_exec_stub: -27");
+	  case -28 :
+	    caml_raise_with_string(*pcre_exc_InternalError, 
+				   "pcre_exec_stub: -28");
+	  case -29 :
+	    caml_raise_with_string(*pcre_exc_InternalError, 
+				   "pcre_exec_stub: -29");
+	  case -30 :
+	    caml_raise_with_string(*pcre_exc_InternalError, 
+				   "pcre_exec_stub: -30");
+
+	/* Fallback: this indicates a serious bug if PCRE version <= 7.9,
+	   or possibly a new error code for more recent versions of PCRE */
+	  default :
+	    caml_raise_with_string(*pcre_exc_InternalError, "pcre_exec_stub");
         }
       }
 

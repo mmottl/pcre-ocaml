@@ -415,6 +415,28 @@ CAMLprim value pcre_study_stat_stub(value v_rex)
   return var_Not_studied;  /* otherwise [`Not_studied] */
 }
 
+static inline void handle_exec_error(char *loc, const int ret) Noreturn;
+
+static inline void handle_exec_error(char *loc, const int ret)
+{
+  switch (ret) {
+    /* Dedicated exceptions */
+    case PCRE_ERROR_NOMATCH : caml_raise_not_found();
+    case PCRE_ERROR_PARTIAL : raise_partial();
+    case PCRE_ERROR_MATCHLIMIT : raise_match_limit();
+    case PCRE_ERROR_BADPARTIAL : raise_bad_partial();
+    case PCRE_ERROR_BADUTF8 : raise_bad_utf8();
+    case PCRE_ERROR_BADUTF8_OFFSET : raise_bad_utf8_offset();
+    case PCRE_ERROR_RECURSIONLIMIT : raise_recursion_limit();
+    /* Unknown error */
+    default : {
+      char err_buf[100];
+      snprintf(err_buf, 100, "%s: unhandled PCRE error code: %d", loc, ret);
+      raise_internal_error(err_buf);
+    }
+  }
+}
+
 /* Executes a pattern match with runtime options, a regular expression, a
    string offset, a string length, a subject string, a number of subgroup
    offsets, an offset vector and an optional callout function */
@@ -444,32 +466,7 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_ofs,
       const int ret =
         pcre_exec(code, extra, ocaml_subj, len, ofs, opt, ovec, subgroups3);
 
-      if (ret < 0) {
-        switch(ret) {
-
-          /* Dedicated exceptions */
-          case PCRE_ERROR_NOMATCH : /* -1 */
-            caml_raise_not_found();
-          case PCRE_ERROR_PARTIAL : /* -12 */
-            raise_partial();
-          case PCRE_ERROR_MATCHLIMIT : /* -8 */
-            raise_match_limit();
-          case PCRE_ERROR_BADPARTIAL : /* -13 */
-            raise_bad_partial();
-          case PCRE_ERROR_BADUTF8 : /* -10 */
-            raise_bad_utf8();
-          case PCRE_ERROR_BADUTF8_OFFSET : /* -11 */
-            raise_bad_utf8_offset();
-          /* Unknown error */
-          default : {
-            char err_buf[100];
-            snprintf(err_buf, 100,
-                     "pcre_exec_stub: unhandled PCRE error code: %d", ret);
-            raise_internal_error(err_buf);
-          }
-        }
-      }
-
+      if (ret < 0) handle_exec_error("pcre_exec_stub", ret);
       else {
         const int *ovec_src = ovec + subgroups2_1;
         long int *ovec_dst = (long int *) ovec + subgroups2_1;
@@ -531,29 +528,13 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_ofs,
                           subgroups3);
         }
 
-        free(subj);
+        caml_stat_free(subj);
       End_roots();
 
       if (ret < 0) {
-        free(ovec);
-        switch(ret) {
-          case PCRE_ERROR_NOMATCH : caml_raise_not_found();
-          case PCRE_ERROR_PARTIAL : raise_partial();
-          case PCRE_ERROR_MATCHLIMIT : raise_match_limit();
-          case PCRE_ERROR_BADPARTIAL : raise_bad_partial();
-          case PCRE_ERROR_BADUTF8 : raise_bad_utf8();
-          case PCRE_ERROR_BADUTF8_OFFSET : raise_bad_utf8_offset();
-          case PCRE_ERROR_CALLOUT : caml_raise(cod.v_exn);
-          default : {
-            char err_buf[100];
-            snprintf(err_buf, 100,
-                     "pcre_exec_stub(callout): unhandled PCRE error code: %d", ret);
-            raise_internal_error(err_buf);
-          }
-        }
-      }
-
-      else {
+        caml_stat_free(ovec);
+        handle_exec_error("pcre_exec_stub(callout)", ret);
+      } else {
         int *ovec_src = ovec + subgroups2_1;
         long int *ovec_dst = &Field(v_ovec, 0) + subgroups2_1;
 
@@ -562,7 +543,7 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_ofs,
           --ovec_src; --ovec_dst;
         }
 
-        free(ovec);
+        caml_stat_free(ovec);
       }
     }
   }

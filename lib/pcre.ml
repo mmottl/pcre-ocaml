@@ -129,8 +129,8 @@ type rflag =
 
 let int_of_rflag = function
   | `ANCHORED -> 0x0010
-  | `NOTBOL   -> 0x0080
-  | `NOTEOL   -> 0x0100
+  | `NOTBOL -> 0x0080
+  | `NOTEOL -> 0x0100
   | `NOTEMPTY -> 0x0400
   | `PARTIAL -> 0x8000
 

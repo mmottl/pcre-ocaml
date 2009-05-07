@@ -1,3 +1,8 @@
+2009-05-07:  Changed API wrt. error handling and thus made a major release.
+
+             Improved behavior in the presence of recursion limit errors.
+             Thanks to Martin Jambon <martinj@mylife.com> for this patch!
+
 2009-04-23:  Fixed build problem on MinGW.
 
              Thanks to Gerd Stolpmann <gerd@gerd-stolpmann.de> for
@@ -10,7 +15,7 @@
 
              Update OCamlMakefile.
 
-	     Improved Godi-distribution.
+             Improved Godi-distribution.
 
 2008-05-06:  Fixed build problem with newer versions of PCRE.
 

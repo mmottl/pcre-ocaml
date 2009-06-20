@@ -1,3 +1,7 @@
+2009-06-20:  Fixed bug in configuration functions that could lead to a segfault.
+
+             Thanks to Gerd Stolpmann <gerd@gerd-stolpmann.de> for the patch!
+
 2009-05-07:  Changed API wrt. error handling and thus made a major release.
 
              Improved behavior in the presence of recursion limit errors.
@@ -5,8 +9,7 @@
 
 2009-04-23:  Fixed build problem on MinGW.
 
-             Thanks to Gerd Stolpmann <gerd@gerd-stolpmann.de> for
-             the patch!
+             Thanks to Gerd Stolpmann <gerd@gerd-stolpmann.de> for the patch!
 
 2009-03-08:  Fixed build problem on Mac OS X with macports.
 

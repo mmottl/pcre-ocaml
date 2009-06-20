@@ -303,7 +303,7 @@ CAMLprim value pcre_get_match_limit_stub(value v_rex){
 }
 
 /* Performs the call to the pcre_fullinfo function */
-static value pcre_fullinfo_stub(value v_rex, int what, void *where)
+static inline int pcre_fullinfo_stub(value v_rex, int what, void *where)
 {
   return pcre_fullinfo((pcre *) Field(v_rex, 1), (pcre_extra *) Field(v_rex, 2),
                        what, where);
@@ -312,22 +312,22 @@ static value pcre_fullinfo_stub(value v_rex, int what, void *where)
 /* Some stubs for info-functions */
 
 /* Generic macro for getting integer results from pcre_fullinfo */
-#define make_int_info(name, option) \
+#define make_info(tp, cnv, name, option) \
   CAMLprim value pcre_##name##_stub(value v_rex) \
   { \
-    int options; \
+    tp options; \
     const int ret = pcre_fullinfo_stub(v_rex, PCRE_INFO_##option, &options); \
     if (ret != 0) raise_internal_error("pcre_##name##_stub"); \
-    return Val_int(options); \
+    return cnv(options); \
   }
 
-make_int_info(options, OPTIONS)
-make_int_info(size, SIZE)
-make_int_info(studysize, STUDYSIZE)
-make_int_info(capturecount, CAPTURECOUNT)
-make_int_info(backrefmax, BACKREFMAX)
-make_int_info(namecount, NAMECOUNT)
-make_int_info(nameentrysize, NAMEENTRYSIZE)
+make_info(unsigned long int, Val_long, options, OPTIONS)
+make_info(size_t, Val_long, size, SIZE)
+make_info(size_t, Val_long, studysize, STUDYSIZE)
+make_info(int, Val_int, capturecount, CAPTURECOUNT)
+make_info(int, Val_int, backrefmax, BACKREFMAX)
+make_info(int, Val_int, namecount, NAMECOUNT)
+make_info(int, Val_int, nameentrysize, NAMEENTRYSIZE)
 
 CAMLprim value pcre_firstbyte_stub(value v_rex)
 {
@@ -619,9 +619,17 @@ CAMLprim value pcre_names_stub(value v_rex)
 }
 
 /* Generic stub for getting integer results from pcre_config */
-static int pcre_config_int(int what)
+static inline int pcre_config_int(int what)
 {
   int ret;
+  pcre_config(what, (void *) &ret);
+  return ret;
+}
+
+/* Generic stub for getting long integer results from pcre_config */
+static inline int pcre_config_long(int what)
+{
+  long ret;
   pcre_config(what, (void *) &ret);
   return ret;
 }
@@ -640,10 +648,10 @@ CAMLprim value pcre_config_newline_stub(value __unused v_unit)
 CAMLprim value pcre_config_link_size_stub(value __unused v_unit)
 { return Val_int(pcre_config_int(PCRE_CONFIG_LINK_SIZE)); }
 
-/* Returns default limit for calls to internal matching function */
-CAMLprim value pcre_config_match_limit_stub(value __unused v_unit)
-{ return Val_int(pcre_config_int(PCRE_CONFIG_MATCH_LIMIT)); }
-
 /* Returns boolean indicating use of stack recursion */
 CAMLprim value pcre_config_stackrecurse_stub(value __unused v_unit)
 { return Val_bool(pcre_config_int(PCRE_CONFIG_STACKRECURSE)); }
+
+/* Returns default limit for calls to internal matching function */
+CAMLprim value pcre_config_match_limit_stub(value __unused v_unit)
+{ return Val_long(pcre_config_long(PCRE_CONFIG_MATCH_LIMIT)); }

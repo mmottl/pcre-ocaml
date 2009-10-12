@@ -31,7 +31,7 @@
              This function returns the names of all named substrings in a
              regular expression.
 
-             Thanks to Benedikt Grundmann <bgrundmann@janestcapital.com>
+             Thanks to Benedikt Grundmann <bgrundmann@janestreet.com>
              for the patch!
 
 2007-07-12:  Improved build scripts for Windows.

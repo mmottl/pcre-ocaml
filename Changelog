@@ -1,3 +1,7 @@
+2010-04-01:  Added new function:
+
+               * regexp_or
+
 2009-06-20:  Fixed bug in configuration functions that could lead to a segfault.
 
              Thanks to Gerd Stolpmann <gerd@gerd-stolpmann.de> for the patch!

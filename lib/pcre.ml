@@ -34,6 +34,7 @@ type error =
 
 exception Error of error
 exception Backtrack
+exception Regexp_or of string * error
 
 (* Puts exceptions into global C-variables for fast retrieval *)
 external pcre_ocaml_init : unit -> unit = "pcre_ocaml_init"
@@ -235,6 +236,18 @@ let regexp ?(study = true) ?limit ?(iflags = 0) ?flags ?chtables pat =
   match limit with
   | None -> rex
   | Some lim -> set_imp_match_limit rex lim
+
+let regexp_or ?study ?limit ?(iflags = 0) ?flags ?chtables pats =
+  let check pat =
+    try ignore (regexp ~study:false ~iflags ?flags ?chtables pat)
+    with Error error -> raise (Regexp_or (pat, error))
+  in
+  List.iter check pats;
+  let big_pat =
+    let cnv pat = "(?:" ^ pat ^ ")" in
+    String.concat "|" (List.rev (List.rev_map cnv pats))
+  in
+  regexp ?study ?limit ~iflags ?flags ?chtables big_pat
 
 let string_unsafe_sub s ofs len =
   let r = String.create len in

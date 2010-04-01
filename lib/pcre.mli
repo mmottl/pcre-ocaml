@@ -51,6 +51,9 @@ exception Error of error
 (** [Backtrack] used in callout functions to force backtracking. *)
 exception Backtrack
 
+(** [Regexp_or (pat, error)] gets raised for sub-pattern [pat] by [regexp_or]
+    if it failed to compile. *)
+exception Regexp_or of string * error
 
 (** {6 Compilation and runtime flags and their conversion functions} *)
 
@@ -231,6 +234,17 @@ val regexp :
     expressions (= patterns), please consult the PCRE-documentation
     ("man pcrepattern") or PERL-manuals.
     @see <http://www.perl.com> www.perl.com *)
+
+val regexp_or :
+  ?study : bool ->
+  ?limit : int ->
+  ?iflags : icflag ->
+  ?flags : cflag list ->
+  ?chtables : chtables ->
+  string list -> regexp
+(** [regexp_or ?study ?limit ?iflags ?flags ?chtables patterns] like {!regexp},
+    but combines [patterns] as alternatives (or-patterns) into one regular
+    expression. *)
 
 val quote : string -> string
 (** [quote str] @return the quoted string of [str]. *)

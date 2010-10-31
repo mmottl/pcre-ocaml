@@ -20,10 +20,13 @@
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#if defined(_WIN32) && defined(_DLL)
-#  define PCREextern __declspec(dllexport)
-#else
-#  define PCREextern
+#if defined(_WIN32)
+#  define snprintf _snprintf
+#  if defined(_DLL)
+#    define PCREextern __declspec(dllexport)
+#  else
+#    define PCREextern
+#  endif
 #endif
 
 #if __GNUC__ >= 3

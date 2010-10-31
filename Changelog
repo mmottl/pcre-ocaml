@@ -1,3 +1,7 @@
+2010-10-31:  Improved Windows support with MSVC.
+
+             Thanks to Sylvain Le Gall <sylvain@le-gall.net> for the patch!
+
 2010-04-01:  Added new function:
 
                * regexp_or

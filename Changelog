@@ -1,3 +1,7 @@
+2011-01-16:  Added support for limit recursion flag.
+
+             Thanks to Delphin Lecucq <Delphin.LECUCQ@3ds.com> for the patch!
+
 2010-10-31:  Improved Windows support with MSVC.
 
              Thanks to Sylvain Le Gall <sylvain@le-gall.net> for the patch!

@@ -126,6 +126,9 @@ val config_link_size : int
 (** Default limit for calls to internal matching function *)
 val config_match_limit : int
 
+(** Default limit recursion for calls to internal matching function *)
+val config_match_limit_recursion : int
+
 (** Indicates use of stack recursion in matching function *)
 val config_stackrecurse : bool
 
@@ -210,20 +213,22 @@ external maketables : unit -> chtables = "pcre_maketables_stub"
 val regexp :
   ?study : bool ->
   ?limit : int ->
+  ?limit_recursion : int ->
   ?iflags : icflag ->
   ?flags : cflag list ->
   ?chtables : chtables ->
   string -> regexp
-(** [regexp ?study ?limit ?iflags ?flags ?chtables pattern] compiles
-    [pattern] with [flags] when given, with [iflags] otherwise, and
-    with char tables [chtables]. If [study] is true, then the resulting
-    regular expression will be studied. If [limit] is specified, this
-    sets a limit to the amount of recursion and backtracking (only lower
-    than the builtin default!). If this limit is exceeded, [MatchLimit]
-    will be raised during matching.
+(** [regexp ?study ?limit ?limit_recursion ?iflags ?flags ?chtables pattern]
+    compiles [pattern] with [flags] when given, with [iflags] otherwise, and
+    with char tables [chtables]. If [study] is true, then the resulting regular
+    expression will be studied. If [limit] is specified, this sets a limit to
+    the amount of recursion and backtracking (only lower than the builtin
+    default!). If this limit is exceeded, [MatchLimit] will be raised during
+    matching.
 
     @param study default = true
     @param limit default = no extra limit other than default
+    @param limit_recursion default = no extra limit_recursion other than default
     @param iflags default = no extra flags
     @param flags default = ignored
     @param chtables default = builtin char tables
@@ -238,13 +243,14 @@ val regexp :
 val regexp_or :
   ?study : bool ->
   ?limit : int ->
+  ?limit_recursion : int ->
   ?iflags : icflag ->
   ?flags : cflag list ->
   ?chtables : chtables ->
   string list -> regexp
-(** [regexp_or ?study ?limit ?iflags ?flags ?chtables patterns] like {!regexp},
-    but combines [patterns] as alternatives (or-patterns) into one regular
-    expression. *)
+(** [regexp_or ?study ?limit ?limit_recursion ?iflags ?flags ?chtables patterns]
+    like {!regexp}, but combines [patterns] as alternatives (or-patterns) into
+    one regular expression. *)
 
 val quote : string -> string
 (** [quote str] @return the quoted string of [str]. *)

@@ -170,6 +170,9 @@ external pcre_config_link_size :
 external pcre_config_match_limit :
   unit -> int = "pcre_config_match_limit_stub" "noalloc"
 
+external pcre_config_match_limit_recursion :
+  unit -> int = "pcre_config_match_limit_recursion_stub" "noalloc"
+
 external pcre_config_stackrecurse :
   unit -> bool = "pcre_config_stackrecurse_stub" "noalloc"
 
@@ -178,6 +181,7 @@ let config_utf8 = pcre_config_utf8 ()
 let config_newline = pcre_config_newline ()
 let config_link_size = pcre_config_link_size ()
 let config_match_limit = pcre_config_match_limit ()
+let config_match_limit_recursion = pcre_config_match_limit_recursion ()
 let config_stackrecurse = pcre_config_stackrecurse ()
 
 
@@ -227,17 +231,33 @@ external get_match_limit : regexp -> int option = "pcre_get_match_limit_stub"
 external set_imp_match_limit :
   regexp -> int -> regexp = "pcre_set_imp_match_limit_stub" "noalloc"
 
-let regexp ?(study = true) ?limit ?(iflags = 0) ?flags ?chtables pat =
+external get_match_limit_recursion :
+  regexp -> int option = "pcre_get_match_limit_recursion_stub"
+
+(* Internal use only! *)
+external set_imp_match_limit_recursion : (** ADDITION *)
+  regexp -> int -> regexp = "pcre_set_imp_match_limit_recursion_stub" "noalloc"
+
+let regexp
+      ?(study = true) ?limit ?limit_recursion
+      ?(iflags = 0) ?flags ?chtables pat =
   let rex =
     match flags with
     | Some flag_list -> compile (cflags flag_list) chtables pat
-    | _ -> compile iflags chtables pat in
+    | _ -> compile iflags chtables pat
+  in
   if study then pcre_study rex;
-  match limit with
+  let rex =
+    match limit with
+    | None -> rex
+    | Some lim -> set_imp_match_limit rex lim
+  in
+  match limit_recursion with
   | None -> rex
-  | Some lim -> set_imp_match_limit rex lim
+  | Some lim -> set_imp_match_limit_recursion rex lim
 
-let regexp_or ?study ?limit ?(iflags = 0) ?flags ?chtables pats =
+let regexp_or
+      ?study ?limit ?limit_recursion ?(iflags = 0) ?flags ?chtables pats =
   let check pat =
     try ignore (regexp ~study:false ~iflags ?flags ?chtables pat)
     with Error error -> raise (Regexp_or (pat, error))
@@ -247,7 +267,7 @@ let regexp_or ?study ?limit ?(iflags = 0) ?flags ?chtables pats =
     let cnv pat = "(?:" ^ pat ^ ")" in
     String.concat "|" (List.rev (List.rev_map cnv pats))
   in
-  regexp ?study ?limit ~iflags ?flags ?chtables big_pat
+  regexp ?study ?limit ?limit_recursion ~iflags ?flags ?chtables big_pat
 
 let string_unsafe_sub s ofs len =
   let r = String.create len in

@@ -276,15 +276,45 @@ CAMLprim value pcre_study_stub(value v_rex)
   return v_rex;
 }
 
+/* Sets a match limit recursion for a regular expression imperatively */
+CAMLprim value pcre_set_imp_match_limit_recursion_stub(value v_rex, value v_lim)
+{
+  pcre_extra *extra = (pcre_extra *) Field(v_rex, 2);
+  if (extra == NULL) {
+    extra = caml_stat_alloc(sizeof(pcre_extra));
+    extra->flags = PCRE_EXTRA_MATCH_LIMIT_RECURSION;
+    Field(v_rex, 2) = (value) extra;
+  } else {
+    unsigned long int *flags_ptr = &extra->flags;
+    *flags_ptr = PCRE_EXTRA_MATCH_LIMIT_RECURSION | *flags_ptr;
+  }
+  extra->match_limit_recursion = Int_val(v_lim);
+  return v_rex;
+}
+
+/* Gets the match limit recursion of a regular expression if it exists */
+CAMLprim value pcre_get_match_limit_recursion_stub(value v_rex)
+{
+  pcre_extra *extra = (pcre_extra *) Field(v_rex, 2);
+  if (extra == NULL) return None;
+  if (extra->flags & PCRE_EXTRA_MATCH_LIMIT_RECURSION) {
+    value v_lim = Val_int(extra->match_limit_recursion);
+    value v_res = caml_alloc_small(1, 0);
+    Field(v_res, 0) = v_lim;
+    return v_res;
+  }
+  return None;
+}
+
 /* Sets a match limit for a regular expression imperatively */
-CAMLprim value pcre_set_imp_match_limit_stub(value v_rex, value v_lim){
+CAMLprim value pcre_set_imp_match_limit_stub(value v_rex, value v_lim)
+{
   pcre_extra *extra = (pcre_extra *) Field(v_rex, 2);
   if (extra == NULL) {
     extra = caml_stat_alloc(sizeof(pcre_extra));
     extra->flags = PCRE_EXTRA_MATCH_LIMIT;
     Field(v_rex, 2) = (value) extra;
-  }
-  else {
+  } else {
     unsigned long int *flags_ptr = &extra->flags;
     *flags_ptr = PCRE_EXTRA_MATCH_LIMIT | *flags_ptr;
   }
@@ -293,14 +323,15 @@ CAMLprim value pcre_set_imp_match_limit_stub(value v_rex, value v_lim){
 }
 
 /* Gets the match limit of a regular expression if it exists */
-CAMLprim value pcre_get_match_limit_stub(value v_rex){
+CAMLprim value pcre_get_match_limit_stub(value v_rex)
+{
   pcre_extra *extra = (pcre_extra *) Field(v_rex, 2);
   if (extra == NULL) return None;
   if (extra->flags & PCRE_EXTRA_MATCH_LIMIT) {
-    value lim = Val_int(extra->match_limit);
-    value res = caml_alloc_small(1, 0);
-    Field(res, 0) = lim;
-    return res;
+    value v_lim = Val_int(extra->match_limit);
+    value v_res = caml_alloc_small(1, 0);
+    Field(v_res, 0) = v_lim;
+    return v_res;
   }
   return None;
 }
@@ -658,3 +689,7 @@ CAMLprim value pcre_config_stackrecurse_stub(value __unused v_unit)
 /* Returns default limit for calls to internal matching function */
 CAMLprim value pcre_config_match_limit_stub(value __unused v_unit)
 { return Val_long(pcre_config_long(PCRE_CONFIG_MATCH_LIMIT)); }
+
+/* ADDITION: Returns default limit for calls to internal matching function */
+CAMLprim value pcre_config_match_limit_recursion_stub(value __unused v_unit)
+{ return Val_long(pcre_config_long(PCRE_CONFIG_MATCH_LIMIT_RECURSION)); }

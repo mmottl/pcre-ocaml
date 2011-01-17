@@ -690,6 +690,6 @@ CAMLprim value pcre_config_stackrecurse_stub(value __unused v_unit)
 CAMLprim value pcre_config_match_limit_stub(value __unused v_unit)
 { return Val_long(pcre_config_long(PCRE_CONFIG_MATCH_LIMIT)); }
 
-/* ADDITION: Returns default limit for calls to internal matching function */
+/* Returns default limit for calls to internal matching function */
 CAMLprim value pcre_config_match_limit_recursion_stub(value __unused v_unit)
 { return Val_long(pcre_config_long(PCRE_CONFIG_MATCH_LIMIT_RECURSION)); }

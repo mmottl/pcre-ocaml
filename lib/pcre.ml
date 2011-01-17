@@ -235,7 +235,7 @@ external get_match_limit_recursion :
   regexp -> int option = "pcre_get_match_limit_recursion_stub"
 
 (* Internal use only! *)
-external set_imp_match_limit_recursion : (** ADDITION *)
+external set_imp_match_limit_recursion :
   regexp -> int -> regexp = "pcre_set_imp_match_limit_recursion_stub" "noalloc"
 
 let regexp

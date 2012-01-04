@@ -1,4 +1,8 @@
-2011-12-15:  Fixed a Windows portability bug in the C-bindings.
+2012-01-04:  Fixed native code debug build target by updating OCamlMakefile.
+
+             Thanks to Stéphane Glondu <glondu@debian.org> for the patch!
+
+2011-12-15:   Fixed a Windows portability bug in the C-bindings.
 
              Thanks to Evgenii Lepikhin <johnlepikhin@gmail.com> for the patch!
 

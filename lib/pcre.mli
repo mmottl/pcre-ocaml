@@ -202,6 +202,11 @@ external get_match_limit : regexp -> int option = "pcre_get_match_limit_stub"
 (** [get_match_limit rex] @return some match limit of regular expression
     [rex] or [None]. *)
 
+external get_match_limit_recursion :
+  regexp -> int option = "pcre_get_match_limit_recursion_stub"
+(** [get_match_limit_recursion rex] @return some recursion match limit
+    of regular expression [rex] or [None]. *)
+
 
 (** {6 Compilation of patterns} *)
 

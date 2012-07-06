@@ -1,34 +1,38 @@
--include Makefile.conf
+# OASIS_START
+# DO NOT EDIT (digest: bc1e05bfc8b39b664f29dae8dbd3ebbb)
 
-EXAMPLES = $(filter-out examples/OMakefile examples/CVS, $(wildcard examples/*))
+SETUP = ocaml setup.ml
 
-.PHONY: all
-all:
-	@cd lib && $(MAKE) byte-code-library native-code-library
+build: setup.data
+	$(SETUP) -build $(BUILDFLAGS)
 
-.PHONY:	examples
-examples:
-	@for dir in $(EXAMPLES); do (cd $$dir && $(MAKE)); done
+doc: setup.data build
+	$(SETUP) -doc $(DOCFLAGS)
 
-.PHONY:	doc
-doc:
-	@cd lib && $(MAKE) $@
-	ln -sf lib/doc
+test: setup.data build
+	$(SETUP) -test $(TESTFLAGS)
 
-.PHONY: htdoc
-htdoc:
-	@cd lib && $(MAKE) $@
+all: 
+	$(SETUP) -all $(ALLFLAGS)
 
-.PHONY:	install
-install:
-	@cd lib && $(MAKE) $@
+install: setup.data
+	$(SETUP) -install $(INSTALLFLAGS)
 
-.PHONY:	uninstall
-uninstall:
-	@cd lib && $(MAKE) $@
+uninstall: setup.data
+	$(SETUP) -uninstall $(UNINSTALLFLAGS)
 
-.PHONY:	clean
-clean:
-	@cd lib && $(MAKE) clean
-	@for dir in $(EXAMPLES); do (cd $$dir && $(MAKE) $@); done
-	@rm -f doc
+reinstall: setup.data
+	$(SETUP) -reinstall $(REINSTALLFLAGS)
+
+clean: 
+	$(SETUP) -clean $(CLEANFLAGS)
+
+distclean: 
+	$(SETUP) -distclean $(DISTCLEANFLAGS)
+
+setup.data:
+	$(SETUP) -configure $(CONFIGUREFLAGS)
+
+.PHONY: build doc test all install uninstall reinstall clean distclean configure
+
+# OASIS_STOP

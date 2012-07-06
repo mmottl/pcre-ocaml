@@ -1,0 +1,34 @@
+# OASIS_START
+# DO NOT EDIT (digest: 3e421fd4f8e09677d50f8c2b5273e8a1)
+# Ignore VCS directories, you can use the same kind of rule outside 
+# OASIS_START/STOP if you want to exclude directories that contains 
+# useless stuff for the build process
+<**/.svn>: -traverse
+<**/.svn>: not_hygienic
+".bzr": -traverse
+".bzr": not_hygienic
+".hg": -traverse
+".hg": not_hygienic
+".git": -traverse
+".git": not_hygienic
+"_darcs": -traverse
+"_darcs": not_hygienic
+# Library pcre
+"lib/pcre.cmxs": use_pcre
+<lib/*.ml{,i}>: oasis_library_pcre_ccopt
+"lib/pcre_stubs.c": oasis_library_pcre_ccopt
+<lib/pcre.{cma,cmxa}>: use_libpcre_stubs
+# Executable cloc
+<examples/cloc/cloc.{native,byte}>: use_pcre
+<examples/cloc/*.ml{,i}>: use_pcre
+# Executable count_hash
+<examples/count_hash/count_hash.{native,byte}>: use_pcre
+<examples/count_hash/*.ml{,i}>: use_pcre
+# Executable pcregrep
+<examples/pcregrep/pcregrep.{native,byte}>: use_pcre
+<examples/pcregrep/*.ml{,i}>: use_pcre
+# Executable subst
+<examples/subst/subst.{native,byte}>: use_pcre
+<examples/subst/*.ml{,i}>: use_pcre
+# OASIS_STOP
+<**/*.ml{,i}>: warn_A, warn_e, warn_r, annot

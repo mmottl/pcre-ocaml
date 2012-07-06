@@ -501,4 +501,49 @@ let dispatch_default = MyOCamlbuildBase.dispatch_default package_default;;
 
 # 503 "myocamlbuild.ml"
 (* OASIS_STOP *)
-Ocamlbuild_plugin.dispatch dispatch_default;;
+
+let () =
+  let additional_rules = function
+    | After_rules ->
+        flag ["compile"; "ocaml"] (S [A "-strict-sequence"]);
+
+        (* Add correct PCRE compilation and link flags *)
+        let pcre_clibs, opcre_cflags, opcre_clibs =
+          let ic = Unix.open_process_in "pcre-config --cflags --libs" in
+          try
+            let pcre_cflags = input_line ic in
+            let pcre_clibs = input_line ic in
+            (* TODO: remove once split-function in generated code is fixed *)
+            let rec split_string s =
+              match try Some (String.index s ' ') with Not_found -> None with
+              | Some pos ->
+                  String.before s pos :: split_string (String.after s (pos + 1))
+              | None -> [s]
+            in
+            let ocamlify ~ocaml_flag flags =
+              let chunks = split_string flags in
+              let cnv flag = [A ocaml_flag; A flag] in
+              List.concat (List.map cnv chunks)
+            in
+            let split_flags flags =
+              let chunks = split_string flags in
+              let cnv flag = A flag in
+              List.map cnv chunks
+            in
+            split_flags pcre_clibs,
+            ocamlify ~ocaml_flag:"-ccopt" pcre_cflags,
+            ocamlify ~ocaml_flag:"-cclib" pcre_clibs
+          with exn ->
+            close_in ic;
+            raise exn
+        in
+        flag ["compile"; "c"] (S opcre_cflags);
+        flag ["link"; "ocaml"; "library"] (S opcre_clibs);
+        flag ["oasis_library_pcre_cclib"; "ocamlmklib"; "c"] (S pcre_clibs);
+        flag ["oasis_library_pcre_cclib"; "link"] (S opcre_clibs)
+      | _ -> ()
+  in
+  dispatch
+    (MyOCamlbuildBase.dispatch_combine [
+         MyOCamlbuildBase.dispatch_default package_default;
+         additional_rules ])

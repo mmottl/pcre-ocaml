@@ -32,3 +32,9 @@
 <examples/subst/*.ml{,i}>: use_pcre
 # OASIS_STOP
 <**/*.ml{,i}>: warn_A, warn_e, warn_r, annot
+
+<lib/pcre.{cma,cmxa}>: oasis_library_pcre_cclib
+"lib/libpcre_stubs.lib": oasis_library_pcre_cclib
+"lib/dllpcre_stubs.dll": oasis_library_pcre_cclib
+"lib/libpcre_stubs.a": oasis_library_pcre_cclib
+"lib/dllpcre_stubs.so": oasis_library_pcre_cclib

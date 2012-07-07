@@ -530,17 +530,17 @@ let () =
               let cnv flag = A flag in
               List.map cnv chunks
             in
-            split_flags pcre_clibs,
-            ocamlify ~ocaml_flag:"-ccopt" pcre_cflags,
-            ocamlify ~ocaml_flag:"-cclib" pcre_clibs
+            S (split_flags pcre_clibs),
+            S (ocamlify ~ocaml_flag:"-ccopt" pcre_cflags),
+            S (ocamlify ~ocaml_flag:"-cclib" pcre_clibs)
           with exn ->
             close_in ic;
             raise exn
         in
-        flag ["compile"; "c"] (S opcre_cflags);
-        flag ["link"; "ocaml"; "library"] (S opcre_clibs);
-        flag ["oasis_library_pcre_cclib"; "ocamlmklib"; "c"] (S pcre_clibs);
-        flag ["oasis_library_pcre_cclib"; "link"] (S opcre_clibs)
+        flag ["compile"; "c"] opcre_cflags;
+        flag ["link"; "ocaml"; "library"] opcre_clibs;
+        flag ["oasis_library_pcre_cclib"; "ocamlmklib"; "c"] pcre_clibs;
+        flag ["oasis_library_pcre_cclib"; "link"] opcre_clibs
       | _ -> ()
   in
   dispatch

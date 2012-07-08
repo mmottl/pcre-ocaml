@@ -530,6 +530,7 @@ let () =
               let cnv flag = A flag in
               List.map cnv chunks
             in
+            close_in ic;
             S (split_flags pcre_clibs),
             S (ocamlify ~ocaml_flag:"-ccopt" pcre_cflags),
             S (ocamlify ~ocaml_flag:"-cclib" pcre_clibs)
@@ -543,7 +544,6 @@ let () =
         flag ["oasis_library_pcre_cclib"; "link"] opcre_clibs
       | _ -> ()
   in
-  dispatch
-    (MyOCamlbuildBase.dispatch_combine [
-         MyOCamlbuildBase.dispatch_default package_default;
-         additional_rules ])
+  dispatch (
+    MyOCamlbuildBase.dispatch_combine
+      [MyOCamlbuildBase.dispatch_default package_default; additional_rules])

@@ -17,13 +17,14 @@ Homepage:         https://bitbucket.org/mmottl/pcre-ocaml
 Plugins:          META (0.3), StdFiles (0.3), DevFiles (0.3)
 XStdFilesREADME:  false
 
+BuildTools:       ocamldoc, ocamlbuild
+
 Library pcre
   Path:           lib
   FindlibName:    pcre
   Modules:        Pcre
   CSources:       pcre_stubs.c
   CCOpt:          -O2 -DPIC
-  BuildTools:     ocamlbuild
 
 
 # Examples
@@ -34,7 +35,6 @@ Executable cloc
   BuildDepends:   pcre
   Install:        false
   CompiledObject: best
-  BuildTools:     ocamlbuild
 
 Executable count_hash
   Path:           examples/count_hash
@@ -42,7 +42,6 @@ Executable count_hash
   BuildDepends:   pcre
   Install:        false
   CompiledObject: best
-  BuildTools:     ocamlbuild
 
 Executable pcregrep
   Path:           examples/pcregrep
@@ -50,7 +49,6 @@ Executable pcregrep
   BuildDepends:   pcre
   Install:        false
   CompiledObject: best
-  BuildTools:     ocamlbuild
 
 Executable subst
   Path:           examples/subst
@@ -58,7 +56,6 @@ Executable subst
   BuildDepends:   pcre
   Install:        false
   CompiledObject: best
-  BuildTools:     ocamlbuild
 
 #
 
@@ -66,7 +63,6 @@ Document API
   Title:                API reference for PCRE-OCaml
   Type:                 OCamlbuild (0.3)
   InstallDir:           $docdir/api
-  BuildTools:           ocamldoc, ocamlbuild
   XOCamlbuildPath:      .
   XOCamlbuildLibraries: pcre
 

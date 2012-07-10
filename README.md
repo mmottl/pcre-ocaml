@@ -108,7 +108,7 @@ a few example applications demonstrating the functionality of PCRE-OCaml.
 
 ---------------------------------------------------------------------------
 
-Contact information and contributing
+Contact Information and Contributing
 ------------------------------------
 
 In the case of bugs, feature requests, contributions and similar, you can

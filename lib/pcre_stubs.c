@@ -529,8 +529,16 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_ofs,
       int ret;
       struct cod cod = { (value *) NULL, (value *) NULL, (value) NULL };
       struct pcre_extra new_extra =
-#ifdef PCRE_CONFIG_MATCH_LIMIT_RECURSION
+#ifdef PCRE_EXTRA_MATCH_LIMIT_RECURSION
+# ifdef PCRE_EXTRA_MARK
+#  ifdef PCRE_EXTRA_EXECUTABLE_JIT
+        { PCRE_EXTRA_CALLOUT_DATA, NULL, 0, NULL, NULL, 0, NULL, NULL };
+#  else
+        { PCRE_EXTRA_CALLOUT_DATA, NULL, 0, NULL, NULL, 0, NULL };
+#  endif
+# else
         { PCRE_EXTRA_CALLOUT_DATA, NULL, 0, NULL, NULL, 0 };
+# endif
 #else
         { PCRE_EXTRA_CALLOUT_DATA, NULL, 0, NULL, NULL };
 #endif
@@ -558,7 +566,7 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_ofs,
           new_extra.study_data = extra->study_data;
           new_extra.match_limit = extra->match_limit;
           new_extra.tables = extra->tables;
-#ifdef PCRE_CONFIG_MATCH_LIMIT_RECURSION
+#ifdef PCRE_EXTRA_MATCH_LIMIT_RECURSION
           new_extra.match_limit_recursion = extra->match_limit_recursion;
 #endif
 

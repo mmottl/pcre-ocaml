@@ -35,9 +35,14 @@ Library pcre
 
 # Examples
 
+Flag examples
+  Description:    Build examples
+  Default:        true
+
 Executable cloc
   Path:           examples/cloc
   MainIs:         cloc.ml
+  Build$:         flag(examples)
   BuildDepends:   pcre
   Install:        false
   CompiledObject: best
@@ -45,6 +50,7 @@ Executable cloc
 Executable count_hash
   Path:           examples/count_hash
   MainIs:         count_hash.ml
+  Build$:         flag(examples)
   BuildDepends:   pcre
   Install:        false
   CompiledObject: best
@@ -52,6 +58,7 @@ Executable count_hash
 Executable pcregrep
   Path:           examples/pcregrep
   MainIs:         pcregrep.ml
+  Build$:         flag(examples)
   BuildDepends:   pcre
   Install:        false
   CompiledObject: best
@@ -59,6 +66,7 @@ Executable pcregrep
 Executable subst
   Path:           examples/subst
   MainIs:         subst.ml
+  Build$:         flag(examples)
   BuildDepends:   pcre
   Install:        false
   CompiledObject: best

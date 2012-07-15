@@ -49,8 +49,10 @@ Other reasons to use PCRE-OCaml:
 
 ### Usage
 
-The API-documentation which is built and installed with PCRE-OCaml explains all
-functions, most of which are fairly straightforward to understand, in detail.
+The API-documentation which is built and installed with
+PCRE-OCaml explains all functions, most of which are fairly
+straightforward to understand, in detail.  It can also be found
+[online](http://mmottl.bitbucket.org/projects/pcre-ocaml/api/).
 
 A general concept the user may need to understand is that most functions
 allow for two different kinds of flags:

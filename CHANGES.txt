@@ -1,3 +1,12 @@
+2012-07-15:  New major release version 7.0.0:
+
+               * Upgraded to OCaml 4.00
+               * Switched to Oasis for packaging
+               * Switched to OCamlBuild for the build process
+               * Rewrote README in Markdown
+               * Added stricter compilation flags
+               * Minor bugfixes
+
 2012-01-04:  Fixed native code debug build target by updating OCamlMakefile.
 
              Thanks to Stéphane Glondu <glondu@debian.org> for the patch!

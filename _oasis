@@ -1,6 +1,6 @@
 OASISFormat:      0.3
 Name:             pcre-ocaml
-Version:          6.2.6
+Version:          7.0.0
 Synopsis:         pcre-ocaml - bindings to the Perl Compatibility Regular Expressions library
 Description:      pcre-ocaml offers library functions for string pattern matching and substitution, similar to the functionality offered by the Perl language.
 Authors:          Markus Mottl <markus.mottl@gmail.com>

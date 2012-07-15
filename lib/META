@@ -1,6 +1,6 @@
 # OASIS_START
-# DO NOT EDIT (digest: f0a13fa6daf60c3070bdac9c5d5fbfdb)
-version = "6.2.6"
+# DO NOT EDIT (digest: c57f2d485325421c6ce880a4de56e8c7)
+version = "7.0.0"
 description =
 "pcre-ocaml - bindings to the Perl Compatibility Regular Expressions library"
 archive(byte) = "pcre.cma"

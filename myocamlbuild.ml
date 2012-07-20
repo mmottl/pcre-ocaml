@@ -543,7 +543,14 @@ let () =
 
         (* Add correct PCRE compilation and link flags *)
         let pcre_clibs, opcre_cflags, opcre_clibs =
-          let ic = Unix.open_process_in "pcre-config --cflags --libs" in
+          let ic =
+            let pcre_config =
+              let env =
+                BaseEnvLight.load ~filename:MyOCamlbuildBase.env_filename ()
+              in
+              BaseEnvLight.var_get "with_pcre_config" env
+            in
+            Unix.open_process_in (pcre_config ^ " --cflags --libs") in
           try
             let pcre_cflags = input_line ic in
             let pcre_clibs = input_line ic in
@@ -579,5 +586,4 @@ let () =
       | _ -> ()
   in
   dispatch (
-    MyOCamlbuildBase.dispatch_combine
-      [MyOCamlbuildBase.dispatch_default package_default; additional_rules])
+    MyOCamlbuildBase.dispatch_combine [dispatch_default; additional_rules])

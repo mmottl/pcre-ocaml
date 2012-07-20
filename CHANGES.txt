@@ -1,6 +1,9 @@
 2012-07-20:  Downgraded findlib version requirement to support the Debian
              testing branch.
 
+             Added --with-pcre-config flag to configure location of PCRE
+             configuration generator.
+
 2012-07-15:  New major release version 7.0.0:
 
                * Upgraded to OCaml 4.00

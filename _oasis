@@ -1,6 +1,6 @@
-OASISFormat:      0.3
+OASISFormat:      0.4
 Name:             pcre-ocaml
-Version:          7.0.2
+Version:          7.0.3
 Synopsis:         pcre-ocaml - bindings to the Perl Compatibility Regular Expressions library
 Description:      pcre-ocaml offers library functions for string pattern matching and substitution, similar to the functionality offered by the Perl language.
 Authors:          Markus Mottl <markus.mottl@gmail.com>
@@ -14,7 +14,7 @@ Homepage:         https://bitbucket.org/mmottl/pcre-ocaml
 #Categories:
 #FilesAB:
 
-Plugins:          META (0.3), StdFiles (0.3), DevFiles (0.3)
+Plugins:          META (0.4), StdFiles (0.4), DevFiles (0.4)
 XStdFilesREADME:  false
 
 BuildTools:       ocamldoc, ocamlbuild
@@ -75,7 +75,7 @@ Executable subst
 
 Document API
   Title:                API reference for PCRE-OCaml
-  Type:                 OCamlbuild (0.3)
+  Type:                 OCamlbuild (0.4)
   InstallDir:           $docdir/api
   XOCamlbuildPath:      .
   XOCamlbuildLibraries: pcre

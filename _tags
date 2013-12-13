@@ -1,7 +1,7 @@
 # OASIS_START
-# DO NOT EDIT (digest: 3e421fd4f8e09677d50f8c2b5273e8a1)
-# Ignore VCS directories, you can use the same kind of rule outside 
-# OASIS_START/STOP if you want to exclude directories that contains 
+# DO NOT EDIT (digest: c60675dbf6679827b7140bf2f8bd409f)
+# Ignore VCS directories, you can use the same kind of rule outside
+# OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
 <**/.svn>: -traverse
 <**/.svn>: not_hygienic
@@ -31,10 +31,15 @@
 <examples/subst/subst.{native,byte}>: use_pcre
 <examples/subst/*.ml{,i}>: use_pcre
 # OASIS_STOP
-<**/*.ml{,i}>: warn_A, warn_e, warn_r, annot
+
+true: -traverse
+<{lib,examples}/**>: traverse
+
+<**/*.ml{,i}>: warn(Aer), annot
 
 <lib/pcre.{cma,cmxa}>: oasis_library_pcre_cclib
 "lib/libpcre_stubs.lib": oasis_library_pcre_cclib
 "lib/dllpcre_stubs.dll": oasis_library_pcre_cclib
 "lib/libpcre_stubs.a": oasis_library_pcre_cclib
 "lib/dllpcre_stubs.so": oasis_library_pcre_cclib
+"lib/pcre.cmxs": use_libpcre_stubs

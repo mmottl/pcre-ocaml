@@ -613,8 +613,6 @@ let dispatch_default = MyOCamlbuildBase.dispatch_default package_default;;
 let () =
   let additional_rules = function
     | After_rules ->
-        flag ["compile"; "ocaml"] (S [A "-strict-sequence"]);
-
         (* Add correct PCRE compilation and link flags *)
         let pcre_clibs, opcre_cflags, opcre_clibs =
           let ic =

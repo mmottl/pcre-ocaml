@@ -29,6 +29,12 @@
 #  endif
 #endif
 
+#if _WIN64
+  typedef long long *ovec_dst_ptr;
+#else
+  typedef long *ovec_dst_ptr;
+#endif
+
 #if __GNUC__ >= 3
 # define inline inline __attribute__ ((always_inline))
 # define __unused __attribute__ ((unused))
@@ -64,6 +70,7 @@ typedef const unsigned char *chartables;  /* Type of chartable sets */
 
 /* Contents of callout data */
 struct cod {
+  long subj_start;         /* Start of subject string */
   value *v_substrings_p;  /* Pointer to substrings matched so far */
   value *v_cof_p;         /* Pointer to callout function */
   value v_exn;            /* Possible exception raised by callout function */
@@ -83,6 +90,27 @@ static value var_Optimal;      /* Variant [`Optimal] */
 
 static value None = Val_int(0);
 
+/* Converts subject offsets from C-integers to OCaml-Integers.
+
+   This is a bit tricky, because there are 32- and 64-bit platforms around
+   and OCaml chooses the larger possibility for representing integers when
+   available (also in arrays) - not so the PCRE!
+*/
+static inline void copy_ovector(
+  long subj_start, const int *ovec_src, ovec_dst_ptr ovec_dst, int subgroups2)
+{
+  if (subj_start == 0)
+    while (subgroups2--) {
+      *ovec_dst = Val_int(*ovec_src);
+      --ovec_src; --ovec_dst;
+    }
+  else
+    while (subgroups2--) {
+      *ovec_dst = Val_long(*ovec_src + subj_start);
+      --ovec_src; --ovec_dst;
+    }
+}
+
 /* Callout handler */
 static int pcre_callout_handler(pcre_callout_block* cb)
 {
@@ -93,7 +121,7 @@ static int pcre_callout_handler(pcre_callout_block* cb)
     value v_res;
 
     /* Set up parameter array */
-    value v_callout_data = caml_alloc_small(6, 0);
+    value v_callout_data = caml_alloc_small(8, 0);
 
     const value v_substrings = *cod->v_substrings_p;
 
@@ -102,18 +130,15 @@ static int pcre_callout_handler(pcre_callout_block* cb)
     const int subgroups2_1 = subgroups2 - 1;
 
     const int *ovec_src = cb->offset_vector + subgroups2_1;
-    long int *ovec_dst = &Field(Field(v_substrings, 1), 0) + subgroups2_1;
+    ovec_dst_ptr ovec_dst = &Field(Field(v_substrings, 1), 0) + subgroups2_1;
+    long subj_start = cod->subj_start;
 
-    /* Copy preliminary substring information */
-    while (subgroups2--) {
-      *ovec_dst = Val_int(*ovec_src);
-      --ovec_src; --ovec_dst;
-    }
+    copy_ovector(subj_start, ovec_src, ovec_dst, subgroups2);
 
     Field(v_callout_data, 0) = Val_int(cb->callout_number);
     Field(v_callout_data, 1) = v_substrings;
-    Field(v_callout_data, 2) = Val_int(cb->start_match);
-    Field(v_callout_data, 3) = Val_int(cb->current_position);
+    Field(v_callout_data, 2) = Val_int(cb->start_match + subj_start);
+    Field(v_callout_data, 3) = Val_int(cb->current_position + subj_start);
     Field(v_callout_data, 4) = Val_int(capture_top);
     Field(v_callout_data, 5) = Val_int(cb->capture_last);
     Field(v_callout_data, 6) = Val_int(cb->pattern_position);
@@ -285,7 +310,7 @@ CAMLprim value pcre_set_imp_match_limit_recursion_stub(value v_rex, value v_lim)
     extra->flags = PCRE_EXTRA_MATCH_LIMIT_RECURSION;
     Field(v_rex, 2) = (value) extra;
   } else {
-    unsigned long int *flags_ptr = &extra->flags;
+    unsigned long *flags_ptr = &extra->flags;
     *flags_ptr = PCRE_EXTRA_MATCH_LIMIT_RECURSION | *flags_ptr;
   }
   extra->match_limit_recursion = Int_val(v_lim);
@@ -315,7 +340,7 @@ CAMLprim value pcre_set_imp_match_limit_stub(value v_rex, value v_lim)
     extra->flags = PCRE_EXTRA_MATCH_LIMIT;
     Field(v_rex, 2) = (value) extra;
   } else {
-    unsigned long int *flags_ptr = &extra->flags;
+    unsigned long *flags_ptr = &extra->flags;
     *flags_ptr = PCRE_EXTRA_MATCH_LIMIT | *flags_ptr;
   }
   extra->match_limit = Int_val(v_lim);
@@ -355,7 +380,7 @@ static inline int pcre_fullinfo_stub(value v_rex, int what, void *where)
     return cnv(options); \
   }
 
-make_info(unsigned long int, Val_long, options, OPTIONS)
+make_info(unsigned long, Val_long, options, OPTIONS)
 make_info(size_t, Val_long, size, SIZE)
 make_info(size_t, Val_long, studysize, STUDYSIZE)
 make_info(int, Val_int, capturecount, CAPTURECOUNT)
@@ -472,21 +497,33 @@ static inline void handle_exec_error(char *loc, const int ret)
 }
 
 /* Executes a pattern match with runtime options, a regular expression, a
-   string offset, a string length, a subject string, a number of subgroup
-   offsets, an offset vector and an optional callout function */
-CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_ofs,
-                              value v_subj, value v_subgroups2, value v_ovec,
+   matching position, the start of the the subject string, a subject string,
+   a number of subgroup offsets, an offset vector and an optional callout
+   function */
+CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_pos,
+                              value v_subj_start, value v_subj,
+                              value v_subgroups2, value v_ovec,
                               value v_maybe_cof)
 {
-  const int ofs = Int_val(v_ofs), len = caml_string_length(v_subj);
+  long
+    pos = Long_val(v_pos),
+    len = caml_string_length(v_subj),
+    subj_start = Long_val(v_subj_start);
 
-  if (ofs > len || ofs < 0)
-    caml_invalid_argument("Pcre.pcre_exec_stub: illegal offset");
+  if (pos > len || pos < subj_start)
+    caml_invalid_argument("Pcre.pcre_exec_stub: illegal position");
+
+  if (subj_start > len || subj_start < 0)
+    caml_invalid_argument("Pcre.pcre_exec_stub: illegal subject start");
+
+  pos -= subj_start;
+  len -= subj_start;
 
   {
     const pcre *code = (pcre *) Field(v_rex, 1);  /* Compiled pattern */
     const pcre_extra *extra = (pcre_extra *) Field(v_rex, 2);  /* Extra info */
-    const char *ocaml_subj = String_val(v_subj);  /* Subject string */
+    const char *ocaml_subj =
+      String_val(v_subj) + subj_start;  /* Subject string */
     const int opt = Int_val(v_opt);  /* Runtime options */
     int subgroups2 = Int_val(v_subgroups2);
     const int subgroups2_1 = subgroups2 - 1;
@@ -498,25 +535,13 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_ofs,
 
       /* Performs the match */
       const int ret =
-        pcre_exec(code, extra, ocaml_subj, len, ofs, opt, ovec, subgroups3);
+        pcre_exec(code, extra, ocaml_subj, len, pos, opt, ovec, subgroups3);
 
       if (ret < 0) handle_exec_error("pcre_exec_stub", ret);
       else {
         const int *ovec_src = ovec + subgroups2_1;
-#if _WIN64
-        long long *ovec_dst = (long long *) ovec + subgroups2_1;
-#else
-        long int *ovec_dst = (long int *) ovec + subgroups2_1;
-#endif
-
-        /* Converts offsets from C-integers to OCaml-Integers
-           This is a bit tricky, because there are 32- and 64-bit platforms
-           around and OCaml chooses the larger possibility for representing
-           integers when available (also in arrays) - not so the PCRE */
-        while (subgroups2--) {
-          *ovec_dst = Val_int(*ovec_src);
-          --ovec_src; --ovec_dst;
-        }
+        ovec_dst_ptr ovec_dst = (ovec_dst_ptr) ovec + subgroups2_1;
+        copy_ovector(subj_start, ovec_src, ovec_dst, subgroups2);
       }
     }
 
@@ -527,7 +552,8 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_ofs,
       char *subj = caml_stat_alloc(sizeof(char) * len);
       int *ovec = caml_stat_alloc(sizeof(int) * subgroups3);
       int ret;
-      struct cod cod = { (value *) NULL, (value *) NULL, (value) NULL };
+      struct cod cod =
+        { subj_start, (value *) NULL, (value *) NULL, (value) NULL };
       struct pcre_extra new_extra =
 #ifdef PCRE_EXTRA_MATCH_LIMIT_RECURSION
 # ifdef PCRE_EXTRA_MARK
@@ -545,8 +571,8 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_ofs,
 
       memcpy(subj, ocaml_subj, len);
 
-      Begin_roots3(v_rex, v_cof, v_substrings);
-        Begin_roots2(v_subj, v_ovec);
+      Begin_roots4(v_rex, v_cof, v_substrings, v_ovec);
+        Begin_roots1(v_subj);
           v_substrings = caml_alloc_small(2, 0);
         End_roots();
 
@@ -558,7 +584,7 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_ofs,
         new_extra.callout_data = &cod;
 
         if (extra == NULL) {
-          ret = pcre_exec(code, &new_extra, subj, len, ofs, opt, ovec,
+          ret = pcre_exec(code, &new_extra, subj, len, pos, opt, ovec,
                           subgroups3);
         }
         else {
@@ -570,7 +596,7 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_ofs,
           new_extra.match_limit_recursion = extra->match_limit_recursion;
 #endif
 
-          ret = pcre_exec(code, &new_extra, subj, len, ofs, opt, ovec,
+          ret = pcre_exec(code, &new_extra, subj, len, pos, opt, ovec,
                           subgroups3);
         }
 
@@ -579,16 +605,12 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_ofs,
 
       if (ret < 0) {
         caml_stat_free(ovec);
-        handle_exec_error("pcre_exec_stub(callout)", ret);
+        if (ret == PCRE_ERROR_CALLOUT) caml_raise(cod.v_exn);
+        else handle_exec_error("pcre_exec_stub(callout)", ret);
       } else {
         int *ovec_src = ovec + subgroups2_1;
-        long int *ovec_dst = &Field(v_ovec, 0) + subgroups2_1;
-
-        while (subgroups2--) {
-          *ovec_dst = Val_int(*ovec_src);
-          --ovec_src; --ovec_dst;
-        }
-
+        ovec_dst_ptr ovec_dst = &Field(v_ovec, 0) + subgroups2_1;
+        copy_ovector(subj_start, ovec_src, ovec_dst, subgroups2);
         caml_stat_free(ovec);
       }
     }
@@ -602,7 +624,7 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_ofs,
 CAMLprim value pcre_exec_stub_bc(value *argv, int __unused argn)
 {
   return pcre_exec_stub(argv[0], argv[1], argv[2], argv[3],
-                        argv[4], argv[5], argv[6]);
+                        argv[4], argv[5], argv[6], argv[7]);
 }
 
 /* Generates a new set of chartables for the current locale (see man

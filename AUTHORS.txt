@@ -1,8 +1,12 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: 93683b64c87cceb7fb743de09cb8234a) *)
-Authors of pcre-ocaml
-Markus Mottl <markus.mottl@gmail.com>
+(* DO NOT EDIT (digest: 0c8392bae2c1e3939a3603756f57f94a) *)
 
-Current maintainers of pcre-ocaml
-Markus Mottl <markus.mottl@gmail.com>
+Authors of pcre-ocaml:
+
+* Markus Mottl <markus.mottl@gmail.com>
+
+Current maintainers of pcre-ocaml:
+
+* Markus Mottl <markus.mottl@gmail.com>
+
 (* OASIS_STOP *)

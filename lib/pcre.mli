@@ -909,11 +909,17 @@ val foreach_file : string list -> (string -> in_channel -> unit) -> unit
 (** {6 {b UNSAFE STUFF - USE WITH CAUTION!}} *)
 
 external unsafe_pcre_exec :
-  irflag -> regexp -> int -> string ->
-  int -> int array -> callout option
-  -> unit = "pcre_exec_stub_bc" "pcre_exec_stub"
-(** [unsafe_pcre_exec flags rex pos subject subgroup_offsets offset_vector].
-    You should read the C-source to know what happens.
+  irflag ->
+  regexp ->
+  pos : int ->
+  subj_start : int ->
+  subj : string ->
+  subgroups2 : int ->
+  int array ->
+  callout option ->
+  unit = "pcre_exec_stub_bc" "pcre_exec_stub"
+(** [unsafe_pcre_exec flags rex ~pos ~subj_start ~subj ~subgroups2
+    offset_vector].  You should read the C-source to know what happens.
     If you do not understand it - {b don't use this function!} *)
 
 val make_ovector : regexp -> int * int array

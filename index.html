@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Pcre-ocaml : OCaml bindings to PCRE (Perl Compatibility Regular Expressions)" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Pcre-ocaml</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/mmottl/pcre-ocaml">View on GitHub</a>
+
+          <h1 id="project_title">Pcre-ocaml</h1>
+          <h2 id="project_tagline">OCaml bindings to PCRE (Perl Compatibility Regular Expressions)</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/mmottl/pcre-ocaml/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/mmottl/pcre-ocaml/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a name="pcre-ocaml---perl-compatibility-regular-expressions-for-ocaml" class="anchor" href="#pcre-ocaml---perl-compatibility-regular-expressions-for-ocaml"><span class="octicon octicon-link"></span></a>PCRE-OCaml - Perl Compatibility Regular Expressions for OCaml</h1>
+
+<hr><h2>
+<a name="what-is-pcre-ocaml" class="anchor" href="#what-is-pcre-ocaml"><span class="octicon octicon-link"></span></a>What is PCRE-OCaml?</h2>
+
+<p>This <a href="http://www.ocaml.org">OCaml</a>-library interfaces the C-library
+<a href="http://www.pcre.org">PCRE</a> (Perl-compatibility Regular Expressions).  It can
+be used for matching regular expressions which are written in "PERL"-style.</p>
+
+<h3>
+<a name="features" class="anchor" href="#features"><span class="octicon octicon-link"></span></a>Features</h3>
+
+<p>PCRE-OCaml offers the following functionality for operating on strings:</p>
+
+<ul>
+<li>Searching for patterns</li>
+<li>Extracting subpatterns</li>
+<li>Splitting strings according to patterns</li>
+<li>Pattern substitution</li>
+</ul><p>Other reasons to use PCRE-OCaml:</p>
+
+<ul>
+<li><p>The PCRE-library by Philip Hazel has been under development for many
+years and is fairly advanced and stable.  It implements just about all
+of the functionality that can be found in PERL regular expressions.
+The higher-level functions written in OCaml (split, replace, etc.),
+too, are compatible with the corresponding PERL-functions to the extent
+that OCaml allows.  Most people find the syntax of PERL-style regular
+expressions more straightforward and powerful than the Emacs-style regular
+expressions used in the <code>Str</code>-module in the standard OCaml distribution.</p></li>
+<li><p>PCRE-OCaml is reentrant and thus thread-safe, which is not the case
+for the <code>Str</code>-module in the OCaml standard library.  Using reentrant
+libraries also means more convenience for programmers.  They do not
+have to reason about states in which the library might be in.</p></li>
+<li><p>The high-level functions for replacement and substitution, which are all
+implemented in OCaml, are much faster than the ones in the <code>Str</code>-module.
+In fact, when compiled to native code, they even seem to be significantly
+faster than those found in PERL (PERL is written in C).</p></li>
+<li><p>You can rely on the data returned being unique.  In other terms: if
+the result of a function is a string, you can safely use destructive
+updates on it without having to fear side effects.</p></li>
+<li><p>The interface to the library makes use of labels and default arguments
+to give you a high degree of programming comfort.</p></li>
+</ul><h3>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h3>
+
+<p>The API-documentation which is built and installed with PCRE-OCaml explains all
+functions, most of which are fairly straightforward to understand, in detail.
+It can also be found <a href="http://mmottl.github.io/pcre-ocaml/api">online</a>.</p>
+
+<p>A general concept the user may need to understand is that most functions
+allow for two different kinds of flags:</p>
+
+<ol>
+<li>
+<p>"Convenience"-flags that make for readable and concise code, but which
+ need to be translated to an internal representation on each call.
+ Example:</p>
+
+<div class="highlight highlight-ocaml"><pre> <span class="k">let</span> <span class="n">rex</span> <span class="o">=</span> <span class="n">regexp</span> <span class="o">~</span><span class="n">flags</span><span class="o">:[`</span><span class="nc">ANCHORED</span><span class="o">;</span> <span class="o">`</span><span class="nc">CASELESS</span><span class="o">]</span> <span class="s2">"some pattern"</span> <span class="k">in</span>
+ <span class="c">(* ... *)</span>
+</pre></div>
+
+<p>This makes it easy to pass flags on the fly.  They will be translated to
+ the internal format automatically.  However, if this happens to be in a
+ loop, this translation will occur on each iteration.  If you really need
+ to save as much performance as possible, you should use the next approach.</p>
+</li>
+<li>
+<p>"Internal" flags that need to be defined and translated from
+ "convenience"-flags before function calls, but which allow for optimum
+ performance in loops.  Example:</p>
+
+<div class="highlight highlight-ocaml"><pre> <span class="k">let</span> <span class="n">iflags</span> <span class="o">=</span> <span class="n">cflags</span> <span class="o">[`</span><span class="nc">ANCHORED</span><span class="o">;</span> <span class="o">`</span><span class="nc">CASELESS</span><span class="o">]</span> <span class="k">in</span>
+ <span class="k">for</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">to</span> <span class="mi">1000</span> <span class="k">do</span>
+   <span class="k">let</span> <span class="n">rex</span> <span class="o">=</span> <span class="n">regexp</span> <span class="o">~</span><span class="n">iflags</span> <span class="s2">"some pattern constructed at runtime"</span> <span class="k">in</span>
+   <span class="c">(* ... *)</span>
+ <span class="k">done</span>
+</pre></div>
+
+<p>Factoring out the translation of flags for regular expressions may
+  save some cycles, but don't expect too much.  You can save more CPU
+  time when lifting the creation of regular expressions out of loops.
+  Example for what not to do:</p>
+
+<div class="highlight highlight-ocaml"><pre>  <span class="k">for</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">to</span> <span class="mi">1000</span> <span class="k">do</span>
+    <span class="k">let</span> <span class="n">chunks</span> <span class="o">=</span> <span class="n">split</span> <span class="o">~</span><span class="n">pat</span><span class="o">:</span><span class="s2">"[ </span><span class="se">\t</span><span class="s2">]+"</span> <span class="s2">"foo bar"</span> <span class="k">in</span>
+    <span class="c">(* ... *)</span>
+  <span class="k">done</span>
+</pre></div>
+
+<p>Better:</p>
+
+<div class="highlight highlight-ocaml"><pre>  <span class="k">let</span> <span class="n">rex</span> <span class="o">=</span> <span class="n">regexp</span> <span class="s2">"[ </span><span class="se">\t</span><span class="s2">]+"</span> <span class="k">in</span>
+  <span class="k">for</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">to</span> <span class="mi">1000</span> <span class="k">do</span>
+    <span class="k">let</span> <span class="n">chunks</span> <span class="o">=</span> <span class="n">split</span> <span class="o">~</span><span class="n">rex</span> <span class="s2">"foo bar"</span> <span class="k">in</span>
+    <span class="c">(* ... *)</span>
+  <span class="k">done</span>
+</pre></div>
+</li>
+</ol><p>The provided functions use optional arguments with intuitive defaults.
+For example, the <code>split</code>-function will assume whitespace as pattern.</p>
+
+<p>Take a look at the interface file <code>pcre.mli</code> to see which ways exists to pass
+parameters and to learn about the defaults.  The <code>examples</code>-directory contains
+a few example applications demonstrating the functionality of PCRE-OCaml.</p>
+
+<hr><h2>
+<a name="contact-information-and-contributing" class="anchor" href="#contact-information-and-contributing"><span class="octicon octicon-link"></span></a>Contact Information and Contributing</h2>
+
+<p>In the case of bugs, feature requests, contributions and similar, you can
+contact me here: <a href="mailto:markus.mottl@gmail.com">markus.mottl@gmail.com</a></p>
+
+<p>Up-to-date information should be available at:
+<a href="http://mmottl.github.io/pcre-ocaml">http://mmottl.github.io/pcre-ocaml</a></p>
+
+<p>Enjoy!</p>
+
+<p>Markus Mottl on July 10, 2012</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Pcre-ocaml maintained by <a href="https://github.com/mmottl">mmottl</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>

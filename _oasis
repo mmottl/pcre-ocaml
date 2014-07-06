@@ -1,6 +1,6 @@
 OASISFormat:      0.4
 Name:             pcre-ocaml
-Version:          7.1.0
+Version:          7.1.1
 Synopsis:         pcre-ocaml - bindings to the Perl Compatibility Regular Expressions library
 Description:      pcre-ocaml offers library functions for string pattern matching and substitution, similar to the functionality offered by the Perl language.
 Authors:          Markus Mottl <markus.mottl@gmail.com>
@@ -10,7 +10,7 @@ LicenseFile:      COPYING.txt
 License:          LGPL-2.1+ with OCaml linking exception
 OCamlVersion:     >= 3.12
 FindlibVersion:   >= 1.3.1
-Homepage:         https://bitbucket.org/mmottl/pcre-ocaml
+Homepage:         http://mmottl.github.io/pcre-ocaml
 #Categories:
 #FilesAB:
 
@@ -80,8 +80,8 @@ Document API
   XOCamlbuildPath:      .
   XOCamlbuildLibraries: pcre
 
-SourceRepository trunk
-  Type:       hg
-  Location:   ssh://hg@bitbucket.org/mmottl/pcre-ocaml
-  Browser:    https://bitbucket.org/mmottl/pcre-ocaml
-  Tag:        release-$(pkg_version)
+SourceRepository head
+  Type:       Git
+  Location:   https://github.com/mmottl/pcre-ocaml.git
+  Browser:    https://github.com/mmottl/pcre-ocaml
+  Tag:        v$(pkg_version)

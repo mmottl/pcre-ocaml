@@ -49,10 +49,9 @@ Other reasons to use PCRE-OCaml:
 
 ### Usage
 
-The API-documentation which is built and installed with
-PCRE-OCaml explains all functions, most of which are fairly
-straightforward to understand, in detail.  It can also be found
-[online](http://mmottl.bitbucket.org/projects/pcre-ocaml/api/).
+The API-documentation which is built and installed with PCRE-OCaml explains all
+functions, most of which are fairly straightforward to understand, in detail.
+It can also be found [online](http://mmottl.github.io/pcre-ocaml/api).
 
 A general concept the user may need to understand is that most functions
 allow for two different kinds of flags:
@@ -61,9 +60,10 @@ allow for two different kinds of flags:
      need to be translated to an internal representation on each call.
      Example:
 
-         :::ocaml
-         let rex = regexp ~flags:[`ANCHORED; `CASELESS] "some pattern" in
-         (* ... *)
+     ```ocaml
+     let rex = regexp ~flags:[`ANCHORED; `CASELESS] "some pattern" in
+     (* ... *)
+     ```
 
      This makes it easy to pass flags on the fly.  They will be translated to
      the internal format automatically.  However, if this happens to be in a
@@ -74,32 +74,35 @@ allow for two different kinds of flags:
      "convenience"-flags before function calls, but which allow for optimum
      performance in loops.  Example:
 
-         :::ocaml
-         let iflags = cflags [`ANCHORED; `CASELESS] in
-         for i = 1 to 1000 do
-           let rex = regexp ~iflags "some pattern constructed at runtime" in
-           (* ... *)
-         done
+     ```ocaml
+     let iflags = cflags [`ANCHORED; `CASELESS] in
+     for i = 1 to 1000 do
+       let rex = regexp ~iflags "some pattern constructed at runtime" in
+       (* ... *)
+     done
+     ```
 
       Factoring out the translation of flags for regular expressions may
       save some cycles, but don't expect too much.  You can save more CPU
       time when lifting the creation of regular expressions out of loops.
       Example for what not to do:
 
-          :::ocaml
-          for i = 1 to 1000 do
-            let chunks = split ~pat:"[ \t]+" "foo bar" in
-            (* ... *)
-          done
+      ```ocaml
+      for i = 1 to 1000 do
+        let chunks = split ~pat:"[ \t]+" "foo bar" in
+        (* ... *)
+      done
+      ```
 
       Better:
 
-          :::ocaml
-          let rex = regexp "[ \t]+" in
-          for i = 1 to 1000 do
-            let chunks = split ~rex "foo bar" in
-            (* ... *)
-          done
+      ```ocaml
+      let rex = regexp "[ \t]+" in
+      for i = 1 to 1000 do
+        let chunks = split ~rex "foo bar" in
+        (* ... *)
+      done
+      ```
 
 The provided functions use optional arguments with intuitive defaults.
 For example, the `split`-function will assume whitespace as pattern.
@@ -117,8 +120,8 @@ In the case of bugs, feature requests, contributions and similar, you can
 contact me here: <markus.mottl@gmail.com>
 
 Up-to-date information should be available at:
-<https://bitbucket.org/mmottl/pcre-ocaml>
+<http://mmottl.github.io/pcre-ocaml>
 
 Enjoy!
 
-Markus Mottl in Rutherford, NJ on July 10, 2012
+Markus Mottl on July 10, 2012

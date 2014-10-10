@@ -26,7 +26,7 @@ Flag strict
 Library pcre
   Path:           lib
   FindlibName:    pcre
-  Modules:        Pcre
+  Modules:        Pcre_compat, Pcre
   CSources:       pcre_stubs.c
   CCOpt:          -g -O2 -fPIC -DPIC
   if flag(strict) && ccomp_type(cc)

@@ -22,6 +22,8 @@
 
 (* Public exceptions and their registration with the C runtime *)
 
+open Pcre_compat
+
 type error =
   | Partial
   | BadPartial
@@ -269,24 +271,30 @@ let regexp_or
   in
   regexp ?study ?limit ?limit_recursion ~iflags ?flags ?chtables big_pat
 
-let string_unsafe_sub s ofs len =
-  let r = String.create len in
-  String.unsafe_blit s ofs r 0 len;
-  r
+let bytes_unsafe_blit_string str str_ofs bts bts_ofs len =
+  let str_bts = Bytes.unsafe_of_string str in
+  Bytes.unsafe_blit str_bts str_ofs bts bts_ofs len
+
+let string_unsafe_sub str ofs len =
+  let res = Bytes.create len in
+  bytes_unsafe_blit_string str ofs res 0 len;
+  Bytes.unsafe_to_string res
 
 let quote s =
   let len = String.length s in
-  let buf = String.create (len lsl 1) in
+  let buf = Bytes.create (len lsl 1) in
   let pos = ref 0 in
   for i = 0 to len - 1 do
     match String.unsafe_get s i with
     | '\\' | '^' | '$' | '.' | '[' | '|'
     | '('  | ')' | '?' | '*' | '+' | '{' as c ->
-      String.unsafe_set buf !pos '\\'; incr pos;
-      String.unsafe_set buf !pos c; incr pos
-    | c -> String.unsafe_set buf !pos c; incr pos
+      Bytes.unsafe_set buf !pos '\\';
+      incr pos;
+      Bytes.unsafe_set buf !pos c;
+      incr pos
+    | c -> Bytes.unsafe_set buf !pos c; incr pos
   done;
-  string_unsafe_sub buf 0 !pos
+  string_unsafe_sub (Bytes.unsafe_to_string buf) 0 !pos
 
 
 (* Matching of patterns and subpattern extraction *)
@@ -579,17 +587,17 @@ let replace ?(iflags = 0) ?flags ?(rex = def_rex) ?pat
     then
       let postfix_len = max (subj_len - cur_pos) 0 in
       let left = pos + full_len in
-      let res = String.create (left + postfix_len) in
-      String.unsafe_blit subj 0 res 0 pos;
-      String.unsafe_blit subj cur_pos res left postfix_len;
+      let res = Bytes.create (left + postfix_len) in
+      bytes_unsafe_blit_string subj 0 res 0 pos;
+      bytes_unsafe_blit_string subj cur_pos res left postfix_len;
       let inner_coll ofs (templ, ix, len) =
-        String.unsafe_blit templ ix res ofs len; ofs + len in
+        bytes_unsafe_blit_string templ ix res ofs len; ofs + len in
       let coll ofs (res_len, trans_lst) =
         let new_ofs = ofs - res_len in
         let _ = List.fold_left inner_coll new_ofs trans_lst in
         new_ofs in
       let _ = List.fold_left coll left trans_lsts in
-      res
+      Bytes.unsafe_to_string res
     else
       let first = Array.unsafe_get ovector 0 in
       let len = first - cur_pos in
@@ -630,20 +638,20 @@ let qreplace ?(iflags = 0) ?flags ?(rex = def_rex) ?pat
     then
       let postfix_len = max (subj_len - cur_pos) 0 in
       let left = pos + full_len in
-      let res = String.create (left + postfix_len) in
-      String.unsafe_blit subj 0 res 0 pos;
-      String.unsafe_blit subj cur_pos res left postfix_len;
+      let res = Bytes.create (left + postfix_len) in
+      bytes_unsafe_blit_string subj 0 res 0 pos;
+      bytes_unsafe_blit_string subj cur_pos res left postfix_len;
       let coll ofs = function
         | Some (substr, ix, len) ->
             let new_ofs = ofs - len in
-            String.unsafe_blit substr ix res new_ofs len;
+            bytes_unsafe_blit_string substr ix res new_ofs len;
             new_ofs
         | None ->
             let new_ofs = ofs - templ_len in
-            String.unsafe_blit templ 0 res new_ofs templ_len;
+            bytes_unsafe_blit_string templ 0 res new_ofs templ_len;
             new_ofs in
       let _ = List.fold_left coll left subst_lst in
-      res
+      Bytes.unsafe_to_string res
     else
       let first = Array.unsafe_get ovector 0 in
       let len = first - cur_pos in
@@ -679,15 +687,15 @@ let substitute_substrings ?(iflags = 0) ?flags ?(rex = def_rex) ?pat
     then
       let postfix_len = max (subj_len - cur_pos) 0 in
       let left = pos + full_len in
-      let res = String.create (left + postfix_len) in
-      String.unsafe_blit subj 0 res 0 pos;
-      String.unsafe_blit subj cur_pos res left postfix_len;
+      let res = Bytes.create (left + postfix_len) in
+      bytes_unsafe_blit_string subj 0 res 0 pos;
+      bytes_unsafe_blit_string subj cur_pos res left postfix_len;
       let coll ofs (templ, ix, len) =
         let new_ofs = ofs - len in
-        String.unsafe_blit templ ix res new_ofs len;
+        bytes_unsafe_blit_string templ ix res new_ofs len;
         new_ofs in
       let _ = List.fold_left coll left subst_lst in
-      res
+      Bytes.unsafe_to_string res
     else
       let first = Array.unsafe_get ovector 0 in
       let len = first - cur_pos in
@@ -736,14 +744,14 @@ let replace_first ?(iflags = 0) ?flags ?(rex = def_rex) ?pat ?(pos = 0)
     let first = Array.unsafe_get ovector 0 in
     let last = Array.unsafe_get ovector 1 in
     let rest = String.length subj - last in
-    let res = String.create (first + res_len + rest) in
-    String.unsafe_blit subj 0 res 0 first;
+    let res = Bytes.create (first + res_len + rest) in
+    bytes_unsafe_blit_string subj 0 res 0 first;
     let coll ofs (templ, ix, len) =
-      String.unsafe_blit templ ix res ofs len; ofs + len in
+      bytes_unsafe_blit_string templ ix res ofs len; ofs + len in
     let ofs = List.fold_left coll first trans_lst in
-    String.unsafe_blit subj last res ofs rest;
-    res
-  with Not_found -> String.copy subj
+    bytes_unsafe_blit_string subj last res ofs rest;
+    Bytes.unsafe_to_string res
+  with Not_found -> string_copy subj
 
 let qreplace_first ?(iflags = 0) ?flags ?(rex = def_rex) ?pat
                    ?(pos = 0) ?(templ = "") ?callout subj =
@@ -759,12 +767,12 @@ let qreplace_first ?(iflags = 0) ?flags ?(rex = def_rex) ?pat
     let len = String.length templ in
     let rest = String.length subj - last in
     let postfix_start = first + len in
-    let res = String.create (postfix_start + rest) in
-    String.unsafe_blit subj 0 res 0 first;
-    String.unsafe_blit templ 0 res first len;
-    String.unsafe_blit subj last res postfix_start rest;
-    res
-  with Not_found -> String.copy subj
+    let res = Bytes.create (postfix_start + rest) in
+    bytes_unsafe_blit_string subj 0 res 0 first;
+    bytes_unsafe_blit_string templ 0 res first len;
+    bytes_unsafe_blit_string subj last res postfix_start rest;
+    Bytes.unsafe_to_string res
+  with Not_found -> string_copy subj
 
 let substitute_substrings_first ?(iflags = 0) ?flags ?(rex = def_rex) ?pat
                                 ?(pos = 0) ?callout ~subst subj =
@@ -782,12 +790,12 @@ let substitute_substrings_first ?(iflags = 0) ?flags ?(rex = def_rex) ?pat
     let postfix_len = subj_len - last in
     let templ_len = String.length templ in
     let postfix_start = prefix_len + templ_len in
-    let res = String.create (postfix_start + postfix_len) in
-    String.unsafe_blit subj 0 res 0 prefix_len;
-    String.unsafe_blit templ 0 res prefix_len templ_len;
-    String.unsafe_blit subj last res postfix_start postfix_len;
-    res
-  with Not_found -> String.copy subj
+    let res = Bytes.create (postfix_start + postfix_len) in
+    bytes_unsafe_blit_string subj 0 res 0 prefix_len;
+    bytes_unsafe_blit_string templ 0 res prefix_len templ_len;
+    bytes_unsafe_blit_string subj last res postfix_start postfix_len;
+    Bytes.unsafe_to_string res
+  with Not_found -> string_copy subj
 
 let substitute_first ?iflags ?flags ?rex ?pat ?pos
                      ?callout ~subst:str_subst subj =
@@ -804,7 +812,7 @@ let substitute_first ?iflags ?flags ?rex ?pat ?pos
 let internal_psplit flags rex max pos callout subj =
   let subj_len = String.length subj in
   if subj_len = 0 then []
-  else if max = 1 then [String.copy subj]
+  else if max = 1 then [string_copy subj]
   else
     let subgroups2, ovector = make_ovector rex in
 
@@ -920,7 +928,7 @@ let full_split ?(iflags = 0) ?flags ?(rex = def_rex) ?pat
   let iflags = match flags with Some flags -> rflags flags | _ -> iflags in
   let subj_len = String.length subj in
   if subj_len = 0 then []
-  else if max = 1 then [Text (String.copy subj)]
+  else if max = 1 then [Text (string_copy subj)]
   else
     let subgroups2, ovector = make_ovector rex in
 

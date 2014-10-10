@@ -552,8 +552,7 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_pos,
       char *subj = caml_stat_alloc(sizeof(char) * len);
       int *ovec = caml_stat_alloc(sizeof(int) * subgroups3);
       int ret;
-      struct cod cod =
-        { subj_start, (value *) NULL, (value *) NULL, (value) NULL };
+      struct cod cod = { 0, (value *) NULL, (value *) NULL, (value) NULL };
       struct pcre_extra new_extra =
 #ifdef PCRE_EXTRA_MATCH_LIMIT_RECURSION
 # ifdef PCRE_EXTRA_MARK
@@ -569,6 +568,7 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_pos,
         { PCRE_EXTRA_CALLOUT_DATA, NULL, 0, NULL, NULL };
 #endif
 
+      cod.subj_start = subj_start;
       memcpy(subj, ocaml_subj, len);
 
       Begin_roots4(v_rex, v_cof, v_substrings, v_ovec);

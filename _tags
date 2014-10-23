@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: c60675dbf6679827b7140bf2f8bd409f)
+# DO NOT EDIT (digest: 7921ee7e2f586699a2e96170dbcd2955)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -18,17 +18,27 @@
 <lib/*.ml{,i}>: oasis_library_pcre_ccopt
 "lib/pcre_stubs.c": oasis_library_pcre_ccopt
 <lib/pcre.{cma,cmxa}>: use_libpcre_stubs
+<lib/*.ml{,i}>: pkg_bytes
+"lib/pcre_stubs.c": pkg_bytes
 # Executable cloc
+<examples/cloc/cloc.{native,byte}>: pkg_bytes
 <examples/cloc/cloc.{native,byte}>: use_pcre
+<examples/cloc/*.ml{,i}>: pkg_bytes
 <examples/cloc/*.ml{,i}>: use_pcre
 # Executable count_hash
+<examples/count_hash/count_hash.{native,byte}>: pkg_bytes
 <examples/count_hash/count_hash.{native,byte}>: use_pcre
+<examples/count_hash/*.ml{,i}>: pkg_bytes
 <examples/count_hash/*.ml{,i}>: use_pcre
 # Executable pcregrep
+<examples/pcregrep/pcregrep.{native,byte}>: pkg_bytes
 <examples/pcregrep/pcregrep.{native,byte}>: use_pcre
+<examples/pcregrep/*.ml{,i}>: pkg_bytes
 <examples/pcregrep/*.ml{,i}>: use_pcre
 # Executable subst
+<examples/subst/subst.{native,byte}>: pkg_bytes
 <examples/subst/subst.{native,byte}>: use_pcre
+<examples/subst/*.ml{,i}>: pkg_bytes
 <examples/subst/*.ml{,i}>: use_pcre
 # OASIS_STOP
 

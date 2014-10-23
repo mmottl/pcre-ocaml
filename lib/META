@@ -1,8 +1,9 @@
 # OASIS_START
-# DO NOT EDIT (digest: 53cc30deb5448f0e6c35a8e1b54a8802)
-version = "7.1.1"
+# DO NOT EDIT (digest: e848c4c6cf4b09451ff44023a647fd1a)
+version = "7.1.2"
 description =
 "pcre-ocaml - bindings to the Perl Compatibility Regular Expressions library"
+requires = "bytes"
 archive(byte) = "pcre.cma"
 archive(byte, plugin) = "pcre.cma"
 archive(native) = "pcre.cmxa"

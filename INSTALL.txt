@@ -1,5 +1,5 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: 1e40b3eb93fd299ffda7513c651e8512) *)
+(* DO NOT EDIT (digest: 33107e1b27849d0dd7ab3df5fbd86340) *)
 
 This is the INSTALL file for the pcre-ocaml distribution.
 
@@ -12,7 +12,8 @@ Dependencies
 In order to compile this package, you will need:
 
 * ocaml (>= 3.12) for all, doc API
-* findlib (>= 1.3.1)
+* findlib (>= 1.5)
+* bytes for library pcre
 
 Installing
 ==========

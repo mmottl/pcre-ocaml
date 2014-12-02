@@ -1,3 +1,7 @@
+2014-12-02:  Fixed a limit handling bug in the full_split function.
+
+             Thanks to Rudi Grinberg <rudi.grinberg@gmail.com> for the report!
+
 2014-10-23:  Fixed string handling for new OCaml version 4.02 (String/Bytes
              modules).  Requires new findlib version (>= 1.5).
 

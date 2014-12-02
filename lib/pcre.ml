@@ -922,6 +922,10 @@ type split_result = Text of string
                   | Group of int * string
                   | NoGroup
 
+let rec strip_all_empty_full = function
+  | Delim _ :: rest -> strip_all_empty_full rest
+  | l -> l
+
 let full_split ?(iflags = 0) ?flags ?(rex = def_rex) ?pat
                ?(pos = 0) ?(max = 0) ?callout subj =
   let rex = match pat with Some str -> regexp str | _ -> rex in
@@ -1026,7 +1030,7 @@ let full_split ?(iflags = 0) ?flags ?(rex = def_rex) ?pat
                 Text (string_unsafe_sub subj pos (first - pos)) :: strs in
               loop
                 (handle_subgroups (delim :: pre_strs)) (cnt - 1) last false in
-    List.rev (loop [] (max - 1) pos true)
+    List.rev (strip_all_empty_full (loop [] (max - 1) pos true))
 
 
 (* Additional convenience functions useful in combination with this library *)

@@ -855,9 +855,8 @@ val asplit :
     {!Pcre.split} but @return an array instead of a list. *)
 
 (** Result of a {!Pcre.full_split} *)
-type split_result = Text of string        (** Text part of splitted string *)
-                  | Delim of string       (** Delimiter part of splitted
-                                              string *)
+type split_result = Text of string        (** Text part of split string *)
+                  | Delim of string       (** Delimiter part of split string *)
                   | Group of int * string (** Subgroup of matched delimiter
                                               (subgroup_nr, subgroup_str) *)
                   | NoGroup               (** Unmatched subgroup *)

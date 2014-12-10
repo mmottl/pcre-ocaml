@@ -1,3 +1,5 @@
+2014-12-10:  Fixed another limit handling bug in the full_split function.
+
 2014-12-02:  Fixed a limit handling bug in the full_split function.
 
              Thanks to Rudi Grinberg <rudi.grinberg@gmail.com> for the report!

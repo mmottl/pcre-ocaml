@@ -1030,7 +1030,8 @@ let full_split ?(iflags = 0) ?flags ?(rex = def_rex) ?pat
                 Text (string_unsafe_sub subj pos (first - pos)) :: strs in
               loop
                 (handle_subgroups (delim :: pre_strs)) (cnt - 1) last false in
-    List.rev (strip_all_empty_full (loop [] (max - 1) pos true))
+    let res = loop [] (max - 1) pos true in
+    List.rev (if max = 0 then strip_all_empty_full res else res)
 
 
 (* Additional convenience functions useful in combination with this library *)

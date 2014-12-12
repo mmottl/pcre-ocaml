@@ -1,7 +1,7 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: 33107e1b27849d0dd7ab3df5fbd86340) *)
+(* DO NOT EDIT (digest: 586e6593097e6aa8a079b1c6279f1b96) *)
 
-This is the INSTALL file for the pcre-ocaml distribution.
+This is the INSTALL file for the pcre distribution.
 
 This package uses OASIS to generate its build system. See section OASIS for
 full information.

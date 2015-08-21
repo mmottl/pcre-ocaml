@@ -267,10 +267,10 @@ CAMLprim value pcre_compile_stub(value v_opt, value v_tables, value v_pat)
      could not be compiled */
   if (regexp == NULL) raise_bad_pattern(error, error_ofs);
 
-  /* Finalized value: GC will do a full cycle every 500 regexp allocations
-     (one regexp consumes in average probably less than 100 bytes ->
-     maximum of 50000 bytes unreclaimed regexps) */
-  v_rex = caml_alloc_final(4, pcre_dealloc_regexp, 100, 50000);
+  /* GC will do a full cycle every 1_000_000 regexp allocations (a typical
+     regexp probably consumes less than 100 bytes -> maximum of 100_000_000
+     bytes unreclaimed regexps) */
+  v_rex = caml_alloc_final(4, pcre_dealloc_regexp, 1, 1000000);
 
   /* Field[1]: compiled regular expression (Field[0] is finalizing
      function! See above!) */
@@ -631,10 +631,10 @@ CAMLprim value pcre_exec_stub_bc(value *argv, int __unused argn)
    page of PCRE */
 CAMLprim value pcre_maketables_stub(value __unused v_unit)
 {
-  /* GC will do a full cycle every 100 table set allocations
-     (one table set consumes 864 bytes -> maximum of 86400 bytes
-     unreclaimed table sets) */
-  const value v_res = caml_alloc_final(2, pcre_dealloc_tables, 864, 86400);
+  /* GC will do a full cycle every 1_000_000 table set allocations (one
+     table set consumes 864 bytes -> maximum of 864_000_000 bytes unreclaimed
+     table sets) */
+  const value v_res = caml_alloc_final(2, pcre_dealloc_tables, 1, 1000000);
   Field(v_res, 1) = (value) pcre_maketables();
   return v_res;
 }

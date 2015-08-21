@@ -57,8 +57,11 @@ exception Regexp_or of string * error
 
 (** {6 Compilation and runtime flags and their conversion functions} *)
 
-type icflag (** Internal representation of compilation flags *)
-and  irflag (** Internal representation of runtime flags *)
+(** Internal representation of compilation flags *)
+type icflag
+
+(** Internal representation of runtime flags *)
+and  irflag
 
 (** Compilation flags *)
 and cflag =

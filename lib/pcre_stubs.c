@@ -187,7 +187,7 @@ static void pcre_dealloc_regexp(value v_rex)
 {
   void *extra = (void *) Field(v_rex, 2);
   (pcre_free)((void *) Field(v_rex, 1));
-  if (extra != NULL) (pcre_free)(extra);
+  if (extra != NULL) pcre_free_study(extra);
 }
 
 /* Makes OCaml-string from PCRE-version */
@@ -306,7 +306,7 @@ CAMLprim value pcre_set_imp_match_limit_recursion_stub(value v_rex, value v_lim)
 {
   pcre_extra *extra = (pcre_extra *) Field(v_rex, 2);
   if (extra == NULL) {
-    extra = caml_stat_alloc(sizeof(pcre_extra));
+    extra = pcre_malloc(sizeof(pcre_extra));
     extra->flags = PCRE_EXTRA_MATCH_LIMIT_RECURSION;
     Field(v_rex, 2) = (value) extra;
   } else {
@@ -336,7 +336,7 @@ CAMLprim value pcre_set_imp_match_limit_stub(value v_rex, value v_lim)
 {
   pcre_extra *extra = (pcre_extra *) Field(v_rex, 2);
   if (extra == NULL) {
-    extra = caml_stat_alloc(sizeof(pcre_extra));
+    extra = pcre_malloc(sizeof(pcre_extra));
     extra->flags = PCRE_EXTRA_MATCH_LIMIT;
     Field(v_rex, 2) = (value) extra;
   } else {

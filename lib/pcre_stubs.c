@@ -70,7 +70,7 @@ typedef const unsigned char *chartables;  /* Type of chartable sets */
 
 /* Contents of callout data */
 struct cod {
-  long subj_start;         /* Start of subject string */
+  long subj_start;        /* Start of subject string */
   value *v_substrings_p;  /* Pointer to substrings matched so far */
   value *v_cof_p;         /* Pointer to callout function */
   value v_exn;            /* Possible exception raised by callout function */
@@ -496,19 +496,33 @@ static inline void handle_exec_error(char *loc, const int ret)
   }
 }
 
+static inline void handle_pcre_exec_result(
+  value v_ovec, long ovec_len, long subj_start, int ret)
+{
+  int *ovec = (int *) &Field(v_ovec, 0);
+  const int subgroups2 = ret * 2;
+  const int subgroups2_1 = subgroups2 - 1;
+  const int *ovec_src = ovec + subgroups2_1;
+  ovec_dst_ptr ovec_clear_stop = (ovec_dst_ptr) ovec + (ovec_len * 2) / 3;
+  ovec_dst_ptr ovec_dst = (ovec_dst_ptr) ovec + subgroups2_1;
+  copy_ovector(subj_start, ovec_src, ovec_dst, subgroups2);
+  while (++ovec_dst < ovec_clear_stop) *ovec_dst = -1;
+}
+
 /* Executes a pattern match with runtime options, a regular expression, a
    matching position, the start of the the subject string, a subject string,
    a number of subgroup offsets, an offset vector and an optional callout
    function */
 CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_pos,
                               value v_subj_start, value v_subj,
-                              value v_subgroups2, value v_ovec,
-                              value v_maybe_cof)
+                              value v_ovec, value v_maybe_cof)
 {
+  int ret;
   long
     pos = Long_val(v_pos),
     len = caml_string_length(v_subj),
     subj_start = Long_val(v_subj_start);
+  long ovec_len = caml_array_length(v_ovec);
 
   if (pos > len || pos < subj_start)
     caml_invalid_argument("Pcre.pcre_exec_stub: illegal position");
@@ -525,24 +539,16 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_pos,
     const char *ocaml_subj =
       String_val(v_subj) + subj_start;  /* Subject string */
     const int opt = Int_val(v_opt);  /* Runtime options */
-    int subgroups2 = Int_val(v_subgroups2);
-    const int subgroups2_1 = subgroups2 - 1;
-    const int subgroups3 = (subgroups2 >> 1) + subgroups2;
 
     /* Special case when no callout functions specified */
     if (v_maybe_cof == None) {
       int *ovec = (int *) &Field(v_ovec, 0);
 
       /* Performs the match */
-      const int ret =
-        pcre_exec(code, extra, ocaml_subj, len, pos, opt, ovec, subgroups3);
+      ret = pcre_exec(code, extra, ocaml_subj, len, pos, opt, ovec, ovec_len);
 
       if (ret < 0) handle_exec_error("pcre_exec_stub", ret);
-      else {
-        const int *ovec_src = ovec + subgroups2_1;
-        ovec_dst_ptr ovec_dst = (ovec_dst_ptr) ovec + subgroups2_1;
-        copy_ovector(subj_start, ovec_src, ovec_dst, subgroups2);
-      }
+      else handle_pcre_exec_result(v_ovec, ovec_len, subj_start, ret);
     }
 
     /* There are callout functions */
@@ -550,8 +556,7 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_pos,
       value v_cof = Field(v_maybe_cof, 0);
       value v_substrings;
       char *subj = caml_stat_alloc(sizeof(char) * len);
-      int *ovec = caml_stat_alloc(sizeof(int) * subgroups3);
-      int ret;
+      int *ovec = caml_stat_alloc(sizeof(int) * ovec_len);
       struct cod cod = { 0, (value *) NULL, (value *) NULL, (value) NULL };
       struct pcre_extra new_extra =
 #ifdef PCRE_EXTRA_MATCH_LIMIT_RECURSION
@@ -585,7 +590,7 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_pos,
 
         if (extra == NULL) {
           ret = pcre_exec(code, &new_extra, subj, len, pos, opt, ovec,
-                          subgroups3);
+                          ovec_len);
         }
         else {
           new_extra.flags = PCRE_EXTRA_CALLOUT_DATA | extra->flags;
@@ -597,7 +602,7 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_pos,
 #endif
 
           ret = pcre_exec(code, &new_extra, subj, len, pos, opt, ovec,
-                          subgroups3);
+                          ovec_len);
         }
 
         caml_stat_free(subj);
@@ -608,9 +613,7 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_pos,
         if (ret == PCRE_ERROR_CALLOUT) caml_raise(cod.v_exn);
         else handle_exec_error("pcre_exec_stub(callout)", ret);
       } else {
-        int *ovec_src = ovec + subgroups2_1;
-        ovec_dst_ptr ovec_dst = &Field(v_ovec, 0) + subgroups2_1;
-        copy_ovector(subj_start, ovec_src, ovec_dst, subgroups2);
+        handle_pcre_exec_result(v_ovec, ovec_len, subj_start, ret);
         caml_stat_free(ovec);
       }
     }
@@ -624,7 +627,7 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_pos,
 CAMLprim value pcre_exec_stub_bc(value *argv, int __unused argn)
 {
   return pcre_exec_stub(argv[0], argv[1], argv[2], argv[3],
-                        argv[4], argv[5], argv[6], argv[7]);
+                        argv[4], argv[5], argv[6]);
 }
 
 /* Generates a new set of chartables for the current locale (see man

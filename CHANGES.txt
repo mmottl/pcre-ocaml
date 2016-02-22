@@ -1,3 +1,7 @@
+2016-02-22:  Fixed a subgroup matching bug.
+
+             Thanks to Cheng Lou for the bug report!
+
 2015-08-21:  Made GC less aggressive reclaiming regexps and chartables.
 
 2014-12-10:  Fixed another limit handling bug in the full_split function.

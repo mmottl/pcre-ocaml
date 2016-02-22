@@ -916,12 +916,11 @@ external unsafe_pcre_exec :
   pos : int ->
   subj_start : int ->
   subj : string ->
-  subgroups2 : int ->
   int array ->
   callout option ->
   unit = "pcre_exec_stub_bc" "pcre_exec_stub"
-(** [unsafe_pcre_exec flags rex ~pos ~subj_start ~subj ~subgroups2
-    offset_vector].  You should read the C-source to know what happens.
+(** [unsafe_pcre_exec flags rex ~pos ~subj_start ~subj offset_vector].
+    You should read the C-source to know what happens.
     If you do not understand it - {b don't use this function!} *)
 
 val make_ovector : regexp -> int * int array

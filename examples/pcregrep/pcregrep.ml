@@ -54,7 +54,7 @@ let _ =
   let rex, files = parse_args ()
   and rfl = rflags [] in
 
-  let subgroups2, ovector = make_ovector rex in
+  let _, ovector = make_ovector rex in
 
   let pcregrep file name =
     let ret_code = ref 1
@@ -72,8 +72,7 @@ let _ =
     let try_match line =
       let matched =
         try
-          unsafe_pcre_exec
-            rfl rex ~pos:0 ~subj_start:0 ~subj:line ~subgroups2 ovector None;
+          unsafe_pcre_exec rfl rex ~pos:0 ~subj_start:0 ~subj:line ovector None;
           if !whole_lines && ovector.(1) <> String.length line then false
           else true
         with Not_found -> false in

@@ -1,10 +1,10 @@
 OASISFormat:      0.4
 Name:             pcre
-Version:          7.1.6
+Version:          7.2.0
 Synopsis:         pcre-ocaml - bindings to the Perl Compatibility Regular Expressions library
 Description:      pcre-ocaml offers library functions for string pattern matching and substitution, similar to the functionality offered by the Perl language.
 Authors:          Markus Mottl <markus.mottl@gmail.com>
-Copyrights:       (C) 1999-2015 Markus Mottl <markus.mottl@gmail.com>
+Copyrights:       (C) 1999-2016 Markus Mottl <markus.mottl@gmail.com>
 Maintainers:      Markus Mottl <markus.mottl@gmail.com>
 LicenseFile:      COPYING.txt
 License:          LGPL-2.1+ with OCaml linking exception
@@ -32,7 +32,7 @@ Library pcre
   BuildDepends:    bytes
   CCOpt:          -g -O2 -fPIC -DPIC
   if flag(strict) && ccomp_type(cc)
-    CCOpt+:       -Wall -pedantic -Wextra -Wunused -Wno-long-long
+    CCOpt+:       -Wall -pedantic -Wextra -Wunused -Wno-long-long -Wno-keyword-macro
 
 
 # Examples

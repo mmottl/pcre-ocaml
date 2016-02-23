@@ -187,7 +187,12 @@ static void pcre_dealloc_regexp(value v_rex)
 {
   void *extra = (void *) Field(v_rex, 2);
   (pcre_free)((void *) Field(v_rex, 1));
-  if (extra != NULL) pcre_free_study(extra);
+  if (extra != NULL)
+#ifdef PCRE_STUDY_JIT_COMPILE
+    pcre_free_study(extra);
+#else
+    pcre_free(extra);
+#endif
 }
 
 /* Makes OCaml-string from PCRE-version */

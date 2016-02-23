@@ -46,7 +46,7 @@ true: annot, bin_annot
 true: -traverse
 <{lib,examples}/**>: traverse
 
-<**/*.ml{,i}>: warn(Aer-44), strict_sequence, safe_string, annot
+<**/*.ml{,i}>: warn(Aer-44-50), strict_sequence, safe_string, annot
 
 <lib/pcre.{cma,cmxa}>: oasis_library_pcre_cclib
 "lib/libpcre_stubs.lib": oasis_library_pcre_cclib

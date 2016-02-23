@@ -527,7 +527,7 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_pos,
     pos = Long_val(v_pos),
     len = caml_string_length(v_subj),
     subj_start = Long_val(v_subj_start);
-  long ovec_len = caml_array_length(v_ovec);
+  long ovec_len = Wosize_val(v_ovec);
 
   if (pos > len || pos < subj_start)
     caml_invalid_argument("Pcre.pcre_exec_stub: illegal position");

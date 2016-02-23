@@ -1,5 +1,7 @@
 2016-02-23:  Fixed linking problem with old versions of PCRE (< 8.20).
 
+             Fixed backward compatibility issue with OCaml <= 3.12.
+
 2016-02-22:  Fixed a subgroup matching bug.
 
              Thanks to Cheng Lou for the bug report!

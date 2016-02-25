@@ -502,14 +502,14 @@ static inline void handle_exec_error(char *loc, const int ret)
 }
 
 static inline void handle_pcre_exec_result(
-  value v_ovec, long ovec_len, long subj_start, int ret)
+  int *ovec, value v_ovec, long ovec_len, long subj_start, int ret)
 {
-  int *ovec = (int *) &Field(v_ovec, 0);
+  ovec_dst_ptr ocaml_ovec = (ovec_dst_ptr) &Field(v_ovec, 0);
   const int subgroups2 = ret * 2;
   const int subgroups2_1 = subgroups2 - 1;
   const int *ovec_src = ovec + subgroups2_1;
-  ovec_dst_ptr ovec_clear_stop = (ovec_dst_ptr) ovec + (ovec_len * 2) / 3;
-  ovec_dst_ptr ovec_dst = (ovec_dst_ptr) ovec + subgroups2_1;
+  ovec_dst_ptr ovec_clear_stop = ocaml_ovec + (ovec_len * 2) / 3;
+  ovec_dst_ptr ovec_dst = ocaml_ovec + subgroups2_1;
   copy_ovector(subj_start, ovec_src, ovec_dst, subgroups2);
   while (++ovec_dst < ovec_clear_stop) *ovec_dst = -1;
 }
@@ -553,7 +553,7 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_pos,
       ret = pcre_exec(code, extra, ocaml_subj, len, pos, opt, ovec, ovec_len);
 
       if (ret < 0) handle_exec_error("pcre_exec_stub", ret);
-      else handle_pcre_exec_result(v_ovec, ovec_len, subj_start, ret);
+      else handle_pcre_exec_result(ovec, v_ovec, ovec_len, subj_start, ret);
     }
 
     /* There are callout functions */
@@ -618,7 +618,7 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_pos,
         if (ret == PCRE_ERROR_CALLOUT) caml_raise(cod.v_exn);
         else handle_exec_error("pcre_exec_stub(callout)", ret);
       } else {
-        handle_pcre_exec_result(v_ovec, ovec_len, subj_start, ret);
+        handle_pcre_exec_result(ovec, v_ovec, ovec_len, subj_start, ret);
         caml_stat_free(ovec);
       }
     }

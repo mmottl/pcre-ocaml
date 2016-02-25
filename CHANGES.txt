@@ -1,3 +1,9 @@
+2016-02-25:  Minor version release v7.2.3:
+
+               Fixed callout bug introduced with v7.2.0.
+
+             Thanks to Raman Varabets for the bug report!
+
 2016-02-23:  Fixed linking problem with old versions of PCRE (< 8.20).
 
              Fixed backward compatibility issue with OCaml <= 3.12.

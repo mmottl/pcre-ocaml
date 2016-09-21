@@ -9,260 +9,259 @@
 <link title="Pcre" rel="Chapter" href="Pcre.html"><title>Pcre</title>
 </head>
 <body>
-<code class="code"><span class="keyword">sig</span><br>
-&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;error&nbsp;=<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Partial</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">BadPartial</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">BadPattern</span>&nbsp;<span class="keyword">of</span>&nbsp;string&nbsp;*&nbsp;int<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">BadUTF8</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">BadUTF8Offset</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">MatchLimit</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">RecursionLimit</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">InternalError</span>&nbsp;<span class="keyword">of</span>&nbsp;string<br>
-&nbsp;&nbsp;<span class="keyword">exception</span>&nbsp;<span class="constructor">Error</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Pcre</span>.error<br>
-&nbsp;&nbsp;<span class="keyword">exception</span>&nbsp;<span class="constructor">Backtrack</span><br>
-&nbsp;&nbsp;<span class="keyword">exception</span>&nbsp;<span class="constructor">Regexp_or</span>&nbsp;<span class="keyword">of</span>&nbsp;string&nbsp;*&nbsp;<span class="constructor">Pcre</span>.error<br>
-&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;icflag<br>
-&nbsp;&nbsp;<span class="keyword">and</span>&nbsp;irflag<br>
-&nbsp;&nbsp;<span class="keyword">and</span>&nbsp;cflag&nbsp;=<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;<span class="keywordsign">`</span><span class="constructor">ANCHORED</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">AUTO_CALLOUT</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">CASELESS</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">DOLLAR_ENDONLY</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">DOTALL</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">EXTENDED</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">EXTRA</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">FIRSTLINE</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">MULTILINE</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">NO_AUTO_CAPTURE</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">NO_UTF8_CHECK</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">UNGREEDY</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">UTF8</span>&nbsp;]<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;cflags&nbsp;:&nbsp;<span class="constructor">Pcre</span>.cflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.icflag<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;cflag_list&nbsp;:&nbsp;<span class="constructor">Pcre</span>.icflag&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.cflag&nbsp;list<br>
-&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;rflag&nbsp;=&nbsp;[&nbsp;<span class="keywordsign">`</span><span class="constructor">ANCHORED</span>&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">NOTBOL</span>&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">NOTEMPTY</span>&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">NOTEOL</span>&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">PARTIAL</span>&nbsp;]<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;rflags&nbsp;:&nbsp;<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.irflag<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;rflag_list&nbsp;:&nbsp;<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.rflag&nbsp;list<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;version&nbsp;:&nbsp;string<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;config_utf8&nbsp;:&nbsp;bool<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;config_newline&nbsp;:&nbsp;char<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;config_link_size&nbsp;:&nbsp;int<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;config_match_limit&nbsp;:&nbsp;int<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;config_match_limit_recursion&nbsp;:&nbsp;int<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;config_stackrecurse&nbsp;:&nbsp;bool<br>
-&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;firstbyte_info&nbsp;=&nbsp;[&nbsp;<span class="keywordsign">`</span><span class="constructor">ANCHORED</span>&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Char</span>&nbsp;<span class="keyword">of</span>&nbsp;char&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Start_only</span>&nbsp;]<br>
-&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;study_stat&nbsp;=&nbsp;[&nbsp;<span class="keywordsign">`</span><span class="constructor">Not_studied</span>&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Optimal</span>&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Studied</span>&nbsp;]<br>
-&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;regexp<br>
-&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;options&nbsp;:&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.icflag&nbsp;=&nbsp;<span class="string">"pcre_options_stub"</span><br>
-&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;size&nbsp;:&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;=&nbsp;<span class="string">"pcre_size_stub"</span><br>
-&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;studysize&nbsp;:&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;=&nbsp;<span class="string">"pcre_studysize_stub"</span><br>
-&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;capturecount&nbsp;:&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;=&nbsp;<span class="string">"pcre_capturecount_stub"</span><br>
-&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;backrefmax&nbsp;:&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;=&nbsp;<span class="string">"pcre_backrefmax_stub"</span><br>
-&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;namecount&nbsp;:&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;=&nbsp;<span class="string">"pcre_namecount_stub"</span><br>
-&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;names&nbsp;:&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;array&nbsp;=&nbsp;<span class="string">"pcre_names_stub"</span><br>
-&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;nameentrysize&nbsp;:&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;=&nbsp;<span class="string">"pcre_nameentrysize_stub"</span><br>
-&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;firstbyte&nbsp;:&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.firstbyte_info<br>
-&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;<span class="string">"pcre_firstbyte_stub"</span><br>
-&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;firsttable&nbsp;:&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;option&nbsp;=&nbsp;<span class="string">"pcre_firsttable_stub"</span><br>
-&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;lastliteral&nbsp;:&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;char&nbsp;option&nbsp;=&nbsp;<span class="string">"pcre_lastliteral_stub"</span><br>
-&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;study_stat&nbsp;:&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.study_stat<br>
-&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;<span class="string">"pcre_study_stat_stub"</span>&nbsp;<span class="string">"noalloc"</span><br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;get_stringnumber&nbsp;:&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int<br>
-&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;get_match_limit&nbsp;:&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;option<br>
-&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;<span class="string">"pcre_get_match_limit_stub"</span><br>
-&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;get_match_limit_recursion&nbsp;:&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;option<br>
-&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;<span class="string">"pcre_get_match_limit_recursion_stub"</span><br>
-&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;chtables<br>
-&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;maketables&nbsp;:&nbsp;unit&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.chtables&nbsp;=&nbsp;<span class="string">"pcre_maketables_stub"</span><br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;regexp&nbsp;:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;?study:bool&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?limit:int&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?limit_recursion:int&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.icflag&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.cflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?chtables:<span class="constructor">Pcre</span>.chtables&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.regexp<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;regexp_or&nbsp;:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;?study:bool&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?limit:int&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?limit_recursion:int&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.icflag&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.cflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?chtables:<span class="constructor">Pcre</span>.chtables&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.regexp<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;quote&nbsp;:&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>
-&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;substrings<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;get_subject&nbsp;:&nbsp;<span class="constructor">Pcre</span>.substrings&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;num_of_subs&nbsp;:&nbsp;<span class="constructor">Pcre</span>.substrings&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;get_substring&nbsp;:&nbsp;<span class="constructor">Pcre</span>.substrings&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;get_substring_ofs&nbsp;:&nbsp;<span class="constructor">Pcre</span>.substrings&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;*&nbsp;int<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;get_substrings&nbsp;:&nbsp;?full_match:bool&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.substrings&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;array<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;get_opt_substrings&nbsp;:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;?full_match:bool&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.substrings&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;option&nbsp;array<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;get_named_substring&nbsp;:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.substrings&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;get_named_substring_ofs&nbsp;:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.substrings&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;*&nbsp;int<br>
-&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;callout_data&nbsp;=&nbsp;{<br>
-&nbsp;&nbsp;&nbsp;&nbsp;callout_number&nbsp;:&nbsp;int;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;substrings&nbsp;:&nbsp;<span class="constructor">Pcre</span>.substrings;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;start_match&nbsp;:&nbsp;int;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;current_position&nbsp;:&nbsp;int;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;capture_top&nbsp;:&nbsp;int;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;capture_last&nbsp;:&nbsp;int;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;pattern_position&nbsp;:&nbsp;int;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;next_item_length&nbsp;:&nbsp;int;<br>
-&nbsp;&nbsp;}<br>
-&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;callout&nbsp;=&nbsp;<span class="constructor">Pcre</span>.callout_data&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;pcre_exec&nbsp;:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;array<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;exec&nbsp;:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.substrings<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;exec_all&nbsp;:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.substrings&nbsp;array<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;next_match&nbsp;:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.substrings&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.substrings<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;extract&nbsp;:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?full_match:bool&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;array<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;extract_opt&nbsp;:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?full_match:bool&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;option&nbsp;array<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;extract_all&nbsp;:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?full_match:bool&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;array&nbsp;array<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;extract_all_opt&nbsp;:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?full_match:bool&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;option&nbsp;array&nbsp;array<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;pmatch&nbsp;:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;bool<br>
-&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;substitution<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;subst&nbsp;:&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.substitution<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;replace&nbsp;:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?itempl:<span class="constructor">Pcre</span>.substitution&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?templ:string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;qreplace&nbsp;:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?templ:string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;substitute_substrings&nbsp;:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;subst:(<span class="constructor">Pcre</span>.substrings&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string)&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;substitute&nbsp;:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;subst:(string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string)&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;replace_first&nbsp;:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?itempl:<span class="constructor">Pcre</span>.substitution&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?templ:string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;qreplace_first&nbsp;:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?templ:string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;substitute_substrings_first&nbsp;:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;subst:(<span class="constructor">Pcre</span>.substrings&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string)&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;substitute_first&nbsp;:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;subst:(string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string)&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;split&nbsp;:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?max:int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;list<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;asplit&nbsp;:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?max:int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;array<br>
-&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;split_result&nbsp;=<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Text</span>&nbsp;<span class="keyword">of</span>&nbsp;string<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">Delim</span>&nbsp;<span class="keyword">of</span>&nbsp;string<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">Group</span>&nbsp;<span class="keyword">of</span>&nbsp;int&nbsp;*&nbsp;string<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">NoGroup</span><br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;full_split&nbsp;:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;?max:int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.split_result&nbsp;list<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;foreach_line&nbsp;:&nbsp;?ic:<span class="constructor">Pervasives</span>.in_channel&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;(string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit)&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;foreach_file&nbsp;:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;string&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;(string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pervasives</span>.in_channel&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit)&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit<br>
-&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;unsafe_pcre_exec&nbsp;:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;pos:int&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;subj_start:int&nbsp;<span class="keywordsign">-&gt;</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;subj:string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;subgroups2:int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;array&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.callout&nbsp;option&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit<br>
-&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;<span class="string">"pcre_exec_stub_bc"</span>&nbsp;<span class="string">"pcre_exec_stub"</span><br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;make_ovector&nbsp;:&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;*&nbsp;int&nbsp;array<br>
+<code class="code"><span class="keyword">sig</span>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;error&nbsp;=
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Partial</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">BadPartial</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">BadPattern</span>&nbsp;<span class="keyword">of</span>&nbsp;string&nbsp;*&nbsp;int
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">BadUTF8</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">BadUTF8Offset</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">MatchLimit</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">RecursionLimit</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">InternalError</span>&nbsp;<span class="keyword">of</span>&nbsp;string
+&nbsp;&nbsp;<span class="keyword">exception</span>&nbsp;<span class="constructor">Error</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Pcre</span>.error
+&nbsp;&nbsp;<span class="keyword">exception</span>&nbsp;<span class="constructor">Backtrack</span>
+&nbsp;&nbsp;<span class="keyword">exception</span>&nbsp;<span class="constructor">Regexp_or</span>&nbsp;<span class="keyword">of</span>&nbsp;string&nbsp;*&nbsp;<span class="constructor">Pcre</span>.error
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;icflag
+&nbsp;&nbsp;<span class="keyword">and</span>&nbsp;irflag
+&nbsp;&nbsp;<span class="keyword">and</span>&nbsp;cflag&nbsp;=
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;<span class="keywordsign">`</span><span class="constructor">ANCHORED</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">AUTO_CALLOUT</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">CASELESS</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">DOLLAR_ENDONLY</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">DOTALL</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">EXTENDED</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">EXTRA</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">FIRSTLINE</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">MULTILINE</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">NO_AUTO_CAPTURE</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">NO_UTF8_CHECK</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">UNGREEDY</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">UTF8</span>&nbsp;]
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;cflags&nbsp;:&nbsp;<span class="constructor">Pcre</span>.cflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.icflag
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;cflag_list&nbsp;:&nbsp;<span class="constructor">Pcre</span>.icflag&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.cflag&nbsp;list
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;rflag&nbsp;=&nbsp;[&nbsp;<span class="keywordsign">`</span><span class="constructor">ANCHORED</span>&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">NOTBOL</span>&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">NOTEMPTY</span>&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">NOTEOL</span>&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">PARTIAL</span>&nbsp;]
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;rflags&nbsp;:&nbsp;<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.irflag
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;rflag_list&nbsp;:&nbsp;<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.rflag&nbsp;list
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;version&nbsp;:&nbsp;string
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;config_utf8&nbsp;:&nbsp;bool
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;config_newline&nbsp;:&nbsp;char
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;config_link_size&nbsp;:&nbsp;int
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;config_match_limit&nbsp;:&nbsp;int
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;config_match_limit_recursion&nbsp;:&nbsp;int
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;config_stackrecurse&nbsp;:&nbsp;bool
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;firstbyte_info&nbsp;=&nbsp;[&nbsp;<span class="keywordsign">`</span><span class="constructor">ANCHORED</span>&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Char</span>&nbsp;<span class="keyword">of</span>&nbsp;char&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Start_only</span>&nbsp;]
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;study_stat&nbsp;=&nbsp;[&nbsp;<span class="keywordsign">`</span><span class="constructor">Not_studied</span>&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Optimal</span>&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Studied</span>&nbsp;]
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;regexp
+&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;options&nbsp;:&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.icflag&nbsp;=&nbsp;<span class="string">"pcre_options_stub"</span>
+&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;size&nbsp;:&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;=&nbsp;<span class="string">"pcre_size_stub"</span>
+&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;studysize&nbsp;:&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;=&nbsp;<span class="string">"pcre_studysize_stub"</span>
+&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;capturecount&nbsp;:&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;=&nbsp;<span class="string">"pcre_capturecount_stub"</span>
+&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;backrefmax&nbsp;:&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;=&nbsp;<span class="string">"pcre_backrefmax_stub"</span>
+&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;namecount&nbsp;:&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;=&nbsp;<span class="string">"pcre_namecount_stub"</span>
+&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;names&nbsp;:&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;array&nbsp;=&nbsp;<span class="string">"pcre_names_stub"</span>
+&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;nameentrysize&nbsp;:&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;=&nbsp;<span class="string">"pcre_nameentrysize_stub"</span>
+&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;firstbyte&nbsp;:&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.firstbyte_info
+&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;<span class="string">"pcre_firstbyte_stub"</span>
+&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;firsttable&nbsp;:&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;option&nbsp;=&nbsp;<span class="string">"pcre_firsttable_stub"</span>
+&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;lastliteral&nbsp;:&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;char&nbsp;option&nbsp;=&nbsp;<span class="string">"pcre_lastliteral_stub"</span>
+&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;study_stat&nbsp;:&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.study_stat
+&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;<span class="string">"pcre_study_stat_stub"</span>&nbsp;[@@noalloc]
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;get_stringnumber&nbsp;:&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int
+&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;get_match_limit&nbsp;:&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;option
+&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;<span class="string">"pcre_get_match_limit_stub"</span>
+&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;get_match_limit_recursion&nbsp;:&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;option
+&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;<span class="string">"pcre_get_match_limit_recursion_stub"</span>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;chtables
+&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;maketables&nbsp;:&nbsp;unit&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.chtables&nbsp;=&nbsp;<span class="string">"pcre_maketables_stub"</span>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;regexp&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;?study:bool&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?limit:int&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?limit_recursion:int&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.icflag&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.cflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?chtables:<span class="constructor">Pcre</span>.chtables&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.regexp
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;regexp_or&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;?study:bool&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?limit:int&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?limit_recursion:int&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.icflag&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.cflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?chtables:<span class="constructor">Pcre</span>.chtables&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.regexp
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;quote&nbsp;:&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;substrings
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;get_subject&nbsp;:&nbsp;<span class="constructor">Pcre</span>.substrings&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;num_of_subs&nbsp;:&nbsp;<span class="constructor">Pcre</span>.substrings&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;get_substring&nbsp;:&nbsp;<span class="constructor">Pcre</span>.substrings&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;get_substring_ofs&nbsp;:&nbsp;<span class="constructor">Pcre</span>.substrings&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;*&nbsp;int
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;get_substrings&nbsp;:&nbsp;?full_match:bool&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.substrings&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;array
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;get_opt_substrings&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;?full_match:bool&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.substrings&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;option&nbsp;array
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;get_named_substring&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.substrings&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;get_named_substring_ofs&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.substrings&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;*&nbsp;int
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;callout_data&nbsp;=&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;callout_number&nbsp;:&nbsp;int;
+&nbsp;&nbsp;&nbsp;&nbsp;substrings&nbsp;:&nbsp;<span class="constructor">Pcre</span>.substrings;
+&nbsp;&nbsp;&nbsp;&nbsp;start_match&nbsp;:&nbsp;int;
+&nbsp;&nbsp;&nbsp;&nbsp;current_position&nbsp;:&nbsp;int;
+&nbsp;&nbsp;&nbsp;&nbsp;capture_top&nbsp;:&nbsp;int;
+&nbsp;&nbsp;&nbsp;&nbsp;capture_last&nbsp;:&nbsp;int;
+&nbsp;&nbsp;&nbsp;&nbsp;pattern_position&nbsp;:&nbsp;int;
+&nbsp;&nbsp;&nbsp;&nbsp;next_item_length&nbsp;:&nbsp;int;
+&nbsp;&nbsp;}
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;callout&nbsp;=&nbsp;<span class="constructor">Pcre</span>.callout_data&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;pcre_exec&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;array
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;exec&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.substrings
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;exec_all&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.substrings&nbsp;array
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;next_match&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.substrings&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.substrings
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;extract&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?full_match:bool&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;array
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;extract_opt&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?full_match:bool&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;option&nbsp;array
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;extract_all&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?full_match:bool&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;array&nbsp;array
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;extract_all_opt&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?full_match:bool&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;option&nbsp;array&nbsp;array
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;pmatch&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;bool
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;substitution
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;subst&nbsp;:&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.substitution
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;replace&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?itempl:<span class="constructor">Pcre</span>.substitution&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?templ:string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;qreplace&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?templ:string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;substitute_substrings&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;subst:(<span class="constructor">Pcre</span>.substrings&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string)&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;substitute&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;subst:(string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string)&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;replace_first&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?itempl:<span class="constructor">Pcre</span>.substitution&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?templ:string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;qreplace_first&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?templ:string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;substitute_substrings_first&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;subst:(<span class="constructor">Pcre</span>.substrings&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string)&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;substitute_first&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;subst:(string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string)&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;split&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?max:int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;list
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;asplit&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?max:int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;array
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;split_result&nbsp;=
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Text</span>&nbsp;<span class="keyword">of</span>&nbsp;string
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">Delim</span>&nbsp;<span class="keyword">of</span>&nbsp;string
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">Group</span>&nbsp;<span class="keyword">of</span>&nbsp;int&nbsp;*&nbsp;string
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">NoGroup</span>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;full_split&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;?iflags:<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?flags:<span class="constructor">Pcre</span>.rflag&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?rex:<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pat:string&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?pos:int&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;?max:int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?callout:<span class="constructor">Pcre</span>.callout&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.split_result&nbsp;list
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;foreach_line&nbsp;:&nbsp;?ic:<span class="constructor">Pervasives</span>.in_channel&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;(string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit)&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;foreach_file&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;string&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;(string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pervasives</span>.in_channel&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit)&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit
+&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;unsafe_pcre_exec&nbsp;:
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Pcre</span>.irflag&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;pos:int&nbsp;<span class="keywordsign">-&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;subj_start:int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;subj:string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;array&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Pcre</span>.callout&nbsp;option&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit
+&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;<span class="string">"pcre_exec_stub_bc"</span>&nbsp;<span class="string">"pcre_exec_stub"</span>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;make_ovector&nbsp;:&nbsp;<span class="constructor">Pcre</span>.regexp&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;*&nbsp;int&nbsp;array
 <span class="keyword">end</span></code></body></html>

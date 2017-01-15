@@ -8,7 +8,7 @@
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
    License as published by the Free Software Foundation; either
-   version 2 of the License, or (at your option) any later version.
+   version 2.1 of the License, or (at your option) any later version.
 
    This library is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -17,12 +17,10 @@
 
    You should have received a copy of the GNU Lesser General Public
    License along with this library; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 *)
 
 (* Public exceptions and their registration with the C runtime *)
-
-open Pcre_compat
 
 type error =
   | Partial
@@ -161,22 +159,22 @@ let rflag_list irflags =
 
 external pcre_version : unit -> string = "pcre_version_stub"
 
-external pcre_config_utf8 : unit -> bool = "pcre_config_utf8_stub" "noalloc"
+external pcre_config_utf8 : unit -> bool = "pcre_config_utf8_stub" [@@noalloc]
 
 external pcre_config_newline :
-  unit -> char = "pcre_config_newline_stub" "noalloc"
+  unit -> char = "pcre_config_newline_stub" [@@noalloc]
 
 external pcre_config_link_size :
-  unit -> int = "pcre_config_link_size_stub" "noalloc"
+  unit -> int = "pcre_config_link_size_stub" [@@noalloc]
 
 external pcre_config_match_limit :
-  unit -> int = "pcre_config_match_limit_stub" "noalloc"
+  unit -> int = "pcre_config_match_limit_stub" [@@noalloc]
 
 external pcre_config_match_limit_recursion :
-  unit -> int = "pcre_config_match_limit_recursion_stub" "noalloc"
+  unit -> int = "pcre_config_match_limit_recursion_stub" [@@noalloc]
 
 external pcre_config_stackrecurse :
-  unit -> bool = "pcre_config_stackrecurse_stub" "noalloc"
+  unit -> bool = "pcre_config_stackrecurse_stub" [@@noalloc]
 
 let version = pcre_version ()
 let config_utf8 = pcre_config_utf8 ()
@@ -212,7 +210,7 @@ external nameentrysize : regexp -> int = "pcre_nameentrysize_stub"
 external firstbyte : regexp -> firstbyte_info = "pcre_firstbyte_stub"
 external firsttable : regexp -> string option = "pcre_firsttable_stub"
 external lastliteral : regexp -> char option = "pcre_lastliteral_stub"
-external study_stat : regexp -> study_stat = "pcre_study_stat_stub" "noalloc"
+external study_stat : regexp -> study_stat = "pcre_study_stat_stub" [@@noalloc]
 
 
 (* Compilation of patterns *)
@@ -231,14 +229,14 @@ external get_match_limit : regexp -> int option = "pcre_get_match_limit_stub"
 
 (* Internal use only! *)
 external set_imp_match_limit :
-  regexp -> int -> regexp = "pcre_set_imp_match_limit_stub" "noalloc"
+  regexp -> int -> regexp = "pcre_set_imp_match_limit_stub" [@@noalloc]
 
 external get_match_limit_recursion :
   regexp -> int option = "pcre_get_match_limit_recursion_stub"
 
 (* Internal use only! *)
 external set_imp_match_limit_recursion :
-  regexp -> int -> regexp = "pcre_set_imp_match_limit_recursion_stub" "noalloc"
+  regexp -> int -> regexp = "pcre_set_imp_match_limit_recursion_stub" [@@noalloc]
 
 let regexp
       ?(study = true) ?limit ?limit_recursion
@@ -745,7 +743,7 @@ let replace_first ?(iflags = 0) ?flags ?(rex = def_rex) ?pat ?(pos = 0)
     let ofs = List.fold_left coll first trans_lst in
     bytes_unsafe_blit_string subj last res ofs rest;
     Bytes.unsafe_to_string res
-  with Not_found -> string_copy subj
+  with Not_found -> subj
 
 let qreplace_first ?(iflags = 0) ?flags ?(rex = def_rex) ?pat
                    ?(pos = 0) ?(templ = "") ?callout subj =
@@ -764,7 +762,7 @@ let qreplace_first ?(iflags = 0) ?flags ?(rex = def_rex) ?pat
     bytes_unsafe_blit_string templ 0 res first len;
     bytes_unsafe_blit_string subj last res postfix_start rest;
     Bytes.unsafe_to_string res
-  with Not_found -> string_copy subj
+  with Not_found -> subj
 
 let substitute_substrings_first ?(iflags = 0) ?flags ?(rex = def_rex) ?pat
                                 ?(pos = 0) ?callout ~subst subj =
@@ -785,7 +783,7 @@ let substitute_substrings_first ?(iflags = 0) ?flags ?(rex = def_rex) ?pat
     bytes_unsafe_blit_string templ 0 res prefix_len templ_len;
     bytes_unsafe_blit_string subj last res postfix_start postfix_len;
     Bytes.unsafe_to_string res
-  with Not_found -> string_copy subj
+  with Not_found -> subj
 
 let substitute_first ?iflags ?flags ?rex ?pat ?pos
                      ?callout ~subst:str_subst subj =
@@ -802,7 +800,7 @@ let substitute_first ?iflags ?flags ?rex ?pat ?pos
 let internal_psplit flags rex max pos callout subj =
   let subj_len = String.length subj in
   if subj_len = 0 then []
-  else if max = 1 then [string_copy subj]
+  else if max = 1 then [subj]
   else
     let subgroups2, ovector = make_ovector rex in
 
@@ -879,7 +877,7 @@ let internal_psplit flags rex max pos callout subj =
 
 let rec strip_all_empty = function "" :: t -> strip_all_empty t | l -> l
 
-external isspace : char -> bool = "pcre_isspace_stub" "noalloc"
+external isspace : char -> bool = "pcre_isspace_stub" [@@noalloc]
 
 let rec find_no_space ix len str =
   if ix = len || not (isspace (String.unsafe_get str ix)) then ix
@@ -920,7 +918,7 @@ let full_split ?(iflags = 0) ?flags ?(rex = def_rex) ?pat
   let iflags = match flags with Some flags -> rflags flags | _ -> iflags in
   let subj_len = String.length subj in
   if subj_len = 0 then []
-  else if max = 1 then [Text (string_copy subj)]
+  else if max = 1 then [Text (subj)]
   else
     let subgroups2, ovector = make_ovector rex in
 

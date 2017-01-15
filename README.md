@@ -1,14 +1,8 @@
-PCRE-OCaml - Perl Compatibility Regular Expressions for OCaml
-=============================================================
-
----------------------------------------------------------------------------
-
-What is PCRE-OCaml?
--------------------
+## PCRE-OCaml - Perl Compatibility Regular Expressions for OCaml
 
 This [OCaml](http://www.ocaml.org)-library interfaces the C-library
-[PCRE](http://www.pcre.org) (Perl-compatibility Regular Expressions).  It can
-be used for matching regular expressions which are written in "PERL"-style.
+[PCRE](http://www.pcre.org) (Perl-compatibility Regular Expressions).  It can be
+used for string matching with "PERL"-style regular expressions.
 
 ### Features
 
@@ -49,9 +43,8 @@ Other reasons to use PCRE-OCaml:
 
 ### Usage
 
-The API-documentation which is built and installed with PCRE-OCaml explains all
-functions, most of which are fairly straightforward to understand, in detail.
-It can also be found [online](http://mmottl.github.io/pcre-ocaml/api).
+Please consult the [API](https://mmottl.github.io/pcre-ocaml/api/pcre) for
+details.
 
 A general concept the user may need to understand is that most functions
 allow for two different kinds of flags:
@@ -61,7 +54,7 @@ allow for two different kinds of flags:
      Example:
 
      ```ocaml
-     let rex = regexp ~flags:[`ANCHORED; `CASELESS] "some pattern" in
+     let rex = Pcre.regexp ~flags:[`ANCHORED; `CASELESS] "some pattern" in
      (* ... *)
      ```
 
@@ -75,9 +68,9 @@ allow for two different kinds of flags:
      performance in loops.  Example:
 
      ```ocaml
-     let iflags = cflags [`ANCHORED; `CASELESS] in
+     let iflags = Pcre.cflags [`ANCHORED; `CASELESS] in
      for i = 1 to 1000 do
-       let rex = regexp ~iflags "some pattern constructed at runtime" in
+       let rex = Pcre.regexp ~iflags "some pattern constructed at runtime" in
        (* ... *)
      done
      ```
@@ -89,7 +82,7 @@ allow for two different kinds of flags:
 
       ```ocaml
       for i = 1 to 1000 do
-        let chunks = split ~pat:"[ \t]+" "foo bar" in
+        let chunks = Pcre.split ~pat:"[ \t]+" "foo bar" in
         (* ... *)
       done
       ```
@@ -97,31 +90,21 @@ allow for two different kinds of flags:
       Better:
 
       ```ocaml
-      let rex = regexp "[ \t]+" in
+      let rex = Pcre.regexp "[ \t]+" in
       for i = 1 to 1000 do
-        let chunks = split ~rex "foo bar" in
+        let chunks = Pcre.split ~rex "foo bar" in
         (* ... *)
       done
       ```
 
-The provided functions use optional arguments with intuitive defaults.
-For example, the `split`-function will assume whitespace as pattern.
+The provided functions use optional arguments with intuitive defaults.  For
+example, the `Pcre.split`-function will assume whitespace as pattern.  The
+`examples`-directory contains a few example applications demonstrating the
+functionality of PCRE-OCaml.
 
-Take a look at the interface file `pcre.mli` to see which ways exists to pass
-parameters and to learn about the defaults.  The `examples`-directory contains
-a few example applications demonstrating the functionality of PCRE-OCaml.
+### Contact Information and Contributing
 
----------------------------------------------------------------------------
+Please submit bugs reports, feature requests, contributions and similar to
+the [GitHub issue tracker](https://github.com/mmottl/pcre-ocaml/issues).
 
-Contact Information and Contributing
-------------------------------------
-
-In the case of bugs, feature requests, contributions and similar, you can
-contact me here: <markus.mottl@gmail.com>
-
-Up-to-date information should be available at:
-<http://mmottl.github.io/pcre-ocaml>
-
-Enjoy!
-
-Markus Mottl on July 10, 2012
+Up-to-date information is available at: <https://mmottl.github.io/pcre-ocaml>

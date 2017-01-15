@@ -1,3 +1,5 @@
+.merlin
+*.install
 _build
 API.docdir
 *.bak

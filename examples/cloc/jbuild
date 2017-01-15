@@ -1,0 +1,7 @@
+(jbuild_version 1)
+
+(executables (
+  (names (cloc))
+  (public_names (cloc))
+  (libraries (pcre))
+))

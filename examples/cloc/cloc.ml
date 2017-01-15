@@ -1,4 +1,3 @@
-open Pcre_compat
 open Pcre
 
 let read_whole_channel ch =
@@ -8,7 +7,7 @@ let read_whole_channel ch =
   let len = ref size in
   while !len <> 0 do
     len := input ch strbuf 0 size;
-    buffer_add_subbytes buf strbuf 0 !len
+    Buffer.add_subbytes buf strbuf 0 !len
   done;
   Buffer.contents buf
 

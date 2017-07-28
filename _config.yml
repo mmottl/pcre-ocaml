@@ -1,0 +1,8 @@
+title: Pcre-ocaml
+description: OCaml bindings to PCRE (Perl Compatibility Regular Expressions)
+google_analytics: 
+show_downloads: true
+theme: jekyll-theme-cayman
+
+gems:
+  - jekyll-mentions

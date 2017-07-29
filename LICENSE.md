@@ -1,3 +1,5 @@
+Copyright (c) 1999- Markus Mottl <markus.mottl@gmail.com>
+
 The Library is distributed under the terms of the GNU Lesser General
 Public License version 2.1 (included below).
 

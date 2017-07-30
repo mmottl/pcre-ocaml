@@ -3,7 +3,12 @@
 (library (
   (name pcre)
   (public_name pcre)
-  (flags (:standard -safe-string))
+  (flags (
+    :standard
+    -w -9
+    -safe-string -strict-sequence
+    -principal -short-paths
+  ))
   (c_names (pcre_stubs))
   (c_flags (
     (:include c_flags.sexp) -g -O2 -fPIC -DPIC

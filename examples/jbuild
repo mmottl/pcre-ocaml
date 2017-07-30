@@ -3,5 +3,11 @@
 (executables (
   (names (cloc count_hash pcregrep subst))
   (public_names (cloc count_hash pcregrep subst))
+  (flags (
+    :standard
+    -w -9
+    -safe-string -strict-sequence
+    -principal -short-paths
+  ))
   (libraries (pcre))
 ))

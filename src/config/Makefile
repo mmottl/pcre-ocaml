@@ -1,4 +1,4 @@
-TARGETS = pcre.cma
+TARGETS = discover.bc
 
 .PHONY: all clean
 

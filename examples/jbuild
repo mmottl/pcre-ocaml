@@ -1,0 +1,7 @@
+(jbuild_version 1)
+
+(executables (
+  (names (cloc count_hash pcregrep subst))
+  (public_names (cloc count_hash pcregrep subst))
+  (libraries (pcre))
+))

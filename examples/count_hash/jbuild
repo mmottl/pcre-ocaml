@@ -1,7 +1,0 @@
-(jbuild_version 1)
-
-(executables (
-  (names (count_hash))
-  (public_names (count_hash))
-  (libraries (pcre))
-))

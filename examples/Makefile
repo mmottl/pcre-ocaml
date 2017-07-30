@@ -1,4 +1,4 @@
-TARGETS = pcre.cma
+TARGETS = $(addsuffix .bc, cloc count_hash pcregrep subst)
 
 .PHONY: all clean
 

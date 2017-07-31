@@ -13,11 +13,11 @@ build: [
 ]
 
 depends: [
-  "base-bytes"
-  "base"
-  "stdio"
-  "configurator"
   "conf-libpcre"
+  "base-bytes"
+  "base" {build}
+  "stdio" {build}
+  "configurator" {build}
   "jbuilder" {build & >= "1.0+beta10"}
 ]
 

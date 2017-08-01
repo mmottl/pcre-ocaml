@@ -5,7 +5,7 @@ let () =
   let module C = Configurator in
   C.main ~name:"pcre" (fun c ->
     let default : C.Pkg_config.package_conf = {
-      libs   = ["-lpcre"];
+      libs = ["-lpcre"];
       cflags = []
     } in
     let conf =

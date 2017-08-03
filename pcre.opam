@@ -13,8 +13,8 @@ build: [
 ]
 
 depends: [
-  "conf-libpcre"
   "base-bytes"
+  "conf-libpcre" {build}
   "base" {build}
   "stdio" {build}
   "configurator" {build}

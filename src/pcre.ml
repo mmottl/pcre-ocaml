@@ -164,14 +164,18 @@ external pcre_config_utf8 : unit -> bool = "pcre_config_utf8_stub" [@@noalloc]
 external pcre_config_newline :
   unit -> char = "pcre_config_newline_stub" [@@noalloc]
 
-external pcre_config_link_size :
-  unit -> int = "pcre_config_link_size_stub" [@@noalloc]
+external pcre_config_link_size : unit -> (int [@untagged])
+  = "pcre_config_link_size_stub_bc" "pcre_config_link_size_stub" [@@noalloc]
 
 external pcre_config_match_limit :
-  unit -> int = "pcre_config_match_limit_stub" [@@noalloc]
+  unit -> (int [@untagged])
+  = "pcre_config_match_limit_stub_bc" "pcre_config_match_limit_stub" [@@noalloc]
 
-external pcre_config_match_limit_recursion :
-  unit -> int = "pcre_config_match_limit_recursion_stub" [@@noalloc]
+external pcre_config_match_limit_recursion : unit -> (int [@untagged])
+  =
+  "pcre_config_match_limit_recursion_stub_bc"
+  "pcre_config_match_limit_recursion_stub"
+  [@@noalloc]
 
 external pcre_config_stackrecurse :
   unit -> bool = "pcre_config_stackrecurse_stub" [@@noalloc]
@@ -199,14 +203,28 @@ type study_stat =
 
 type regexp
 
-external options : regexp -> icflag = "pcre_options_stub"
-external size : regexp -> int = "pcre_size_stub"
-external studysize : regexp -> int = "pcre_studysize_stub"
-external capturecount : regexp -> int = "pcre_capturecount_stub"
-external backrefmax : regexp -> int = "pcre_backrefmax_stub"
-external namecount : regexp -> int = "pcre_namecount_stub"
+external options : regexp -> (int (* = [icflag] *) [@untagged])
+  = "pcre_options_stub_bc" "pcre_options_stub"
+
+external size : regexp -> (int [@untagged])
+  = "pcre_size_stub_bc" "pcre_size_stub"
+
+external studysize : regexp -> (int [@untagged])
+  = "pcre_studysize_stub_bc" "pcre_studysize_stub"
+
+external capturecount : regexp -> (int [@untagged])
+  = "pcre_capturecount_stub_bc" "pcre_capturecount_stub"
+
+external backrefmax : regexp -> (int [@untagged])
+  = "pcre_backrefmax_stub_bc" "pcre_backrefmax_stub"
+
+external namecount : regexp -> (int [@untagged])
+  = "pcre_namecount_stub_bc" "pcre_namecount_stub"
+
+external nameentrysize : regexp -> (int [@untagged])
+  = "pcre_nameentrysize_stub_bc" "pcre_nameentrysize_stub"
+
 external names : regexp -> string array = "pcre_names_stub"
-external nameentrysize : regexp -> int = "pcre_nameentrysize_stub"
 external firstbyte : regexp -> firstbyte_info = "pcre_firstbyte_stub"
 external firsttable : regexp -> string option = "pcre_firsttable_stub"
 external lastliteral : regexp -> char option = "pcre_lastliteral_stub"
@@ -222,21 +240,25 @@ external maketables : unit -> chtables = "pcre_maketables_stub"
 (*  Internal use only! *)
 external pcre_study : regexp -> unit = "pcre_study_stub"
 
-external compile :
-  icflag -> chtables option -> string -> regexp = "pcre_compile_stub"
+external compile : icflag -> chtables option -> string -> regexp
+  = "pcre_compile_stub_bc" "pcre_compile_stub"
 
 external get_match_limit : regexp -> int option = "pcre_get_match_limit_stub"
 
-(* Internal use only! *)
-external set_imp_match_limit :
-  regexp -> int -> regexp = "pcre_set_imp_match_limit_stub" [@@noalloc]
-
-external get_match_limit_recursion :
-  regexp -> int option = "pcre_get_match_limit_recursion_stub"
+external get_match_limit_recursion : regexp -> int option
+  = "pcre_get_match_limit_recursion_stub"
 
 (* Internal use only! *)
-external set_imp_match_limit_recursion :
-  regexp -> int -> regexp = "pcre_set_imp_match_limit_recursion_stub" [@@noalloc]
+external set_imp_match_limit : regexp -> (int [@untagged]) -> regexp
+  = "pcre_set_imp_match_limit_stub_bc" "pcre_set_imp_match_limit_stub"
+  [@@noalloc]
+
+(* Internal use only! *)
+external set_imp_match_limit_recursion : regexp -> (int [@untagged]) -> regexp
+  =
+  "pcre_set_imp_match_limit_recursion_stub_bc"
+  "pcre_set_imp_match_limit_recursion_stub"
+  [@@noalloc]
 
 let regexp
       ?(study = true) ?limit ?limit_recursion
@@ -367,8 +389,8 @@ let get_opt_substrings ?(full_match = true) (_, ovector as substrings) =
     let len = (Array.length ovector / 3) - 1 in
     Array.init len (fun n -> unsafe_get_opt_substring substrings (n + 1))
 
-external get_stringnumber :
-  regexp -> string -> int = "pcre_get_stringnumber_stub"
+external get_stringnumber : regexp -> string -> (int [@untagged])
+  = "pcre_get_stringnumber_stub_bc" "pcre_get_stringnumber_stub"
 
 let get_named_substring rex name substrings =
   get_substring substrings (get_stringnumber rex name)
@@ -377,10 +399,10 @@ let get_named_substring_ofs rex name substrings =
   get_substring_ofs substrings (get_stringnumber rex name)
 
 external unsafe_pcre_exec :
-  irflag ->
+  (int (* = [irflag] *) [@untagged]) ->
   regexp ->
-  pos : int ->
-  subj_start : int ->
+  pos : (int [@untagged]) ->
+  subj_start : (int [@untagged]) ->
   subj : string ->
   int array ->
   callout option ->

@@ -195,12 +195,6 @@ static void pcre_dealloc_regexp(value v_rex)
 #endif
 }
 
-/* Makes OCaml-string from PCRE-version */
-CAMLprim value pcre_version_stub(value __unused v_unit)
-{
-  return caml_copy_string((char *) pcre_version());
-}
-
 
 /* Raising exceptions */
 
@@ -253,7 +247,8 @@ static inline void raise_internal_error(char *msg)
 
 /* Makes compiled regular expression from compilation options, an optional
    value of chartables and the pattern string */
-CAMLprim value pcre_compile_stub(value v_opt, value v_tables, value v_pat)
+
+CAMLprim value pcre_compile_stub(intnat v_opt, value v_tables, value v_pat)
 {
   value v_rex;  /* Final result -> value of type [regexp] */
   const char *error = NULL;  /* pointer to possible error message */
@@ -265,7 +260,7 @@ CAMLprim value pcre_compile_stub(value v_opt, value v_tables, value v_pat)
     (v_tables == None) ? NULL : (chartables) Field(Field(v_tables, 0), 1);
 
   /* Compiles the pattern */
-  pcre *regexp = pcre_compile(String_val(v_pat), Int_val(v_opt), &error,
+  pcre *regexp = pcre_compile(String_val(v_pat), v_opt, &error,
                               &error_ofs, tables);
 
   /* Raises appropriate exception with [BadPattern] if the pattern
@@ -292,6 +287,12 @@ CAMLprim value pcre_compile_stub(value v_opt, value v_tables, value v_pat)
   return v_rex;
 }
 
+CAMLprim value pcre_compile_stub_bc(value v_opt, value v_tables, value v_pat)
+{
+  return pcre_compile_stub(Int_val(v_opt), v_tables, v_pat);
+}
+
+
 /* Studies a regexp */
 CAMLprim value pcre_study_stub(value v_rex)
 {
@@ -306,21 +307,6 @@ CAMLprim value pcre_study_stub(value v_rex)
   return v_rex;
 }
 
-/* Sets a match limit recursion for a regular expression imperatively */
-CAMLprim value pcre_set_imp_match_limit_recursion_stub(value v_rex, value v_lim)
-{
-  pcre_extra *extra = (pcre_extra *) Field(v_rex, 2);
-  if (extra == NULL) {
-    extra = pcre_malloc(sizeof(pcre_extra));
-    extra->flags = PCRE_EXTRA_MATCH_LIMIT_RECURSION;
-    Field(v_rex, 2) = (value) extra;
-  } else {
-    unsigned long *flags_ptr = &extra->flags;
-    *flags_ptr = PCRE_EXTRA_MATCH_LIMIT_RECURSION | *flags_ptr;
-  }
-  extra->match_limit_recursion = Int_val(v_lim);
-  return v_rex;
-}
 
 /* Gets the match limit recursion of a regular expression if it exists */
 CAMLprim value pcre_get_match_limit_recursion_stub(value v_rex)
@@ -334,22 +320,6 @@ CAMLprim value pcre_get_match_limit_recursion_stub(value v_rex)
     return v_res;
   }
   return None;
-}
-
-/* Sets a match limit for a regular expression imperatively */
-CAMLprim value pcre_set_imp_match_limit_stub(value v_rex, value v_lim)
-{
-  pcre_extra *extra = (pcre_extra *) Field(v_rex, 2);
-  if (extra == NULL) {
-    extra = pcre_malloc(sizeof(pcre_extra));
-    extra->flags = PCRE_EXTRA_MATCH_LIMIT;
-    Field(v_rex, 2) = (value) extra;
-  } else {
-    unsigned long *flags_ptr = &extra->flags;
-    *flags_ptr = PCRE_EXTRA_MATCH_LIMIT | *flags_ptr;
-  }
-  extra->match_limit = Int_val(v_lim);
-  return v_rex;
 }
 
 /* Gets the match limit of a regular expression if it exists */
@@ -366,6 +336,55 @@ CAMLprim value pcre_get_match_limit_stub(value v_rex)
   return None;
 }
 
+
+/* Sets a match limit for a regular expression imperatively */
+
+CAMLprim value pcre_set_imp_match_limit_stub(value v_rex, intnat v_lim)
+{
+  pcre_extra *extra = (pcre_extra *) Field(v_rex, 2);
+  if (extra == NULL) {
+    extra = pcre_malloc(sizeof(pcre_extra));
+    extra->flags = PCRE_EXTRA_MATCH_LIMIT;
+    Field(v_rex, 2) = (value) extra;
+  } else {
+    unsigned long *flags_ptr = &extra->flags;
+    *flags_ptr = PCRE_EXTRA_MATCH_LIMIT | *flags_ptr;
+  }
+  extra->match_limit = v_lim;
+  return v_rex;
+}
+
+CAMLprim value pcre_set_imp_match_limit_stub_bc(value v_rex, value v_lim)
+{
+  return pcre_set_imp_match_limit_stub(v_rex, Int_val(v_lim));
+}
+
+
+/* Sets a match limit recursion for a regular expression imperatively */
+
+CAMLprim value pcre_set_imp_match_limit_recursion_stub(
+    value v_rex, intnat v_lim)
+{
+  pcre_extra *extra = (pcre_extra *) Field(v_rex, 2);
+  if (extra == NULL) {
+    extra = pcre_malloc(sizeof(pcre_extra));
+    extra->flags = PCRE_EXTRA_MATCH_LIMIT_RECURSION;
+    Field(v_rex, 2) = (value) extra;
+  } else {
+    unsigned long *flags_ptr = &extra->flags;
+    *flags_ptr = PCRE_EXTRA_MATCH_LIMIT_RECURSION | *flags_ptr;
+  }
+  extra->match_limit_recursion = v_lim;
+  return v_rex;
+}
+
+CAMLprim value pcre_set_imp_match_limit_recursion_stub_bc(
+    value v_rex, value v_lim)
+{
+  return pcre_set_imp_match_limit_recursion_stub(v_rex, Int_val(v_lim));
+}
+
+
 /* Performs the call to the pcre_fullinfo function */
 static inline int pcre_fullinfo_stub(value v_rex, int what, void *where)
 {
@@ -376,22 +395,25 @@ static inline int pcre_fullinfo_stub(value v_rex, int what, void *where)
 /* Some stubs for info-functions */
 
 /* Generic macro for getting integer results from pcre_fullinfo */
-#define make_info(tp, cnv, name, option) \
-  CAMLprim value pcre_##name##_stub(value v_rex) \
+#define make_intnat_info(tp, name, option) \
+  CAMLprim intnat pcre_##name##_stub(value v_rex) \
   { \
     tp options; \
     const int ret = pcre_fullinfo_stub(v_rex, PCRE_INFO_##option, &options); \
     if (ret != 0) raise_internal_error("pcre_##name##_stub"); \
-    return cnv(options); \
-  }
+    return options; \
+  } \
+  \
+  CAMLprim value pcre_##name##_stub_bc(value v_rex) \
+  { return Val_int(pcre_##name##_stub(v_rex)); }
 
-make_info(unsigned long, Val_long, options, OPTIONS)
-make_info(size_t, Val_long, size, SIZE)
-make_info(size_t, Val_long, studysize, STUDYSIZE)
-make_info(int, Val_int, capturecount, CAPTURECOUNT)
-make_info(int, Val_int, backrefmax, BACKREFMAX)
-make_info(int, Val_int, namecount, NAMECOUNT)
-make_info(int, Val_int, nameentrysize, NAMEENTRYSIZE)
+make_intnat_info(unsigned long, options, OPTIONS)
+make_intnat_info(size_t, size, SIZE)
+make_intnat_info(size_t, studysize, STUDYSIZE)
+make_intnat_info(int, capturecount, CAPTURECOUNT)
+make_intnat_info(int, backrefmax, BACKREFMAX)
+make_intnat_info(int, namecount, NAMECOUNT)
+make_intnat_info(int, nameentrysize, NAMEENTRYSIZE)
 
 CAMLprim value pcre_firstbyte_stub(value v_rex)
 {
@@ -514,19 +536,21 @@ static inline void handle_pcre_exec_result(
   while (++ovec_dst < ovec_clear_stop) *ovec_dst = -1;
 }
 
+
 /* Executes a pattern match with runtime options, a regular expression, a
    matching position, the start of the the subject string, a subject string,
    a number of subgroup offsets, an offset vector and an optional callout
    function */
-CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_pos,
-                              value v_subj_start, value v_subj,
-                              value v_ovec, value v_maybe_cof)
+
+CAMLprim value pcre_exec_stub(
+    intnat v_opt, value v_rex, intnat v_pos, intnat v_subj_start, value v_subj,
+    value v_ovec, value v_maybe_cof)
 {
   int ret;
   long
-    pos = Long_val(v_pos),
+    pos = v_pos,
     len = caml_string_length(v_subj),
-    subj_start = Long_val(v_subj_start);
+    subj_start = v_subj_start;
   long ovec_len = Wosize_val(v_ovec);
 
   if (pos > len || pos < subj_start)
@@ -543,7 +567,7 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_pos,
     const pcre_extra *extra = (pcre_extra *) Field(v_rex, 2);  /* Extra info */
     const char *ocaml_subj =
       String_val(v_subj) + subj_start;  /* Subject string */
-    const int opt = Int_val(v_opt);  /* Runtime options */
+    const int opt = v_opt;  /* Runtime options */
 
     /* Special case when no callout functions specified */
     if (v_maybe_cof == None) {
@@ -631,8 +655,10 @@ CAMLprim value pcre_exec_stub(value v_opt, value v_rex, value v_pos,
    Needed, because there are more than 5 arguments */
 CAMLprim value pcre_exec_stub_bc(value *argv, int __unused argn)
 {
-  return pcre_exec_stub(argv[0], argv[1], argv[2], argv[3],
-                        argv[4], argv[5], argv[6]);
+  return
+    pcre_exec_stub(
+        Int_val(argv[0]), argv[1], Int_val(argv[2]), Int_val(argv[3]),
+        argv[4], argv[5], argv[6]);
 }
 
 /* Generates a new set of chartables for the current locale (see man
@@ -653,16 +679,24 @@ CAMLprim value pcre_isspace_stub(value v_c)
   return Val_bool(isspace(Int_val(v_c)));
 }
 
+
 /* Returns number of substring associated with a name */
-CAMLprim value pcre_get_stringnumber_stub(value v_rex, value v_name)
+
+CAMLprim intnat pcre_get_stringnumber_stub(value v_rex, value v_name)
 {
   const int ret = pcre_get_stringnumber((pcre *) Field(v_rex, 1),
                                         String_val(v_name));
   if (ret == PCRE_ERROR_NOSUBSTRING)
     caml_invalid_argument("Named string not found");
 
-  return Val_int(ret);
+  return ret;
 }
+
+CAMLprim value pcre_get_stringnumber_stub_bc(value v_rex, value v_name)
+{
+  return Val_int(pcre_get_stringnumber_stub(v_rex, v_name));
+}
+
 
 /* Returns array of names of named substrings in a regexp */
 CAMLprim value pcre_names_stub(value v_rex)
@@ -710,28 +744,53 @@ static inline int pcre_config_long(int what)
   return ret;
 }
 
+
 /* Some stubs for config-functions */
+
+/* Makes OCaml-string from PCRE-version */
+CAMLprim value pcre_version_stub(value __unused v_unit)
+{
+  return caml_copy_string((char *) pcre_version());
+}
 
 /* Returns boolean indicating UTF8-support */
 CAMLprim value pcre_config_utf8_stub(value __unused v_unit)
 { return Val_bool(pcre_config_int(PCRE_CONFIG_UTF8)); }
 
+
 /* Returns character used as newline */
 CAMLprim value pcre_config_newline_stub(value __unused v_unit)
 { return Val_int(pcre_config_int(PCRE_CONFIG_NEWLINE)); }
 
+
 /* Returns number of bytes used for internal linkage of regular expressions */
-CAMLprim value pcre_config_link_size_stub(value __unused v_unit)
-{ return Val_int(pcre_config_int(PCRE_CONFIG_LINK_SIZE)); }
+
+CAMLprim intnat pcre_config_link_size_stub(value __unused v_unit)
+{ return pcre_config_int(PCRE_CONFIG_LINK_SIZE); }
+
+CAMLprim value pcre_config_link_size_stub_bc(value v_unit)
+{ return Val_int(pcre_config_link_size_stub(v_unit)); }
+
+
+/* Returns default limit for calls to internal matching function */
+
+CAMLprim intnat pcre_config_match_limit_stub(value __unused v_unit)
+{ return pcre_config_long(PCRE_CONFIG_MATCH_LIMIT); }
+
+
+CAMLprim value pcre_config_match_limit_stub_bc(value v_unit)
+{ return Val_int(pcre_config_match_limit_stub(v_unit)); }
+
+
+/* Returns default limit for recursive calls to internal matching function */
+
+CAMLprim intnat pcre_config_match_limit_recursion_stub(value __unused v_unit)
+{ return pcre_config_long(PCRE_CONFIG_MATCH_LIMIT_RECURSION); }
+
+CAMLprim value pcre_config_match_limit_recursion_stub_bc(value v_unit)
+{ return Val_int(pcre_config_match_limit_recursion_stub(v_unit)); }
+
 
 /* Returns boolean indicating use of stack recursion */
 CAMLprim value pcre_config_stackrecurse_stub(value __unused v_unit)
 { return Val_bool(pcre_config_int(PCRE_CONFIG_STACKRECURSE)); }
-
-/* Returns default limit for calls to internal matching function */
-CAMLprim value pcre_config_match_limit_stub(value __unused v_unit)
-{ return Val_long(pcre_config_long(PCRE_CONFIG_MATCH_LIMIT)); }
-
-/* Returns default limit for calls to internal matching function */
-CAMLprim value pcre_config_match_limit_recursion_stub(value __unused v_unit)
-{ return Val_long(pcre_config_long(PCRE_CONFIG_MATCH_LIMIT_RECURSION)); }

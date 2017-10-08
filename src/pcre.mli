@@ -158,44 +158,44 @@ type study_stat =
 type regexp (** Compiled regular expressions *)
 
 (** [options regexp] @return compilation flags of [regexp]. *)
-external options : regexp -> icflag = "pcre_options_stub"
+val options : regexp -> icflag
 
 (** [size regexp] @return memory size of [regexp]. *)
-external size : regexp -> int = "pcre_size_stub"
+val size : regexp -> int
 
 (** [studysize regexp] @return memory size of study information of [regexp]. *)
-external studysize : regexp -> int = "pcre_studysize_stub"
+val studysize : regexp -> int
 
 (** [capturecount regexp] @return number of capturing subpatterns in
     [regexp]. *)
-external capturecount : regexp -> int = "pcre_capturecount_stub"
+val capturecount : regexp -> int
 
 (** [backrefmax regexp] @return number of highest backreference in [regexp]. *)
-external backrefmax : regexp -> int = "pcre_backrefmax_stub"
+val backrefmax : regexp -> int
 
 (** [namecount regexp] @return number of named subpatterns in [regexp]. *)
-external namecount : regexp -> int = "pcre_namecount_stub"
-
-(** [names regex] @return array of names of named substrings in [regexp]. *)
-external names : regexp -> string array = "pcre_names_stub"
+val namecount : regexp -> int
 
 (** [nameentrysize regexp] @return size of longest name of named
     subpatterns in [regexp] + 3. *)
-external nameentrysize : regexp -> int = "pcre_nameentrysize_stub"
+val nameentrysize : regexp -> int
+
+(** [names regex] @return array of names of named substrings in [regexp]. *)
+val names : regexp -> string array
 
 (** [firstbyte regexp] @return firstbyte info on [regexp]. *)
-external firstbyte : regexp -> firstbyte_info = "pcre_firstbyte_stub"
+val firstbyte : regexp -> firstbyte_info
 
 (** [firsttable regexp] @return some 256-bit (32-byte) fixed set table in
     form of a string for [regexp] if available, [None] otherwise. *)
-external firsttable : regexp -> string option = "pcre_firsttable_stub"
+val firsttable : regexp -> string option
 
 (** [lastliteral regexp] @return some last matching character of [regexp]
     if available, [None] otherwise. *)
-external lastliteral : regexp -> char option = "pcre_lastliteral_stub"
+val lastliteral : regexp -> char option
 
 (** [study_stat regexp] @return study status of [regexp]. *)
-external study_stat : regexp -> study_stat = "pcre_study_stat_stub" [@@noalloc]
+val study_stat : regexp -> study_stat
 
 val get_stringnumber : regexp -> string -> int
 (** [get_stringnumber rex name] @return the index of the named substring
@@ -204,12 +204,11 @@ val get_stringnumber : regexp -> string -> int
 
     @raise Invalid_arg if there is no such named substring. *)
 
-external get_match_limit : regexp -> int option = "pcre_get_match_limit_stub"
+val get_match_limit : regexp -> int option
 (** [get_match_limit rex] @return some match limit of regular expression
     [rex] or [None]. *)
 
-external get_match_limit_recursion :
-  regexp -> int option = "pcre_get_match_limit_recursion_stub"
+val get_match_limit_recursion : regexp -> int option
 (** [get_match_limit_recursion rex] @return some recursion match limit
     of regular expression [rex] or [None]. *)
 
@@ -218,7 +217,7 @@ external get_match_limit_recursion :
 
 type chtables (** Alternative set of char tables for pattern matching *)
 
-external maketables : unit -> chtables = "pcre_maketables_stub"
+val maketables : unit -> chtables
 (** Generates new set of char tables for the current locale. *)
 
 val regexp :
@@ -913,7 +912,7 @@ val foreach_file : string list -> (string -> in_channel -> unit) -> unit
 
 (** {6 {b UNSAFE STUFF - USE WITH CAUTION!}} *)
 
-external unsafe_pcre_exec :
+val unsafe_pcre_exec :
   irflag ->
   regexp ->
   pos : int ->
@@ -921,7 +920,7 @@ external unsafe_pcre_exec :
   subj : string ->
   int array ->
   callout option ->
-  unit = "pcre_exec_stub_bc" "pcre_exec_stub"
+  unit
 (** [unsafe_pcre_exec flags rex ~pos ~subj_start ~subj offset_vector].
     You should read the C-source to know what happens.
     If you do not understand it - {b don't use this function!} *)

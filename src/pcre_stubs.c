@@ -198,15 +198,41 @@ static void pcre_dealloc_regexp(value v_rex)
 
 /* Raising exceptions */
 
-static inline void raise_pcre_error(value v_arg) Noreturn;
-static inline void raise_partial() Noreturn;
-static inline void raise_bad_partial() Noreturn;
-static inline void raise_bad_utf8() Noreturn;
-static inline void raise_bad_utf8_offset() Noreturn;
-static inline void raise_match_limit() Noreturn;
-static inline void raise_recursion_limit() Noreturn;
-static inline void raise_bad_pattern(const char *msg, int pos) Noreturn;
-static inline void raise_internal_error(char *msg) Noreturn;
+CAMLnoreturn_start
+static inline void raise_pcre_error(value v_arg)
+CAMLnoreturn_end;
+
+CAMLnoreturn_start
+static inline void raise_partial()
+CAMLnoreturn_end;
+
+CAMLnoreturn_start
+static inline void raise_bad_partial()
+CAMLnoreturn_end;
+
+CAMLnoreturn_start
+static inline void raise_bad_utf8()
+CAMLnoreturn_end;
+
+CAMLnoreturn_start
+static inline void raise_bad_utf8_offset()
+CAMLnoreturn_end;
+
+CAMLnoreturn_start
+static inline void raise_match_limit()
+CAMLnoreturn_end;
+
+CAMLnoreturn_start
+static inline void raise_recursion_limit()
+CAMLnoreturn_end;
+
+CAMLnoreturn_start
+static inline void raise_bad_pattern(const char *msg, int pos)
+CAMLnoreturn_end;
+
+CAMLnoreturn_start
+static inline void raise_internal_error(char *msg)
+CAMLnoreturn_end;
 
 static inline void raise_pcre_error(value v_arg)
 { caml_raise_with_arg(*pcre_exc_Error, v_arg); }
@@ -501,7 +527,9 @@ CAMLprim value pcre_study_stat_stub(value v_rex)
   return var_Not_studied;  /* otherwise [`Not_studied] */
 }
 
-static inline void handle_exec_error(char *loc, const int ret) Noreturn;
+CAMLnoreturn_start
+static inline void handle_exec_error(char *loc, const int ret)
+CAMLnoreturn_end;
 
 static inline void handle_exec_error(char *loc, const int ret)
 {

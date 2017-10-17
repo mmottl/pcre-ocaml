@@ -203,7 +203,7 @@ type study_stat =
 
 type regexp
 
-external options : regexp -> (int (* = [icflag] *) [@untagged])
+external options : regexp -> (icflag [@untagged])
   = "pcre_options_stub_bc" "pcre_options_stub"
 
 external size : regexp -> (int [@untagged])
@@ -240,8 +240,7 @@ external maketables : unit -> chtables = "pcre_maketables_stub"
 (*  Internal use only! *)
 external pcre_study : regexp -> unit = "pcre_study_stub"
 
-external compile :
-  (icflag (* = [icflag] *) [@untagged]) -> chtables option -> string -> regexp
+external compile : (icflag  [@untagged]) -> chtables option -> string -> regexp
   = "pcre_compile_stub_bc" "pcre_compile_stub"
 
 external get_match_limit : regexp -> int option = "pcre_get_match_limit_stub"
@@ -400,7 +399,7 @@ let get_named_substring_ofs rex name substrings =
   get_substring_ofs substrings (get_stringnumber rex name)
 
 external unsafe_pcre_exec :
-  (int (* = [irflag] *) [@untagged]) ->
+  (irflag [@untagged]) ->
   regexp ->
   pos : (int [@untagged]) ->
   subj_start : (int [@untagged]) ->

@@ -240,7 +240,8 @@ external maketables : unit -> chtables = "pcre_maketables_stub"
 (*  Internal use only! *)
 external pcre_study : regexp -> unit = "pcre_study_stub"
 
-external compile : icflag -> chtables option -> string -> regexp
+external compile :
+  (icflag (* = [icflag] *) [@untagged]) -> chtables option -> string -> regexp
   = "pcre_compile_stub_bc" "pcre_compile_stub"
 
 external get_match_limit : regexp -> int option = "pcre_get_match_limit_stub"

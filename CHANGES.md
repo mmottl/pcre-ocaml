@@ -1,3 +1,8 @@
+### 7.3.3 (2017-10-17)
+
+  * Fixed external declaration bug in internal regexp compile function
+
+
 ### 7.3.2 (2017-10-10)
 
   * Improved compatibility with MSVC

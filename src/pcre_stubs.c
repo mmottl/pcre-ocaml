@@ -52,6 +52,7 @@
 #include <caml/memory.h>
 #include <caml/fail.h>
 #include <caml/callback.h>
+#include <caml/custom.h>
 
 #include <pcre.h>
 
@@ -89,6 +90,29 @@ static value var_Studied;      /* Variant [`Studied] */
 static value var_Optimal;      /* Variant [`Optimal] */
 
 static value None = Val_int(0);
+
+/* Data associated with OCaml values of PCRE regular expression */
+struct pcre_ocaml_regexp { pcre *rex; pcre_extra *extra; int studied; };
+
+#define Pcre_ocaml_regexp_val(v) \
+  ((struct pcre_ocaml_regexp *) Data_custom_val(v))
+
+#define get_rex(v) Pcre_ocaml_regexp_val(v)->rex
+#define get_extra(v) Pcre_ocaml_regexp_val(v)->extra
+#define get_studied(v) Pcre_ocaml_regexp_val(v)->studied
+
+#define set_rex(v, r) Pcre_ocaml_regexp_val(v)->rex = r
+#define set_extra(v, e) Pcre_ocaml_regexp_val(v)->extra = e
+#define set_studied(v, s) Pcre_ocaml_regexp_val(v)->studied = s
+
+/* Data associated with OCaml values of PCRE tables */
+struct pcre_ocaml_tables { chartables tables; };
+
+#define Pcre_ocaml_tables_val(v) \
+  ((struct pcre_ocaml_tables *) Data_custom_val(v))
+
+#define get_tables(v) Pcre_ocaml_tables_val(v)->tables
+#define set_tables(v, t) Pcre_ocaml_tables_val(v)->tables = t
 
 /* Converts subject offsets from C-integers to OCaml-Integers.
 
@@ -179,20 +203,20 @@ CAMLprim value pcre_ocaml_init(value __unused v_unit)
 }
 
 /* Finalizing deallocation function for chartable sets */
-static void pcre_dealloc_tables(value v_table)
-{ (pcre_free)((void *) Field(v_table, 1)); }
+static void pcre_dealloc_tables(value v_tables)
+{ (pcre_free)((void *) get_tables(v_tables)); }
 
 /* Finalizing deallocation function for compiled regular expressions */
 static void pcre_dealloc_regexp(value v_rex)
 {
-  void *extra = (void *) Field(v_rex, 2);
-  (pcre_free)((void *) Field(v_rex, 1));
+  void *extra = get_extra(v_rex);
   if (extra != NULL)
 #ifdef PCRE_STUDY_JIT_COMPILE
     pcre_free_study(extra);
 #else
     pcre_free(extra);
 #endif
+  (pcre_free)(get_rex(v_rex));
 }
 
 
@@ -271,6 +295,16 @@ static inline void raise_internal_error(char *msg)
 
 /* PCRE pattern compilation */
 
+static struct custom_operations regexp_ops = {
+  "pcre_ocaml_regexp",
+  pcre_dealloc_regexp,
+  custom_compare_default,
+  custom_hash_default,
+  custom_serialize_default,
+  custom_deserialize_default,
+  custom_compare_ext_default
+};
+
 /* Makes compiled regular expression from compilation options, an optional
    value of chartables and the pattern string */
 
@@ -283,7 +317,7 @@ CAMLprim value pcre_compile_stub(intnat v_opt, value v_tables, value v_pat)
   /* If v_tables = [None], then pointer to tables is NULL, otherwise
      set it to the appropriate value */
   chartables tables =
-    (v_tables == None) ? NULL : (chartables) Field(Field(v_tables, 0), 1);
+    (v_tables == None) ? NULL : get_tables(Field(v_tables, 0));
 
   /* Compiles the pattern */
   pcre *regexp = pcre_compile(String_val(v_pat), v_opt, &error,
@@ -296,19 +330,13 @@ CAMLprim value pcre_compile_stub(intnat v_opt, value v_tables, value v_pat)
   /* GC will do a full cycle every 1_000_000 regexp allocations (a typical
      regexp probably consumes less than 100 bytes -> maximum of 100_000_000
      bytes unreclaimed regexps) */
-  v_rex = caml_alloc_final(4, pcre_dealloc_regexp, 1, 1000000);
+  v_rex =
+    caml_alloc_custom(&regexp_ops,
+        sizeof(struct pcre_ocaml_regexp), 1, 1000000);
 
-  /* Field[1]: compiled regular expression (Field[0] is finalizing
-     function! See above!) */
-  Field(v_rex, 1) = (value) regexp;
-
-  /* Field[2]: extra information about regexp when it has been studied
-     successfully */
-  Field(v_rex, 2) = (value) NULL;
-
-  /* Field[3]: If 0 -> regexp has not yet been studied
-                  1 -> regexp has already been studied */
-  Field(v_rex, 3) = 0;
+  set_rex(v_rex, regexp);
+  set_extra(v_rex, NULL);
+  set_studied(v_rex, 0);
 
   return v_rex;
 }
@@ -323,12 +351,12 @@ CAMLprim value pcre_compile_stub_bc(value v_opt, value v_tables, value v_pat)
 CAMLprim value pcre_study_stub(value v_rex)
 {
   /* If it has not yet been studied */
-  if (! (int) Field(v_rex, 3)) {
+  if (! get_studied(v_rex)) {
     const char *error = NULL;
-    pcre_extra *extra = pcre_study((pcre *) Field(v_rex, 1), 0, &error);
+    pcre_extra *extra = pcre_study(get_rex(v_rex), 0, &error);
     if (error != NULL) caml_invalid_argument((char *) error);
-    Field(v_rex, 2) = (value) extra;
-    Field(v_rex, 3) = Val_int(1);
+    set_extra(v_rex, extra);
+    set_studied(v_rex, 1);
   }
   return v_rex;
 }
@@ -337,7 +365,7 @@ CAMLprim value pcre_study_stub(value v_rex)
 /* Gets the match limit recursion of a regular expression if it exists */
 CAMLprim value pcre_get_match_limit_recursion_stub(value v_rex)
 {
-  pcre_extra *extra = (pcre_extra *) Field(v_rex, 2);
+  pcre_extra *extra = get_extra(v_rex);
   if (extra == NULL) return None;
   if (extra->flags & PCRE_EXTRA_MATCH_LIMIT_RECURSION) {
     value v_lim = Val_int(extra->match_limit_recursion);
@@ -351,7 +379,7 @@ CAMLprim value pcre_get_match_limit_recursion_stub(value v_rex)
 /* Gets the match limit of a regular expression if it exists */
 CAMLprim value pcre_get_match_limit_stub(value v_rex)
 {
-  pcre_extra *extra = (pcre_extra *) Field(v_rex, 2);
+  pcre_extra *extra = get_extra(v_rex);
   if (extra == NULL) return None;
   if (extra->flags & PCRE_EXTRA_MATCH_LIMIT) {
     value v_lim = Val_int(extra->match_limit);
@@ -367,11 +395,11 @@ CAMLprim value pcre_get_match_limit_stub(value v_rex)
 
 CAMLprim value pcre_set_imp_match_limit_stub(value v_rex, intnat v_lim)
 {
-  pcre_extra *extra = (pcre_extra *) Field(v_rex, 2);
+  pcre_extra *extra = get_extra(v_rex);
   if (extra == NULL) {
     extra = pcre_malloc(sizeof(pcre_extra));
     extra->flags = PCRE_EXTRA_MATCH_LIMIT;
-    Field(v_rex, 2) = (value) extra;
+    set_extra(v_rex, extra);
   } else {
     unsigned long *flags_ptr = &extra->flags;
     *flags_ptr = PCRE_EXTRA_MATCH_LIMIT | *flags_ptr;
@@ -391,11 +419,11 @@ CAMLprim value pcre_set_imp_match_limit_stub_bc(value v_rex, value v_lim)
 CAMLprim value pcre_set_imp_match_limit_recursion_stub(
     value v_rex, intnat v_lim)
 {
-  pcre_extra *extra = (pcre_extra *) Field(v_rex, 2);
+  pcre_extra *extra = get_extra(v_rex);
   if (extra == NULL) {
     extra = pcre_malloc(sizeof(pcre_extra));
     extra->flags = PCRE_EXTRA_MATCH_LIMIT_RECURSION;
-    Field(v_rex, 2) = (value) extra;
+    set_extra(v_rex, extra);
   } else {
     unsigned long *flags_ptr = &extra->flags;
     *flags_ptr = PCRE_EXTRA_MATCH_LIMIT_RECURSION | *flags_ptr;
@@ -414,8 +442,7 @@ CAMLprim value pcre_set_imp_match_limit_recursion_stub_bc(
 /* Performs the call to the pcre_fullinfo function */
 static inline int pcre_fullinfo_stub(value v_rex, int what, void *where)
 {
-  return pcre_fullinfo((pcre *) Field(v_rex, 1), (pcre_extra *) Field(v_rex, 2),
-                       what, where);
+  return pcre_fullinfo(get_rex(v_rex), get_extra(v_rex), what, where);
 }
 
 /* Some stubs for info-functions */
@@ -521,8 +548,8 @@ CAMLprim value pcre_study_stat_stub(value v_rex)
 {
   /* Generates the appropriate constant constructor [`Optimal] or
      [`Studied] if regexp has already been studied */
-  if (Field(v_rex, 3))
-    return ((pcre_extra *) Field(v_rex, 2) == NULL) ? var_Optimal : var_Studied;
+  if (get_studied(v_rex))
+    return (get_extra(v_rex) == NULL) ? var_Optimal : var_Studied;
 
   return var_Not_studied;  /* otherwise [`Not_studied] */
 }
@@ -591,8 +618,8 @@ CAMLprim value pcre_exec_stub(
   len -= subj_start;
 
   {
-    const pcre *code = (pcre *) Field(v_rex, 1);  /* Compiled pattern */
-    const pcre_extra *extra = (pcre_extra *) Field(v_rex, 2);  /* Extra info */
+    const pcre *code = get_rex(v_rex);  /* Compiled pattern */
+    const pcre_extra *extra = get_extra(v_rex);  /* Extra info */
     const char *ocaml_subj =
       String_val(v_subj) + subj_start;  /* Subject string */
     const int opt = v_opt;  /* Runtime options */
@@ -689,6 +716,16 @@ CAMLprim value pcre_exec_stub_bc(value *argv, int __unused argn)
         argv[4], argv[5], argv[6]);
 }
 
+static struct custom_operations tables_ops = {
+  "pcre_ocaml_tables",
+  pcre_dealloc_tables,
+  custom_compare_default,
+  custom_hash_default,
+  custom_serialize_default,
+  custom_deserialize_default,
+  custom_compare_ext_default
+};
+
 /* Generates a new set of chartables for the current locale (see man
    page of PCRE */
 CAMLprim value pcre_maketables_stub(value __unused v_unit)
@@ -696,9 +733,11 @@ CAMLprim value pcre_maketables_stub(value __unused v_unit)
   /* GC will do a full cycle every 1_000_000 table set allocations (one
      table set consumes 864 bytes -> maximum of 864_000_000 bytes unreclaimed
      table sets) */
-  const value v_res = caml_alloc_final(2, pcre_dealloc_tables, 1, 1000000);
-  Field(v_res, 1) = (value) pcre_maketables();
-  return v_res;
+  const value v_tables =
+    caml_alloc_custom(
+        &tables_ops, sizeof(struct pcre_ocaml_tables), 1, 1000000);
+  set_tables(v_tables, pcre_maketables());
+  return v_tables;
 }
 
 /* Wraps around the isspace-function */
@@ -712,8 +751,7 @@ CAMLprim value pcre_isspace_stub(value v_c)
 
 CAMLprim intnat pcre_get_stringnumber_stub(value v_rex, value v_name)
 {
-  const int ret = pcre_get_stringnumber((pcre *) Field(v_rex, 1),
-                                        String_val(v_name));
+  const int ret = pcre_get_stringnumber(get_rex(v_rex), String_val(v_name));
   if (ret == PCRE_ERROR_NOSUBSTRING)
     caml_invalid_argument("Named string not found");
 

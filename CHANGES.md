@@ -1,3 +1,9 @@
+### 7.3.4 (2017-11-22)
+
+  * Improved finalization of regular expressions and tables for better
+    performance
+
+
 ### 7.3.3 (2017-10-17)
 
   * Fixed external declaration bug in internal regexp compile function

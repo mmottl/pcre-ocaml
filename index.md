@@ -1,4 +1,4 @@
-## PCRE-OCaml - Perl Compatibility Regular Expressions for OCaml
+## TEST PCRE-OCaml - Perl Compatibility Regular Expressions for OCaml
 
 This [OCaml](http://www.ocaml.org)-library interfaces the C-library
 [PCRE](http://www.pcre.org) (Perl-compatibility Regular Expressions).  It can be

@@ -43,8 +43,8 @@ Other reasons to use PCRE-OCaml:
 
 ### Usage
 
-Please consult the [API](https://mmottl.github.io/pcre-ocaml/api/pcre) for
-details.
+Please consult the [API](https://mmottl.github.io/pcre-ocaml/api/_html/pcre)
+for details.
 
 A general concept the user may need to understand is that most functions
 allow for two different kinds of flags:

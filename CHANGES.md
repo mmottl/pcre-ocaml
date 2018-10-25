@@ -1,3 +1,8 @@
+### 7.3.5 (2018-10-25)
+
+  * Switched to dune, dune-release, and OPAM 2.0
+
+
 ### 7.3.4 (2017-11-22)
 
   * Improved finalization of regular expressions and tables for better

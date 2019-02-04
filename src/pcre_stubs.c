@@ -251,6 +251,10 @@ static inline void raise_recursion_limit()
 CAMLnoreturn_end;
 
 CAMLnoreturn_start
+static inline void raise_workspace_size()
+CAMLnoreturn_end;
+
+CAMLnoreturn_start
 static inline void raise_bad_pattern(const char *msg, int pos)
 CAMLnoreturn_end;
 
@@ -267,6 +271,7 @@ static inline void raise_bad_utf8() { raise_pcre_error(Val_int(2)); }
 static inline void raise_bad_utf8_offset() { raise_pcre_error(Val_int(3)); }
 static inline void raise_match_limit() { raise_pcre_error(Val_int(4)); }
 static inline void raise_recursion_limit() { raise_pcre_error(Val_int(5)); }
+static inline void raise_workspace_size() { raise_pcre_error(Val_int(6)); }
 
 static inline void raise_bad_pattern(const char *msg, int pos)
 {
@@ -569,6 +574,7 @@ static inline void handle_exec_error(char *loc, const int ret)
     case PCRE_ERROR_BADUTF8 : raise_bad_utf8();
     case PCRE_ERROR_BADUTF8_OFFSET : raise_bad_utf8_offset();
     case PCRE_ERROR_RECURSIONLIMIT : raise_recursion_limit();
+    case PCRE_ERROR_DFA_WSSIZE : raise_workspace_size();
     /* Unknown error */
     default : {
       char err_buf[100];
@@ -591,15 +597,14 @@ static inline void handle_pcre_exec_result(
   while (++ovec_dst < ovec_clear_stop) *ovec_dst = -1;
 }
 
-
 /* Executes a pattern match with runtime options, a regular expression, a
    matching position, the start of the the subject string, a subject string,
    a number of subgroup offsets, an offset vector and an optional callout
    function */
 
-CAMLprim value pcre_exec_stub(
+CAMLprim value pcre_exec_stub0(
     intnat v_opt, value v_rex, intnat v_pos, intnat v_subj_start, value v_subj,
-    value v_ovec, value v_maybe_cof)
+    value v_ovec, value v_maybe_cof, value v_workspace)
 {
   int ret;
   long
@@ -629,7 +634,14 @@ CAMLprim value pcre_exec_stub(
       int *ovec = (int *) &Field(v_ovec, 0);
 
       /* Performs the match */
-      ret = pcre_exec(code, extra, ocaml_subj, len, pos, opt, ovec, ovec_len);
+      if (v_workspace == (value)NULL) {
+        ret = pcre_exec(code, extra, ocaml_subj, len, pos, opt, ovec, ovec_len);
+      } else {
+        ret = pcre_dfa_exec(code, extra, ocaml_subj, len,
+                            pos, opt, ovec, ovec_len,
+                            (int *) &Field(v_workspace, 0),
+                            Wosize_val(v_workspace));
+      }
 
       if (ret < 0) handle_exec_error("pcre_exec_stub", ret);
       else handle_pcre_exec_result(ovec, v_ovec, ovec_len, subj_start, ret);
@@ -672,11 +684,7 @@ CAMLprim value pcre_exec_stub(
         cod.v_cof_p = &v_cof;
         new_extra.callout_data = &cod;
 
-        if (extra == NULL) {
-          ret = pcre_exec(code, &new_extra, subj, len, pos, opt, ovec,
-                          ovec_len);
-        }
-        else {
+        if (extra != NULL) {
           new_extra.flags = PCRE_EXTRA_CALLOUT_DATA | extra->flags;
           new_extra.study_data = extra->study_data;
           new_extra.match_limit = extra->match_limit;
@@ -684,9 +692,15 @@ CAMLprim value pcre_exec_stub(
 #ifdef PCRE_EXTRA_MATCH_LIMIT_RECURSION
           new_extra.match_limit_recursion = extra->match_limit_recursion;
 #endif
+        }
 
-          ret = pcre_exec(code, &new_extra, subj, len, pos, opt, ovec,
-                          ovec_len);
+        if (v_workspace == (value)NULL) {
+          ret = pcre_exec(code, &new_extra, subj, len, pos, opt, ovec, ovec_len);
+        } else {
+          ret = pcre_dfa_exec(code, extra, subj, len,
+                              pos, opt, ovec, ovec_len,
+                              (int *) &Field(v_workspace, 0),
+                              Wosize_val(v_workspace));
         }
 
         caml_stat_free(subj);
@@ -706,14 +720,32 @@ CAMLprim value pcre_exec_stub(
   return Val_unit;
 }
 
+CAMLprim value pcre_exec_stub(
+    intnat v_opt, value v_rex, intnat v_pos, intnat v_subj_start, value v_subj,
+    value v_ovec, value v_maybe_cof)
+{
+  return pcre_exec_stub0(v_opt, v_rex, v_pos, v_subj_start, v_subj,
+                         v_ovec, v_maybe_cof, (value)NULL);
+}
+
 /* Byte-code hook for pcre_exec_stub
    Needed, because there are more than 5 arguments */
 CAMLprim value pcre_exec_stub_bc(value *argv, int __unused argn)
 {
   return
-    pcre_exec_stub(
+    pcre_exec_stub0(
         Int_val(argv[0]), argv[1], Int_val(argv[2]), Int_val(argv[3]),
-        argv[4], argv[5], argv[6]);
+        argv[4], argv[5], argv[6], (value)NULL);
+}
+
+/* Byte-code hook for pcre_dfa_exec_stub
+   Needed, because there are more than 5 arguments */
+CAMLprim value pcre_dfa_exec_stub_bc(value *argv, int __unused argn)
+{
+  return
+    pcre_exec_stub0(
+        Int_val(argv[0]), argv[1], Int_val(argv[2]), Int_val(argv[3]),
+        argv[4], argv[5], argv[6], argv[7]);
 }
 
 static struct custom_operations tables_ops = {

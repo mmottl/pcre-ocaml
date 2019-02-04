@@ -30,6 +30,7 @@ type error =
   | BadUTF8Offset
   | MatchLimit
   | RecursionLimit
+  | WorkspaceSize
   | InternalError of string
 
 exception Error of error
@@ -126,6 +127,7 @@ type rflag =
   | `NOTEOL
   | `NOTEMPTY
   | `PARTIAL
+  | `RESTART
   ]
 
 let int_of_rflag = function
@@ -134,19 +136,21 @@ let int_of_rflag = function
   | `NOTEOL -> 0x0100
   | `NOTEMPTY -> 0x0400
   | `PARTIAL -> 0x8000
+  | `RESTART -> 0x20000
 
 let coll_irflag irflag flag = int_of_rflag flag lor irflag
 let rflags flags = List.fold_left coll_irflag 0 flags
 
 let rflag_of_int = function
-  | 0x0010 -> `ANCHORED
-  | 0x0080 -> `NOTBOL
-  | 0x0100 -> `NOTEOL
-  | 0x0400 -> `NOTEMPTY
-  | 0x8000 -> `PARTIAL
+  |  0x0010 -> `ANCHORED
+  |  0x0080 -> `NOTBOL
+  |  0x0100 -> `NOTEOL
+  |  0x0400 -> `NOTEMPTY
+  |  0x8000 -> `PARTIAL
+  | 0x20000 -> `RESTART
   | _ -> failwith "Pcre.rflag_list: unknown runtime flag"
 
-let all_rflags = [0x0010; 0x0080; 0x0100; 0x0400; 0x8000]
+let all_rflags = [0x0010; 0x0080; 0x0100; 0x0400; 0x8000; 0x20000]
 
 let rflag_list irflags =
   let coll flag_list flag =
@@ -412,6 +416,26 @@ let make_ovector rex =
   let subgroups1 = capturecount rex + 1 in
   let subgroups2 = subgroups1 lsl 1 in
   subgroups2, Array.make (subgroups1 + subgroups2) 0
+
+external unsafe_pcre_dfa_exec :
+  (irflag [@untagged]) ->
+  regexp ->
+  pos : (int [@untagged]) ->
+  subj_start : (int [@untagged]) ->
+  subj : string ->
+  int array ->
+  callout option ->
+  workspace : int array ->
+  unit = "pcre_dfa_exec_stub_bc" "pcre_exec_stub0"
+
+let pcre_dfa_exec ?(iflags = 0) ?flags ?(rex = def_rex) ?pat ?(pos = 0)
+                  ?callout ~workspace subj =
+  let rex = match pat with Some str -> regexp str | _ -> rex in
+  let iflags = match flags with Some flags -> rflags flags | _ -> iflags in
+  let _, ovector = make_ovector rex in
+  unsafe_pcre_dfa_exec
+    iflags rex ~pos ~subj_start:0 ~subj ovector callout ~workspace;
+  ovector
 
 let pcre_exec ?(iflags = 0) ?flags ?(rex = def_rex) ?pat ?(pos = 0)
               ?callout subj =

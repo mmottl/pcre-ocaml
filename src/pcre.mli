@@ -103,16 +103,16 @@ val cflag_list : icflag -> cflag list
 
 (** Runtime flags *)
 type rflag =
-  [ `ANCHORED  (** Treats pattern as if it were anchored *)
-  | `NOTBOL    (** Beginning of string is not treated as beginning of line *)
-  | `NOTEOL    (** End of string is not treated as end of line *)
-  | `NOTEMPTY  (** Empty strings are not considered to be a valid match *)
-  | `PARTIAL   (** Turns on partial matching *)
-  | `RESTART   (** Causes matching to proceed presuming the subject
-                   string is further to one partially matched previously
-                   using the same int-array working set. May only be used with
-                   {!pcre_dfa_exec} or {!unsafe_pcre_dfa_exec}, and should
-                   always be paired with {!`PARTIAL}. *)
+  [ `ANCHORED     (** Treats pattern as if it were anchored *)
+  | `NOTBOL       (** Beginning of string is not treated as beginning of line *)
+  | `NOTEOL       (** End of string is not treated as end of line *)
+  | `NOTEMPTY     (** Empty strings are not considered to be a valid match *)
+  | `PARTIAL      (** Turns on partial matching *)
+  | `DFA_RESTART  (** Causes matching to proceed presuming the subject
+                      string is further to one partially matched previously
+                      using the same int-array working set.  May only be
+                      used with {!pcre_dfa_exec} or {!unsafe_pcre_dfa_exec},
+                      and should always be paired with {!`PARTIAL}. *)
   ]
 
 val rflags : rflag list -> irflag
@@ -407,10 +407,10 @@ val pcre_dfa_exec :
   ?pat : string ->
   ?pos : int ->
   ?callout : callout ->
-  workspace : int array ->
+  ?workspace : int array ->
   string -> int array
-(** [pcre_exec ?iflags ?flags ?rex ?pat ?pos ?callout workspace subj]
-    Invokes the "alternative" DFA matching function.
+(** [pcre_dfa_exec ?iflags ?flags ?rex ?pat ?pos ?callout ?workspace subj]
+    invokes the "alternative" DFA matching function.
 
     @return an array of offsets that describe the position of matched
     subpatterns in the string [subj] starting at position [pos] with pattern
@@ -420,23 +420,22 @@ val pcre_dfa_exec :
     sufficiently-large [workspace] array. Callouts are handled by [callout].
 
     Note that the returned array of offsets are quite different from those
-    returned by {!pcre_exec} et al.; because the motivating use case for the
-    DFA match function is to be able to restart a partial match with N
-    additional input segments, and because the match function/workspace does
-    not store segments seen previously, the offsets returned when a match
-    completes will refer only to the matching portion of the last subject
-    string provided. Thus, returned offsets from this function should not be
-    used to support extracting captured submatches, etc.; if you need to
-    capture submatches from a series of inputs incrementally matched with
-    this function, you'll need to concatenate those inputs that yield a
-    successful match here and re-run the same pattern against that single
-    subject string.
+    returned by {!pcre_exec} et al.  The motivating use case for the DFA
+    match function is to be able to restart a partial match with N additional
+    input segments.  Because the match function/workspace does not store
+    segments seen previously, the offsets returned when a match completes will
+    refer only to the matching portion of the last subject string provided.
+    Thus, returned offsets from this function should not be used to support
+    extracting captured submatches.  If you need to capture submatches
+    from a series of inputs incrementally matched with this function, you'll
+    need to concatenate those inputs that yield a successful match here and
+    re-run the same pattern against that single subject string.
 
     Aside from an absolute minimum of [20], PCRE does not provide any
-    guidance re: the size of workspace array needed by any given pattern.
-    Therefore, it is wise to appropriately handle the possible
-    [WorkspaceSize] error; if raised, you can allocate a new, larger
-    workspace array, and begin the DFA matching process again.
+    guidance regarding the size of workspace array needed by any given
+    pattern.  Therefore, it is wise to appropriately handle the possible
+    [WorkspaceSize] error.  If raised, you can allocate a new, larger
+    workspace array and begin the DFA matching process again.
 
     @param iflags default = no extra flags
     @param flags default = ignored
@@ -444,12 +443,13 @@ val pcre_dfa_exec :
     @param pat default = ignored
     @param pos default = 0
     @param callout default = ignore callouts
+    @param workspace default = fresh array of length [20]
 
     @raise Not_found if the pattern match has failed
     @raise Error Partial if the pattern has matched partially; a subsequent
-                         exec call with the same pattern and workspace (adding
-                         the RESTART flag) be made to either further advance 
-                         or complete the partial match.
+                         exec call with the same pattern and workspace
+                         (adding the [DFA_RESTART] flag) be made to either
+                         further advance or complete the partial match.
     @raise Error WorkspaceSize if the workspace array is too small to
                                accommodate the DFA state required by the
                                supplied pattern *)
@@ -984,7 +984,7 @@ val unsafe_pcre_exec :
   int array ->
   callout option ->
   unit
-(** [unsafe_pcre_exec flags rex ~pos ~subj_start ~subj offset_vector].
+(** [unsafe_pcre_exec flags rex ~pos ~subj_start ~subj offset_vector callout].
     You should read the C-source to know what happens.
     If you do not understand it - {b don't use this function!} *)
 
@@ -1000,7 +1000,9 @@ val unsafe_pcre_dfa_exec :
   subj : string ->
   int array ->
   callout option ->
-  workspace: int array ->
+  workspace : int array ->
   unit
-(** You should read the C-source to know what happens.
+(** [unsafe_pcre_dfa_exec flags rex ~pos ~subj_start ~subj offset_vector callout
+    ~workpace].
+    You should read the C-source to know what happens.
     If you do not understand it - {b don't use this function!} *)

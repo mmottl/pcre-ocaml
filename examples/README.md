@@ -30,7 +30,7 @@ subst '([Tt])ermcap' '$1ermCap' < /etc/termcap
 ### dfa_restart
 
 Exercises the availability of the DFA matching function and its partial
-match restart capability. Given a pattern, will accept input incrementally,
+match restart capability.  Given a pattern, will accept input incrementally,
 restarting the prior partial match until the pattern succeeds in matching
 completely, or fails.
 
@@ -45,5 +45,5 @@ partial match, provide more input:
 > 222
 partial match, provide more input:
 > 3
-match completed: [0;1;0]
+match completed: "[|0;1;0|]"
 ```

@@ -127,27 +127,27 @@ type rflag =
   | `NOTEOL
   | `NOTEMPTY
   | `PARTIAL
-  | `RESTART
+  | `DFA_RESTART
   ]
 
 let int_of_rflag = function
-  | `ANCHORED -> 0x0010
-  | `NOTBOL -> 0x0080
-  | `NOTEOL -> 0x0100
-  | `NOTEMPTY -> 0x0400
-  | `PARTIAL -> 0x8000
-  | `RESTART -> 0x20000
+  | `ANCHORED -> 0x00010
+  | `NOTBOL -> 0x00080
+  | `NOTEOL -> 0x00100
+  | `NOTEMPTY -> 0x00400
+  | `PARTIAL -> 0x08000
+  | `DFA_RESTART -> 0x20000
 
 let coll_irflag irflag flag = int_of_rflag flag lor irflag
 let rflags flags = List.fold_left coll_irflag 0 flags
 
 let rflag_of_int = function
-  |  0x0010 -> `ANCHORED
-  |  0x0080 -> `NOTBOL
-  |  0x0100 -> `NOTEOL
-  |  0x0400 -> `NOTEMPTY
-  |  0x8000 -> `PARTIAL
-  | 0x20000 -> `RESTART
+  | 0x00010 -> `ANCHORED
+  | 0x00080 -> `NOTBOL
+  | 0x00100 -> `NOTEOL
+  | 0x00400 -> `NOTEMPTY
+  | 0x08000 -> `PARTIAL
+  | 0x20000 -> `DFA_RESTART
   | _ -> failwith "Pcre.rflag_list: unknown runtime flag"
 
 let all_rflags = [0x0010; 0x0080; 0x0100; 0x0400; 0x8000; 0x20000]
@@ -429,7 +429,7 @@ external unsafe_pcre_dfa_exec :
   unit = "pcre_dfa_exec_stub_bc" "pcre_exec_stub0"
 
 let pcre_dfa_exec ?(iflags = 0) ?flags ?(rex = def_rex) ?pat ?(pos = 0)
-                  ?callout ~workspace subj =
+                  ?callout ?(workspace = Array.make 20 0) subj =
   let rex = match pat with Some str -> regexp str | _ -> rex in
   let iflags = match flags with Some flags -> rflags flags | _ -> iflags in
   let _, ovector = make_ovector rex in

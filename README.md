@@ -105,36 +105,29 @@ functionality of PCRE-OCaml.
 #### Restartable (partial) pattern matching
 
 PCRE includes an "alternative" DFA match function that allows one to restart
-a partial match with additional input. This is exposed by pcre-ocaml via the
-`pcre_dfa_exec` function. While this cannot be used for "higher-level"
-operations like extracting submatches or splitting subject strings, it can be
-very useful in certain streaming and search use cases.
+a partial match with additional input.  This is exposed by `pcre-ocaml` via
+the `pcre_dfa_exec` function.  While this cannot be used for "higher-level"
+operations like extracting submatches or splitting subject strings, it can
+be very useful in certain streaming and search use cases.
 
 This `utop` interaction demonstrates the basic workflow of a partial match
 that is then restarted multiple times before completing successfully:
 
 ```ocaml
-─( 09:20:14 )─< command 0 >─────────────────────────────────────────{ counter: 0 }─
 utop # open Pcre;;
-─( 09:20:14 )─< command 1 >─────────────────────────────────────────{ counter: 0 }─
 utop # let rex = regexp "12+3";;
 val rex : regexp = <abstr>
-─( 09:20:18 )─< command 2 >─────────────────────────────────────────{ counter: 0 }─
 utop # let workspace = Array.make 40 0;;
 val workspace : int array =
   [|0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
     0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0|]
-─( 09:20:39 )─< command 3 >─────────────────────────────────────────{ counter: 0 }─
 utop # pcre_dfa_exec ~rex ~flags:[`PARTIAL] ~workspace "12222";;
 Exception: Pcre.Error Partial.
-─( 09:21:28 )─< command 4 >─────────────────────────────────────────{ counter: 0 }─
-utop # pcre_dfa_exec ~rex ~flags:[`PARTIAL; `RESTART] ~workspace "22222222";;
+utop # pcre_dfa_exec ~rex ~flags:[`PARTIAL; `DFA_RESTART] ~workspace "2222222";;
 Exception: Pcre.Error Partial.
-─( 09:21:43 )─< command 5 >─────────────────────────────────────────{ counter: 0 }─
-utop # pcre_dfa_exec ~rex ~flags:[`PARTIAL; `RESTART] ~workspace "22222222";;
+utop # pcre_dfa_exec ~rex ~flags:[`PARTIAL; `DFA_RESTART] ~workspace "2222222";;
 Exception: Pcre.Error Partial.
-─( 09:21:51 )─< command 6 >─────────────────────────────────────────{ counter: 0 }─
-utop # pcre_dfa_exec ~rex ~flags:[`PARTIAL; `RESTART] ~workspace "223xxxx";;
+utop # pcre_dfa_exec ~rex ~flags:[`PARTIAL; `DFA_RESTART] ~workspace "223xxxx";;
 - : int array = [|0; 3; 0|]
 ```
 

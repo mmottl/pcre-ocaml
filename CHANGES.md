@@ -1,3 +1,15 @@
+### 7.4.0 (2019-02-05)
+
+  * Added DFA support
+
+    New functions:
+
+      * pcre_dfa_exec
+      * unsafe_pcre_dfa_exec
+
+    Thanks to Chas Emerick <chas@cemerick.com> for this contribution!
+
+
 ### 7.3.5 (2018-10-25)
 
   * Switched to dune, dune-release, and OPAM 2.0

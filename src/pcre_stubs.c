@@ -30,9 +30,9 @@
 #endif
 
 #if _WIN64
-  typedef long long *ovec_dst_ptr;
+  typedef long long *caml_int_ptr;
 #else
-  typedef long *ovec_dst_ptr;
+  typedef long *caml_int_ptr;
 #endif
 
 #if __GNUC__ >= 3
@@ -121,7 +121,7 @@ struct pcre_ocaml_tables { chartables tables; };
    available (also in arrays) - not so the PCRE!
 */
 static inline void copy_ovector(
-  long subj_start, const int *ovec_src, ovec_dst_ptr ovec_dst, int subgroups2)
+  long subj_start, const int *ovec_src, caml_int_ptr ovec_dst, int subgroups2)
 {
   if (subj_start == 0)
     while (subgroups2--) {
@@ -154,7 +154,7 @@ static int pcre_callout_handler(pcre_callout_block* cb)
     const int subgroups2_1 = subgroups2 - 1;
 
     const int *ovec_src = cb->offset_vector + subgroups2_1;
-    ovec_dst_ptr ovec_dst = &Field(Field(v_substrings, 1), 0) + subgroups2_1;
+    caml_int_ptr ovec_dst = &Field(Field(v_substrings, 1), 0) + subgroups2_1;
     long subj_start = cod->subj_start;
 
     copy_ovector(subj_start, ovec_src, ovec_dst, subgroups2);
@@ -587,12 +587,12 @@ static inline void handle_exec_error(char *loc, const int ret)
 static inline void handle_pcre_exec_result(
   int *ovec, value v_ovec, long ovec_len, long subj_start, int ret)
 {
-  ovec_dst_ptr ocaml_ovec = (ovec_dst_ptr) &Field(v_ovec, 0);
+  caml_int_ptr ocaml_ovec = (caml_int_ptr) &Field(v_ovec, 0);
   const int subgroups2 = ret * 2;
   const int subgroups2_1 = subgroups2 - 1;
   const int *ovec_src = ovec + subgroups2_1;
-  ovec_dst_ptr ovec_clear_stop = ocaml_ovec + (ovec_len * 2) / 3;
-  ovec_dst_ptr ovec_dst = ocaml_ovec + subgroups2_1;
+  caml_int_ptr ovec_clear_stop = ocaml_ovec + (ovec_len * 2) / 3;
+  caml_int_ptr ovec_dst = ocaml_ovec + subgroups2_1;
   copy_ovector(subj_start, ovec_src, ovec_dst, subgroups2);
   while (++ovec_dst < ovec_clear_stop) *ovec_dst = -1;
 }
@@ -652,6 +652,9 @@ CAMLprim value pcre_exec_stub0(
       value v_substrings;
       char *subj = caml_stat_alloc(sizeof(char) * len);
       int *ovec = caml_stat_alloc(sizeof(int) * ovec_len);
+      int is_dfa = v_workspace != (value) NULL;
+      int workspace_len;
+      int *workspace;
       struct cod cod = { 0, (value *) NULL, (value *) NULL, (value) NULL };
       struct pcre_extra new_extra =
 #ifdef PCRE_EXTRA_MATCH_LIMIT_RECURSION
@@ -693,23 +696,39 @@ CAMLprim value pcre_exec_stub0(
 #endif
         }
 
-        if (v_workspace == (value) NULL)
+        if (is_dfa)
           ret =
             pcre_exec(code, &new_extra, subj, len, pos, opt, ovec, ovec_len);
-        else
+        else {
+          workspace_len = Wosize_val(v_workspace);
+          workspace = caml_stat_alloc(sizeof(int) * workspace_len);
           ret =
             pcre_dfa_exec(code, extra, subj, len, pos, opt, ovec, ovec_len,
-                (int *) &Field(v_workspace, 0), Wosize_val(v_workspace));
+                (int *) &Field(v_workspace, 0), workspace_len);
+        }
 
         caml_stat_free(subj);
       End_roots();
 
       if (ret < 0) {
+        if (is_dfa) caml_stat_free(workspace);
         caml_stat_free(ovec);
         if (ret == PCRE_ERROR_CALLOUT) caml_raise(cod.v_exn);
         else handle_exec_error("pcre_exec_stub(callout)", ret);
       } else {
         handle_pcre_exec_result(ovec, v_ovec, ovec_len, subj_start, ret);
+        if (is_dfa) {
+          caml_int_ptr ocaml_workspace_dst =
+            (caml_int_ptr) &Field(v_workspace, 0);
+          const int *workspace_src = workspace;
+          const int *workspace_src_stop = workspace + workspace_len;
+          while (workspace_src != workspace_src_stop) {
+            *ocaml_workspace_dst = *workspace_src;
+            ocaml_workspace_dst++;
+            workspace_src++;
+          }
+          caml_stat_free(workspace);
+        }
         caml_stat_free(ovec);
       }
     }

@@ -607,6 +607,7 @@ CAMLprim value pcre_exec_stub0(
     value v_ovec, value v_maybe_cof, value v_workspace)
 {
   int ret;
+  int is_dfa = v_workspace != (value) NULL;
   long
     pos = v_pos,
     len = caml_string_length(v_subj),
@@ -634,13 +635,12 @@ CAMLprim value pcre_exec_stub0(
       int *ovec = (int *) &Field(v_ovec, 0);
 
       /* Performs the match */
-      if (v_workspace == (value) NULL) {
-        ret = pcre_exec(code, extra, ocaml_subj, len, pos, opt, ovec, ovec_len);
-      } else {
+      if (is_dfa)
         ret =
           pcre_dfa_exec(code, extra, ocaml_subj, len, pos, opt, ovec, ovec_len,
-            (int *) &Field(v_workspace, 0), Wosize_val(v_workspace));
-      }
+              (int *) &Field(v_workspace, 0), Wosize_val(v_workspace));
+      else
+        ret = pcre_exec(code, extra, ocaml_subj, len, pos, opt, ovec, ovec_len);
 
       if (ret < 0) handle_exec_error("pcre_exec_stub", ret);
       else handle_pcre_exec_result(ovec, v_ovec, ovec_len, subj_start, ret);
@@ -652,7 +652,6 @@ CAMLprim value pcre_exec_stub0(
       value v_substrings;
       char *subj = caml_stat_alloc(sizeof(char) * len);
       int *ovec = caml_stat_alloc(sizeof(int) * ovec_len);
-      int is_dfa = v_workspace != (value) NULL;
       int workspace_len;
       int *workspace;
       struct cod cod = { 0, (value *) NULL, (value *) NULL, (value) NULL };
@@ -696,16 +695,15 @@ CAMLprim value pcre_exec_stub0(
 #endif
         }
 
-        if (is_dfa)
-          ret =
-            pcre_exec(code, &new_extra, subj, len, pos, opt, ovec, ovec_len);
-        else {
+        if (is_dfa) {
           workspace_len = Wosize_val(v_workspace);
           workspace = caml_stat_alloc(sizeof(int) * workspace_len);
           ret =
             pcre_dfa_exec(code, extra, subj, len, pos, opt, ovec, ovec_len,
                 (int *) &Field(v_workspace, 0), workspace_len);
-        }
+        } else
+          ret =
+            pcre_exec(code, &new_extra, subj, len, pos, opt, ovec, ovec_len);
 
         caml_stat_free(subj);
       End_roots();

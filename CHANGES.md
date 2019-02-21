@@ -1,3 +1,8 @@
+### 7.4.1 (2019-02-21)
+
+  * Fixed pattern execution bug due to DFA implementation
+
+
 ### 7.4.0 (2019-02-05)
 
   * Added DFA support

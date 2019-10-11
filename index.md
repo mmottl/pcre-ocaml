@@ -102,6 +102,38 @@ example, the `Pcre.split`-function will assume whitespace as pattern.  The
 `examples`-directory contains a few example applications demonstrating the
 functionality of PCRE-OCaml.
 
+#### Restartable (partial) pattern matching
+
+PCRE includes an "alternative" DFA match function that allows one to restart
+a partial match with additional input.  This is exposed by `pcre-ocaml` via
+the `pcre_dfa_exec` function.  While this cannot be used for "higher-level"
+operations like extracting submatches or splitting subject strings, it can
+be very useful in certain streaming and search use cases.
+
+This `utop` interaction demonstrates the basic workflow of a partial match
+that is then restarted multiple times before completing successfully:
+
+```ocaml
+utop # open Pcre;;
+utop # let rex = regexp "12+3";;
+val rex : regexp = <abstr>
+utop # let workspace = Array.make 40 0;;
+val workspace : int array =
+  [|0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
+    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0|]
+utop # pcre_dfa_exec ~rex ~flags:[`PARTIAL] ~workspace "12222";;
+Exception: Pcre.Error Partial.
+utop # pcre_dfa_exec ~rex ~flags:[`PARTIAL; `DFA_RESTART] ~workspace "2222222";;
+Exception: Pcre.Error Partial.
+utop # pcre_dfa_exec ~rex ~flags:[`PARTIAL; `DFA_RESTART] ~workspace "2222222";;
+Exception: Pcre.Error Partial.
+utop # pcre_dfa_exec ~rex ~flags:[`PARTIAL; `DFA_RESTART] ~workspace "223xxxx";;
+- : int array = [|0; 3; 0|]
+```
+
+Please refer to the documentation of `pcre_dfa_exec` and check out the
+`dfa_restart` example for more info.
+
 ### Contact Information and Contributing
 
 Please submit bugs reports, feature requests, contributions and similar to

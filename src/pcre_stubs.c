@@ -78,8 +78,8 @@ struct cod {
 };
 
 /* Cache for exceptions */
-static value *pcre_exc_Error         = NULL;  /* Exception [Error] */
-static value *pcre_exc_Backtrack     = NULL;  /* Exception [Backtrack] */
+static const value *pcre_exc_Error     = NULL;  /* Exception [Error] */
+static const value *pcre_exc_Backtrack = NULL;  /* Exception [Backtrack] */
 
 /* Cache for polymorphic variants */
 static value var_Start_only;   /* Variant [`Start_only] */

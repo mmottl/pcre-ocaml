@@ -1,3 +1,8 @@
+### 7.4.2 (2019-10-11)
+
+  * Fixed warnings in C-stubs
+
+
 ### 7.4.1 (2019-02-21)
 
   * Fixed pattern execution bug due to DFA implementation

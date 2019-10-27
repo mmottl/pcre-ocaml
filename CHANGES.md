@@ -1,3 +1,10 @@
+### 7.4.3 (2019-10-27)
+
+  * Switched from `caml_alloc_custom` to `caml_alloc_custom_mem`.
+
+    This should improve memory usage and GC performance.
+
+
 ### 7.4.2 (2019-10-11)
 
   * Fixed warnings in C-stubs

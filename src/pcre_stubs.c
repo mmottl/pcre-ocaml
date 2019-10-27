@@ -317,6 +317,7 @@ static struct custom_operations regexp_ops = {
 CAMLprim value pcre_compile_stub(intnat v_opt, value v_tables, value v_pat)
 {
   value v_rex;  /* Final result -> value of type [regexp] */
+  size_t regexp_size, ocaml_regexp_size = sizeof(struct pcre_ocaml_regexp);
   const char *error = NULL;  /* pointer to possible error message */
   int error_ofs = 0;  /* offset in the pattern at which error occurred */
 
@@ -333,12 +334,13 @@ CAMLprim value pcre_compile_stub(intnat v_opt, value v_tables, value v_pat)
      could not be compiled */
   if (regexp == NULL) raise_bad_pattern(error, error_ofs);
 
-  /* GC will do a full cycle every 1_000_000 regexp allocations (a typical
-     regexp probably consumes less than 100 bytes -> maximum of 100_000_000
-     bytes unreclaimed regexps) */
-  v_rex =
-    caml_alloc_custom(&regexp_ops,
-        sizeof(struct pcre_ocaml_regexp), 1, 1000000);
+  /* It's unknown at this point whether the user will study the pattern
+     later (probably), or if JIT compilation is going to be used, but we
+     have to decide on a size.  Tests with some simple patterns indicate a
+     roughly 50% increase in size when studying without JIT.  A factor of
+     two times hence seems like a reasonable bound to use here. */
+  pcre_fullinfo(regexp, NULL, PCRE_INFO_SIZE, &regexp_size);
+  v_rex = caml_alloc_custom_mem(&regexp_ops, ocaml_regexp_size, 2*regexp_size);
 
   set_rex(v_rex, regexp);
   set_extra(v_rex, NULL);
@@ -779,12 +781,13 @@ static struct custom_operations tables_ops = {
    page of PCRE */
 CAMLprim value pcre_maketables_stub(value __unused v_unit)
 {
-  /* GC will do a full cycle every 1_000_000 table set allocations (one
-     table set consumes 864 bytes -> maximum of 864_000_000 bytes unreclaimed
-     table sets) */
-  const value v_tables =
-    caml_alloc_custom(
-        &tables_ops, sizeof(struct pcre_ocaml_tables), 1, 1000000);
+  /* According to testing with `malloc_size`, it seems that a typical set of
+     tables will require about 1536 bytes of memory.  This may or may not
+     be true on other platforms or for all versions of PCRE.  Since there
+     is apparently no reliable way of finding out, 1536 is probably a good
+     default value. */
+  size_t tables_size = sizeof(struct pcre_ocaml_tables);
+  const value v_tables = caml_alloc_custom_mem(&tables_ops, tables_size, 1536);
   set_tables(v_tables, pcre_maketables());
   return v_tables;
 }

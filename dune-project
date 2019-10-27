@@ -1,4 +1,6 @@
 (lang dune 1.10)
+(name pcre)
+
 (generate_opam_files true)
 
 (source (github mmottl/pcre-ocaml))

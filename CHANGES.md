@@ -4,6 +4,8 @@
 
     This should improve memory usage and GC performance.
 
+  * Switched to OPAM file generation via `dune-project`
+
 
 ### 7.4.2 (2019-10-11)
 

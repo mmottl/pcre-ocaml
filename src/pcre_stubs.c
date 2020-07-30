@@ -35,6 +35,12 @@
   typedef long *caml_int_ptr;
 #endif
 
+#if __GNUC__ >= 3
+# define __unused __attribute__ ((unused))
+#else
+# define __unused
+#endif
+
 #include <ctype.h>
 #include <string.h>
 #include <stdio.h>

@@ -511,15 +511,10 @@ CAMLprim value pcre_firsttable_stub(value v_rex)
   if (ftable == NULL) return None;
   else {
     value v_res, v_res_str;
-    char *ptr;
-    int i;
 
     Begin_roots1(v_rex);
-      v_res_str = caml_alloc_string(32);
+      v_res_str = caml_alloc_initialized_string(32, (char *) ftable);
     End_roots();
-
-    ptr = (char *) String_val(v_res_str);
-    for (i = 0; i <= 31; ++i) { *ptr = *ftable; ++ptr; ++ftable; }
 
     Begin_roots1(v_res_str);
       /* Allocates [Some string] from firsttable */

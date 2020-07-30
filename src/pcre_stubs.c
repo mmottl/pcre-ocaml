@@ -35,14 +35,6 @@
   typedef long *caml_int_ptr;
 #endif
 
-#if __GNUC__ >= 3
-# define inline inline __attribute__ ((always_inline))
-# define __unused __attribute__ ((unused))
-#else
-# define __unused
-# define inline
-#endif
-
 #include <ctype.h>
 #include <string.h>
 #include <stdio.h>

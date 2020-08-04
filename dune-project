@@ -22,7 +22,6 @@ substitution, similar to the functionality offered by the Perl language.")
     (dune (>= 1.10))
     dune-configurator
     (conf-libpcre :build)
-    (base :build)
     base-bytes
   )
 )

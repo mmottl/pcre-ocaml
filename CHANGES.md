@@ -1,3 +1,8 @@
+### 7.4.5 (2020-08-04)
+
+  * Removed excessive build dependency on `base` package.
+
+
 ### 7.4.4 (2020-07-30)
 
   * Added missing dune-configurator dependency.

@@ -1,10 +1,10 @@
-(lang dune 1.10)
+(lang dune 2.7)
 (name pcre)
 
 (generate_opam_files true)
 
 (source (github mmottl/pcre-ocaml))
-(license "LGPL-2.1+ with OCaml linking exception")
+(license "LGPL-2.1-or-later with OCaml-LGPL-linking-exception")
 (homepage "https://mmottl.github.io/pcre-ocaml")
 (documentation "https://mmottl.github.io/pcre-ocaml/api")
 
@@ -19,7 +19,6 @@ pcre-ocaml offers library functions for string pattern matching and
 substitution, similar to the functionality offered by the Perl language.")
   (depends
     (ocaml (>= 4.08))
-    (dune (>= 1.10))
     dune-configurator
     (conf-libpcre :build)
     base-bytes

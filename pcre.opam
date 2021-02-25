@@ -12,7 +12,7 @@ doc: "https://mmottl.github.io/pcre-ocaml/api"
 bug-reports: "https://github.com/mmottl/pcre-ocaml/issues"
 depends: [
   "dune" {>= "2.7"}
-  "ocaml" {>= "4.08"}
+  "ocaml" {>= "4.12"}
   "dune-configurator"
   "conf-libpcre" {build}
   "base-bytes"

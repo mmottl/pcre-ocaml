@@ -56,13 +56,18 @@
 
 /* Error codes as defined for pcre 7.9, undefined in pcre 4.5 */
 #ifndef PCRE_ERROR_PARTIAL
-#define PCRE_ERROR_PARTIAL        (-12)
+# define PCRE_ERROR_PARTIAL        (-12)
 #endif
 #ifndef PCRE_ERROR_BADPARTIAL
-#define PCRE_ERROR_BADPARTIAL     (-13)
+# define PCRE_ERROR_BADPARTIAL     (-13)
 #endif
 #ifndef PCRE_ERROR_RECURSIONLIMIT
-#define PCRE_ERROR_RECURSIONLIMIT (-21)
+# define PCRE_ERROR_RECURSIONLIMIT (-21)
+#endif
+
+/* Make sure to define JIT-compilation flag appropriately if unsupported */
+#ifndef PCRE_STUDY_JIT_COMPILE
+# define PCRE_STUDY_JIT_COMPILE 0
 #endif
 
 typedef const unsigned char *chartables;  /* Type of chartable sets */
@@ -351,12 +356,13 @@ CAMLprim value pcre_compile_stub_bc(value v_opt, value v_tables, value v_pat)
 
 
 /* Studies a regexp */
-CAMLprim value pcre_study_stub(value v_rex)
+CAMLprim value pcre_study_stub(value v_rex, value v_jit_compile)
 {
   /* If it has not yet been studied */
   if (! get_studied(v_rex)) {
     const char *error = NULL;
-    pcre_extra *extra = pcre_study(get_rex(v_rex), 0, &error);
+    int flags = Bool_val(v_jit_compile) ? PCRE_STUDY_JIT_COMPILE : 0;
+    pcre_extra *extra = pcre_study(get_rex(v_rex), flags, &error);
     if (error != NULL) caml_invalid_argument((char *) error);
     set_extra(v_rex, extra);
     set_studied(v_rex, 1);

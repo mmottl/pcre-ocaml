@@ -155,7 +155,7 @@ static int pcre_callout_handler(pcre_callout_block* cb)
     const int subgroups2_1 = subgroups2 - 1;
 
     const int *ovec_src = cb->offset_vector + subgroups2_1;
-    caml_int_ptr ovec_dst = &Field(Field(v_substrings, 1), 0) + subgroups2_1;
+    caml_int_ptr ovec_dst = (long *) &Field(Field(v_substrings, 1), 0) + subgroups2_1;
     long subj_start = cod->subj_start;
 
     copy_ovector(subj_start, ovec_src, ovec_dst, subgroups2);

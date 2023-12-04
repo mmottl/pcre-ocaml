@@ -228,31 +228,31 @@ static inline void raise_pcre_error(value v_arg)
 CAMLnoreturn_end;
 
 CAMLnoreturn_start
-static inline void raise_partial()
+static inline void raise_partial(void)
 CAMLnoreturn_end;
 
 CAMLnoreturn_start
-static inline void raise_bad_partial()
+static inline void raise_bad_partial(void)
 CAMLnoreturn_end;
 
 CAMLnoreturn_start
-static inline void raise_bad_utf8()
+static inline void raise_bad_utf8(void)
 CAMLnoreturn_end;
 
 CAMLnoreturn_start
-static inline void raise_bad_utf8_offset()
+static inline void raise_bad_utf8_offset(void)
 CAMLnoreturn_end;
 
 CAMLnoreturn_start
-static inline void raise_match_limit()
+static inline void raise_match_limit(void)
 CAMLnoreturn_end;
 
 CAMLnoreturn_start
-static inline void raise_recursion_limit()
+static inline void raise_recursion_limit(void)
 CAMLnoreturn_end;
 
 CAMLnoreturn_start
-static inline void raise_workspace_size()
+static inline void raise_workspace_size(void)
 CAMLnoreturn_end;
 
 CAMLnoreturn_start
@@ -266,13 +266,13 @@ CAMLnoreturn_end;
 static inline void raise_pcre_error(value v_arg)
 { caml_raise_with_arg(*pcre_exc_Error, v_arg); }
 
-static inline void raise_partial() { raise_pcre_error(Val_int(0)); }
-static inline void raise_bad_partial() { raise_pcre_error(Val_int(1)); }
-static inline void raise_bad_utf8() { raise_pcre_error(Val_int(2)); }
-static inline void raise_bad_utf8_offset() { raise_pcre_error(Val_int(3)); }
-static inline void raise_match_limit() { raise_pcre_error(Val_int(4)); }
-static inline void raise_recursion_limit() { raise_pcre_error(Val_int(5)); }
-static inline void raise_workspace_size() { raise_pcre_error(Val_int(6)); }
+static inline void raise_partial(void) { raise_pcre_error(Val_int(0)); }
+static inline void raise_bad_partial(void) { raise_pcre_error(Val_int(1)); }
+static inline void raise_bad_utf8(void) { raise_pcre_error(Val_int(2)); }
+static inline void raise_bad_utf8_offset(void) { raise_pcre_error(Val_int(3)); }
+static inline void raise_match_limit(void) { raise_pcre_error(Val_int(4)); }
+static inline void raise_recursion_limit(void) { raise_pcre_error(Val_int(5)); }
+static inline void raise_workspace_size(void) { raise_pcre_error(Val_int(6)); }
 
 static inline void raise_bad_pattern(const char *msg, int pos)
 {

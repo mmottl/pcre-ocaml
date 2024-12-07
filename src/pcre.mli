@@ -20,7 +20,7 @@
 
     {e %%VERSION%% - {{:%%PKG_HOMEPAGE%%} homepage}} *)
 
-(** {6 Exceptions} *)
+(** {1 Exceptions} *)
 
 type error =
   | Partial  (** String only matched the pattern partially *)
@@ -56,7 +56,7 @@ exception Regexp_or of string * error
 (** [Regexp_or (pat, error)] gets raised for sub-pattern [pat] by [regexp_or] if
     it failed to compile. *)
 
-(** {6 Compilation and runtime flags and their conversion functions} *)
+(** {1 Compilation and runtime flags and their conversion functions} *)
 
 type icflag
 (** Internal representation of compilation flags *)
@@ -105,7 +105,7 @@ type rflag =
     (** Causes matching to proceed presuming the subject string is further to
         one partially matched previously using the same int-array working set.
         May only be used with {!pcre_dfa_exec} or {!unsafe_pcre_dfa_exec}, and
-        should always be paired with {!`PARTIAL}. *) ]
+        should always be paired with [`PARTIAL]. *) ]
 (** Runtime flags *)
 
 val rflags : rflag list -> irflag
@@ -116,7 +116,7 @@ val rflag_list : irflag -> rflag list
 (** [rflag_list rflags] converts internal representation of runtime flags to a
     list. *)
 
-(** {6 Information on the PCRE-configuration (build-time options)} *)
+(** {1 Information on the PCRE-configuration (build-time options)} *)
 
 (** Version information *)
 val version : string
@@ -140,7 +140,7 @@ val config_match_limit_recursion : int
 val config_stackrecurse : bool
 (** Indicates use of stack recursion in matching function *)
 
-(** {6 Information on patterns} *)
+(** {1 Information on patterns} *)
 
 type firstbyte_info =
   [ `Char of char  (** Fixed first character *)
@@ -158,61 +158,88 @@ type regexp
 (** Compiled regular expressions *)
 
 val options : regexp -> icflag
-(** [options regexp] @return compilation flags of [regexp]. *)
+(** [options regexp]
+
+    @return compilation flags of [regexp]. *)
 
 val size : regexp -> int
-(** [size regexp] @return memory size of [regexp]. *)
+(** [size regexp]
+
+    @return memory size of [regexp]. *)
 
 val studysize : regexp -> int
-(** [studysize regexp] @return memory size of study information of [regexp]. *)
+(** [studysize regexp]
+
+    @return memory size of study information of [regexp]. *)
 
 val capturecount : regexp -> int
-(** [capturecount regexp] @return number of capturing subpatterns in
-    [regexp]. *)
+(** [capturecount regexp]
+
+    @return number of capturing subpatterns in [regexp]. *)
 
 val backrefmax : regexp -> int
-(** [backrefmax regexp] @return number of highest backreference in [regexp]. *)
+(** [backrefmax regexp]
+
+    @return number of highest backreference in [regexp]. *)
 
 val namecount : regexp -> int
-(** [namecount regexp] @return number of named subpatterns in [regexp]. *)
+(** [namecount regexp]
+
+    @return number of named subpatterns in [regexp]. *)
 
 val nameentrysize : regexp -> int
-(** [nameentrysize regexp] @return size of longest name of named
-    subpatterns in [regexp] + 3. *)
+(** [nameentrysize regexp]
+
+    @return size of longest name of named subpatterns in [regexp] + 3. *)
 
 val names : regexp -> string array
-(** [names regex] @return array of names of named substrings in [regexp]. *)
+(** [names regex]
+
+    @return array of names of named substrings in [regexp]. *)
 
 val firstbyte : regexp -> firstbyte_info
-(** [firstbyte regexp] @return firstbyte info on [regexp]. *)
+(** [firstbyte regexp]
+
+    @return firstbyte info on [regexp]. *)
 
 val firsttable : regexp -> string option
-(** [firsttable regexp] @return some 256-bit (32-byte) fixed set table in
-    form of a string for [regexp] if available, [None] otherwise. *)
+(** [firsttable regexp]
+
+    @return
+      some 256-bit (32-byte) fixed set table in form of a string for [regexp] if
+      available, [None] otherwise. *)
 
 val lastliteral : regexp -> char option
-(** [lastliteral regexp] @return some last matching character of [regexp]
-    if available, [None] otherwise. *)
+(** [lastliteral regexp]
+
+    @return
+      some last matching character of [regexp] if available, [None] otherwise. *)
 
 val study_stat : regexp -> study_stat
-(** [study_stat regexp] @return study status of [regexp]. *)
+(** [study_stat regexp]
+
+    @return study status of [regexp]. *)
 
 val get_stringnumber : regexp -> string -> int
-(** [get_stringnumber rex name] @return the index of the named substring
-    [name] in regular expression [rex]. This index can then be used with
-    [get_substring].
+(** [get_stringnumber rex name]
+
+    @return
+      the index of the named substring [name] in regular expression [rex]. This
+      index can then be used with [get_substring].
 
     @raise Invalid_arg if there is no such named substring. *)
 
 val get_match_limit : regexp -> int option
-(** [get_match_limit rex] @return some match limit of regular expression
-    [rex] or [None]. *)
+(** [get_match_limit rex]
+
+    @return some match limit of regular expression [rex] or [None]. *)
 
 val get_match_limit_recursion : regexp -> int option
-(** [get_match_limit_recursion rex] @return some recursion match limit
-    of regular expression [rex] or [None]. *)
+(** [get_match_limit_recursion rex]
 
-(** {6 Compilation of patterns} *)
+    @return some recursion match limit of regular expression [rex] or [None]. *)
+
+(** {1 Compilation of patterns} *)
 
 type chtables
 (** Alternative set of char tables for pattern matching *)
@@ -231,13 +258,14 @@ val regexp :
   string ->
   regexp
 (** [regexp ?jit_compile ?study ?limit ?limit_recursion ?iflags ?flags
-    ?chtables pattern] compiles [pattern] with [flags] when given, with
-    [iflags] otherwise, and with char tables [chtables].  If [study] is true,
-    then the resulting regular expression will be studied.  If [jit_compile]
-    is true, studying will also perform JIT-compilation of the pattern.
-    [If [limit] is specified, this sets a limit to the amount of recursion
-    and backtracking (only lower than the builtin default!).  If this limit
-    is exceeded, [MatchLimit] will be raised during matching.
+    ?chtables pattern]
+    compiles [pattern] with [flags] when given, with [iflags] otherwise, and
+    with char tables [chtables]. If [study] is true, then the resulting regular
+    expression will be studied. If [jit_compile] is true, studying will also
+    perform JIT-compilation of the pattern. If [limit] is specified, this sets a
+    limit to the amount of recursion and backtracking (only lower than the
+    builtin default!). If this limit is exceeded, [MatchLimit] will be raised
+    during matching.
 
     @param study default = true
     @param jit_compile default = false
@@ -247,11 +275,13 @@ val regexp :
     @param flags default = ignored
     @param chtables default = builtin char tables
 
-    @return the regular expression.
+    @return
+      the regular expression.
 
-    For detailed documentation on how you can specify PERL-style regular
-    expressions (= patterns), please consult the PCRE-documentation
-    ("man pcrepattern") or PERL-manuals.
+      For detailed documentation on how you can specify PERL-style regular
+      expressions (= patterns), please consult the PCRE-documentation ("man
+      pcrepattern") or PERL-manuals.
+
     @see <http://www.perl.com> www.perl.com *)
 
 val regexp_or :
@@ -265,78 +295,96 @@ val regexp_or :
   string list ->
   regexp
 (** [regexp_or ?study ?limit ?limit_recursion ?iflags ?flags ?chtables patterns]
-    like {!regexp}, but combines [patterns] as alternatives (or-patterns) into
-    one regular expression. *)
+    like {!val-regexp}, but combines [patterns] as alternatives (or-patterns)
+    into one regular expression. *)
 
 val quote : string -> string
-(** [quote str] @return the quoted string of [str]. *)
+(** [quote str]
 
-(** {6 Subpattern extraction} *)
+    @return the quoted string of [str]. *)
+
+(** {1 Subpattern extraction} *)
 
 type substrings
 (** Information on substrings after pattern matching *)
 
 val get_subject : substrings -> string
-(** [get_subject substrings] @return the subject string of [substrings]. *)
+(** [get_subject substrings]
+
+    @return the subject string of [substrings]. *)
 
 val num_of_subs : substrings -> int
-(** [num_of_subs substrings] @return number of strings in [substrings]
-    (whole match inclusive). *)
+(** [num_of_subs substrings]
+
+    @return number of strings in [substrings] (whole match inclusive). *)
 
 val get_substring : substrings -> int -> string
-(** [get_substring substrings n] @return the [n]th substring
-    (0 is whole match) of [substrings].
+(** [get_substring substrings n]
 
-    @raise Invalid_argument if [n] is not in the range of the number of
-    substrings.
-    @raise Not_found if the corresponding subpattern did not capture
-           a substring. *)
+    @return the [n]th substring (0 is whole match) of [substrings].
+
+    @raise Invalid_argument
+      if [n] is not in the range of the number of substrings.
+    @raise Not_found
+      if the corresponding subpattern did not capture a substring. *)
 
 val get_substring_ofs : substrings -> int -> int * int
-(** [get_substring_ofs substrings n] @return the offset tuple of the
-    [n]th substring of [substrings] (0 is whole match).
+(** [get_substring_ofs substrings n]
 
-    @raise Invalid_argument if [n] is not in the range of the number
-           of substrings.
-    @raise Not_found if the corresponding subpattern did not capture
-           a substring. *)
+    @return
+      the offset tuple of the [n]th substring of [substrings] (0 is whole
+      match).
+
+    @raise Invalid_argument
+      if [n] is not in the range of the number of substrings.
+    @raise Not_found
+      if the corresponding subpattern did not capture a substring. *)
 
 val get_substrings : ?full_match:bool -> substrings -> string array
-(** [get_substrings ?full_match substrings] @return the array of
-    substrings in [substrings]. It includes the full match at index 0
-    when [full_match] is [true], the captured substrings only when it
-    is [false]. If a subpattern did not capture a substring, the empty
-    string is returned in the corresponding position instead.
+(** [get_substrings ?full_match substrings]
+
+    @return
+      the array of substrings in [substrings]. It includes the full match at
+      index 0 when [full_match] is [true], the captured substrings only when it
+      is [false]. If a subpattern did not capture a substring, the empty string
+      is returned in the corresponding position instead.
 
     @param full_match default = true *)
 
 val get_opt_substrings : ?full_match:bool -> substrings -> string option array
-(** [get_opt_substrings ?full_match substrings] @return the array of
-    optional substrings in [substrings]. It includes [Some full_match_str]
-    at index 0 when [full_match] is [true], [Some captured_substrings]
-    only when it is [false]. If a subpattern did not capture a substring,
-    [None] is returned in the corresponding position instead.
+(** [get_opt_substrings ?full_match substrings]
+
+    @return
+      the array of optional substrings in [substrings]. It includes
+      [Some full_match_str] at index 0 when [full_match] is [true],
+      [Some captured_substrings] only when it is [false]. If a subpattern did
+      not capture a substring, [None] is returned in the corresponding position
+      instead.
 
     @param full_match default = true *)
 
 val get_named_substring : regexp -> string -> substrings -> string
-(** [get_named_substring rex name substrings] @return the named substring
-    [name] in regular expression [rex] and [substrings].
+(** [get_named_substring rex name substrings]
+
+    @return
+      the named substring [name] in regular expression [rex] and [substrings].
 
     @raise Invalid_argument if there is no such named substring.
-    @raise Not_found if the corresponding subpattern did not capture
-           a substring. *)
+    @raise Not_found
+      if the corresponding subpattern did not capture a substring. *)
 
 val get_named_substring_ofs : regexp -> string -> substrings -> int * int
-(** [get_named_substring_ofs rex name substrings] @return the offset
-    tuple of the named substring [name] in regular expression [rex] and
-    [substrings].
+(** [get_named_substring_ofs rex name substrings]
+
+    @return
+      the offset tuple of the named substring [name] in regular expression [rex]
+      and [substrings].
 
     @raise Invalid_argument if there is no such named substring.
-    @raise Not_found if the corresponding subpattern did not capture
-           a substring. *)
+    @raise Not_found
+      if the corresponding subpattern did not capture a substring. *)
 
-(** {6 Callouts} *)
+(** {1 Callouts} *)
 
 type callout_data = {
   callout_number : int;  (** Callout number *)
@@ -362,7 +410,7 @@ type callout = callout_data -> unit
     Other exceptions will terminate matching immediately and return control to
     OCaml. *)
 
-(** {6 Matching of patterns and subpattern extraction} *)
+(** {1 Matching of patterns and subpattern extraction} *)
 
 val pcre_exec :
   ?iflags:irflag ->
@@ -373,13 +421,14 @@ val pcre_exec :
   ?callout:callout ->
   string ->
   int array
-(** [pcre_exec ?iflags ?flags ?rex ?pat ?pos ?callout subj] @return an
-    array of offsets that describe the position of matched subpatterns in
-    the string [subj] starting at position [pos] with pattern [pat] when
-    given, regular expression [rex] otherwise. The array also contains
-    additional workspace needed by the match engine. Uses [flags] when
-    given, the precompiled [iflags] otherwise. Callouts are handled by
-    [callout].
+(** [pcre_exec ?iflags ?flags ?rex ?pat ?pos ?callout subj]
+
+    @return
+      an array of offsets that describe the position of matched subpatterns in
+      the string [subj] starting at position [pos] with pattern [pat] when
+      given, regular expression [rex] otherwise. The array also contains
+      additional workspace needed by the match engine. Uses [flags] when given,
+      the precompiled [iflags] otherwise. Callouts are handled by [callout].
 
     @param iflags default = no extra flags
     @param flags default = ignored
@@ -455,11 +504,13 @@ val exec :
   ?callout:callout ->
   string ->
   substrings
-(** [exec ?iflags ?flags ?rex ?pat ?pos ?callout subj] @return substring
-    information on string [subj] starting at position [pos] with pattern
-    [pat] when given, regular expression [rex] otherwise. Uses [flags]
-    when given, the precompiled [iflags] otherwise. Callouts are handled
-    by [callout].
+(** [exec ?iflags ?flags ?rex ?pat ?pos ?callout subj]
+
+    @return
+      substring information on string [subj] starting at position [pos] with
+      pattern [pat] when given, regular expression [rex] otherwise. Uses [flags]
+      when given, the precompiled [iflags] otherwise. Callouts are handled by
+      [callout].
 
     @param iflags default = no extra flags
     @param flags default = ignored
@@ -479,11 +530,13 @@ val exec_all :
   ?callout:callout ->
   string ->
   substrings array
-(** [exec_all ?iflags ?flags ?rex ?pat ?pos ?callout subj] @return
-    an array of substring information of all matching substrings in
-    string [subj] starting at position [pos] with pattern [pat] when
-    given, regular expression [rex] otherwise. Uses [flags] when given,
-    the precompiled [iflags] otherwise. Callouts are handled by [callout].
+(** [exec_all ?iflags ?flags ?rex ?pat ?pos ?callout subj]
+
+    @return
+      an array of substring information of all matching substrings in string
+      [subj] starting at position [pos] with pattern [pat] when given, regular
+      expression [rex] otherwise. Uses [flags] when given, the precompiled
+      [iflags] otherwise. Callouts are handled by [callout].
 
     @param iflags default = no extra flags
     @param flags default = ignored
@@ -503,12 +556,14 @@ val next_match :
   ?callout:callout ->
   substrings ->
   substrings
-(** [next_match ?iflags ?flags ?rex ?pat ?pos ?callout substrs] @return
-    substring information on the match that follows on the last
-    match denoted by [substrs], jumping over [pos] characters (also
-    backwards!), using pattern [pat] when given, regular expression
-    [rex] otherwise. Uses [flags] when given, the precompiled [iflags]
-    otherwise. Callouts are handled by [callout].
+(** [next_match ?iflags ?flags ?rex ?pat ?pos ?callout substrs]
+
+    @return
+      substring information on the match that follows on the last match denoted
+      by [substrs], jumping over [pos] characters (also backwards!), using
+      pattern [pat] when given, regular expression [rex] otherwise. Uses [flags]
+      when given, the precompiled [iflags] otherwise. Callouts are handled by
+      [callout].
 
     @param iflags default = no extra flags
     @param flags default = ignored
@@ -518,8 +573,8 @@ val next_match :
     @param callout default = ignore callouts
 
     @raise Not_found if pattern does not match.
-    @raise Invalid_arg if [pos] let matching start outside of
-           the subject string. *)
+    @raise Invalid_arg
+      if [pos] let matching start outside of the subject string. *)
 
 val extract :
   ?iflags:irflag ->
@@ -532,6 +587,7 @@ val extract :
   string ->
   string array
 (** [extract ?iflags ?flags ?rex ?pat ?pos ?full_match ?callout subj]
+
     @return
       the array of substrings that match [subj] starting at position [pos],
       using pattern [pat] when given, regular expression [rex] otherwise. Uses
@@ -562,6 +618,7 @@ val extract_opt :
   string ->
   string option array
 (** [extract_opt ?iflags ?flags ?rex ?pat ?pos ?full_match ?callout subj]
+
     @return
       the array of optional substrings that match [subj] starting at position
       [pos], using pattern [pat] when given, regular expression [rex] otherwise.
@@ -592,6 +649,7 @@ val extract_all :
   string ->
   string array array
 (** [extract_all ?iflags ?flags ?rex ?pat ?pos ?full_match ?callout subj]
+
     @return
       an array of arrays of all matching substrings that match [subj] starting
       at position [pos], using pattern [pat] when given, regular expression
@@ -622,6 +680,7 @@ val extract_all_opt :
   string option array array
 (** [extract_all_opt
       ?iflags ?flags ?rex ?pat ?pos ?full_match ?callout subj]
+
     @return
       an array of arrays of all optional matching substrings that match [subj]
       starting at position [pos], using pattern [pat] when given, regular
@@ -651,10 +710,13 @@ val pmatch :
   ?callout:callout ->
   string ->
   bool
-(** [pmatch ?iflags ?flags ?rex ?pat ?pos ?callout subj] @return [true]
-    if [subj] is matched by pattern [pat] when given, regular expression
-    [rex] otherwise, starting at position [pos]. Uses [flags] when given,
-    the precompiled [iflags] otherwise. Callouts are handled by [callout].
+(** [pmatch ?iflags ?flags ?rex ?pat ?pos ?callout subj]
+
+    @return
+      [true] if [subj] is matched by pattern [pat] when given, regular
+      expression [rex] otherwise, starting at position [pos]. Uses [flags] when
+      given, the precompiled [iflags] otherwise. Callouts are handled by
+      [callout].
 
     @param iflags default = no extra flags
     @param flags default = ignored
@@ -663,7 +725,7 @@ val pmatch :
     @param pos default = 0
     @param callout default = ignore callouts *)
 
-(** {6 String substitution} *)
+(** {1 String substitution} *)
 
 type substitution
 (** Information on substitution patterns *)
@@ -886,7 +948,7 @@ val substitute_first :
     @param pos default = 0
     @param callout default = ignore callouts *)
 
-(** {6 Splitting} *)
+(** {1 Splitting} *)
 
 val split :
   ?iflags:irflag ->
@@ -926,7 +988,7 @@ val asplit :
   string ->
   string array
 (** [asplit ?iflags ?flags ?rex ?pat ?pos ?max ?callout subj] same as
-    {!Pcre.split} but @return an array instead of a list. *)
+    {!Pcre.split} but return an array instead of a list. *)
 
 (** Result of a {!Pcre.full_split} *)
 type split_result =
@@ -962,7 +1024,7 @@ val full_split :
     @param max default = 0
     @param callout default = ignore callouts *)
 
-(** {6 Additional convenience functions} *)
+(** {1 Additional convenience functions} *)
 
 val foreach_line : ?ic:in_channel -> (string -> unit) -> unit
 (** [foreach_line ?ic f] applies [f] to each line in inchannel [ic] until the
@@ -976,7 +1038,7 @@ val foreach_file : string list -> (string -> in_channel -> unit) -> unit
     closed after each operation (even when exceptions occur - they get reraised
     afterwards!). *)
 
-(** {6 {b UNSAFE STUFF - USE WITH CAUTION!}} *)
+(** {1 {b UNSAFE STUFF - USE WITH CAUTION!}} *)
 
 val unsafe_pcre_exec :
   irflag ->

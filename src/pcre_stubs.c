@@ -27,7 +27,7 @@
 #endif
 #endif
 
-#if _WIN64
+#if defined(_WIN64)
 typedef long long *caml_int_ptr;
 #else
 typedef long *caml_int_ptr;

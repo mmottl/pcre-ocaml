@@ -431,7 +431,7 @@ static inline int pcre_fullinfo_stub(value v_rex, int what, void *where) {
 /* Some stubs for info-functions */
 
 /* Generic macro for getting integer results from pcre_fullinfo */
-#define make_intnat_info(tp, name, option)                                     \
+#define MAKE_INTNAT_INFO(tp, name, option)                                     \
   CAMLprim intnat pcre_##name##_stub(value v_rex) {                            \
     tp options;                                                                \
     const int ret = pcre_fullinfo_stub(v_rex, PCRE_INFO_##option, &options);   \
@@ -444,15 +444,15 @@ static inline int pcre_fullinfo_stub(value v_rex, int what, void *where) {
     return Val_int(pcre_##name##_stub(v_rex));                                 \
   }
 
-make_intnat_info(unsigned long, options, OPTIONS)
-    make_intnat_info(size_t, size, SIZE)
-        make_intnat_info(size_t, studysize, STUDYSIZE)
-            make_intnat_info(int, capturecount, CAPTURECOUNT)
-                make_intnat_info(int, backrefmax, BACKREFMAX)
-                    make_intnat_info(int, namecount, NAMECOUNT)
-                        make_intnat_info(int, nameentrysize, NAMEENTRYSIZE)
+MAKE_INTNAT_INFO(unsigned long, options, OPTIONS)
+MAKE_INTNAT_INFO(size_t, size, SIZE)
+MAKE_INTNAT_INFO(size_t, studysize, STUDYSIZE)
+MAKE_INTNAT_INFO(int, capturecount, CAPTURECOUNT)
+MAKE_INTNAT_INFO(int, backrefmax, BACKREFMAX)
+MAKE_INTNAT_INFO(int, namecount, NAMECOUNT)
+MAKE_INTNAT_INFO(int, nameentrysize, NAMEENTRYSIZE)
 
-                            CAMLprim value pcre_firstbyte_stub(value v_rex) {
+CAMLprim value pcre_firstbyte_stub(value v_rex) {
   int firstbyte;
   const int ret = pcre_fullinfo_stub(v_rex, PCRE_INFO_FIRSTBYTE, &firstbyte);
 

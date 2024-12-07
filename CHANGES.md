@@ -1,3 +1,12 @@
+## 7.5.1 (2024-12-07)
+
+- Added GitHub workflow for automated CI/CD.
+- Reformatted all OCaml and C-files for consistency.
+- Improved and fixed documentation.
+- Enhanced README and example README for clarity.
+- Fixed macro instantiation formatting and minor C preprocessing issues.
+- Corrected license typo.
+
 ## 7.5.0 (2021-07-22)
 
 - Added support for JIT-compilation of patterns, which can greatly improve

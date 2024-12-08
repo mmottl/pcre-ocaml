@@ -32,7 +32,8 @@ type error =
           in [msg], the position of the error in the pattern in [pos]. *)
   | BadUTF8  (** UTF8 string being matched is invalid *)
   | BadUTF8Offset
-      (** Gets raised when a UTF8 string being matched with offset is invalid. *)
+      (** Gets raised when a UTF8 string being matched with offset is invalid.
+      *)
   | MatchLimit
       (** Maximum allowed number of match attempts with backtracking or
           recursion is reached during matching. ALL FUNCTIONS CALLING THE
@@ -213,7 +214,8 @@ val lastliteral : regexp -> char option
 (** [lastliteral regexp]
 
     @return
-      some last matching character of [regexp] if available, [None] otherwise. *)
+      some last matching character of [regexp] if available, [None] otherwise.
+*)
 
 val study_stat : regexp -> study_stat
 (** [study_stat regexp]
@@ -257,15 +259,14 @@ val regexp :
   ?chtables:chtables ->
   string ->
   regexp
-(** [regexp ?jit_compile ?study ?limit ?limit_recursion ?iflags ?flags
-    ?chtables pattern]
-    compiles [pattern] with [flags] when given, with [iflags] otherwise, and
-    with char tables [chtables]. If [study] is true, then the resulting regular
-    expression will be studied. If [jit_compile] is true, studying will also
-    perform JIT-compilation of the pattern. If [limit] is specified, this sets a
-    limit to the amount of recursion and backtracking (only lower than the
-    builtin default!). If this limit is exceeded, [MatchLimit] will be raised
-    during matching.
+(** [regexp ?jit_compile ?study ?limit ?limit_recursion ?iflags ?flags ?chtables
+     pattern] compiles [pattern] with [flags] when given, with [iflags]
+    otherwise, and with char tables [chtables]. If [study] is true, then the
+    resulting regular expression will be studied. If [jit_compile] is true,
+    studying will also perform JIT-compilation of the pattern. If [limit] is
+    specified, this sets a limit to the amount of recursion and backtracking
+    (only lower than the builtin default!). If this limit is exceeded,
+    [MatchLimit] will be raised during matching.
 
     @param study default = true
     @param jit_compile default = false
@@ -275,12 +276,11 @@ val regexp :
     @param flags default = ignored
     @param chtables default = builtin char tables
 
-    @return
-      the regular expression.
+    @return the regular expression.
 
-      For detailed documentation on how you can specify PERL-style regular
-      expressions (= patterns), please consult the PCRE-documentation ("man
-      pcrepattern") or PERL-manuals.
+    For detailed documentation on how you can specify PERL-style regular
+    expressions (= patterns), please consult the PCRE-documentation ("man
+    pcrepattern") or PERL-manuals.
 
     @see <http://www.perl.com> www.perl.com *)
 
@@ -460,23 +460,23 @@ val pcre_dfa_exec :
       the precompiled [iflags] otherwise. Requires a sufficiently-large
       [workspace] array. Callouts are handled by [callout].
 
-      Note that the returned array of offsets are quite different from those
-      returned by {!pcre_exec} et al. The motivating use case for the DFA match
-      function is to be able to restart a partial match with N additional input
-      segments. Because the match function/workspace does not store segments
-      seen previously, the offsets returned when a match completes will refer
-      only to the matching portion of the last subject string provided. Thus,
-      returned offsets from this function should not be used to support
-      extracting captured submatches. If you need to capture submatches from a
-      series of inputs incrementally matched with this function, you'll need to
-      concatenate those inputs that yield a successful match here and re-run the
-      same pattern against that single subject string.
+    Note that the returned array of offsets are quite different from those
+    returned by {!pcre_exec} et al. The motivating use case for the DFA match
+    function is to be able to restart a partial match with N additional input
+    segments. Because the match function/workspace does not store segments seen
+    previously, the offsets returned when a match completes will refer only to
+    the matching portion of the last subject string provided. Thus, returned
+    offsets from this function should not be used to support extracting captured
+    submatches. If you need to capture submatches from a series of inputs
+    incrementally matched with this function, you'll need to concatenate those
+    inputs that yield a successful match here and re-run the same pattern
+    against that single subject string.
 
-      Aside from an absolute minimum of [20], PCRE does not provide any guidance
-      regarding the size of workspace array needed by any given pattern.
-      Therefore, it is wise to appropriately handle the possible [WorkspaceSize]
-      error. If raised, you can allocate a new, larger workspace array and begin
-      the DFA matching process again.
+    Aside from an absolute minimum of [20], PCRE does not provide any guidance
+    regarding the size of workspace array needed by any given pattern.
+    Therefore, it is wise to appropriately handle the possible [WorkspaceSize]
+    error. If raised, you can allocate a new, larger workspace array and begin
+    the DFA matching process again.
 
     @param iflags default = no extra flags
     @param flags default = ignored
@@ -678,8 +678,7 @@ val extract_all_opt :
   ?callout:callout ->
   string ->
   string option array array
-(** [extract_all_opt
-      ?iflags ?flags ?rex ?pat ?pos ?full_match ?callout subj]
+(** [extract_all_opt ?iflags ?flags ?rex ?pat ?pos ?full_match ?callout subj]
 
     @return
       an array of arrays of all optional matching substrings that match [subj]
@@ -910,11 +909,10 @@ val substitute_substrings_first :
   subst:(substrings -> string) ->
   string ->
   string
-(** [substitute_substrings_first
-       ?iflags ?flags ?rex ?pat ?pos ?callout ~subst subj]
-    replaces the first substring of [subj] matching pattern [pat] when given,
-    regular expression [rex] otherwise, starting at position [pos] with the
-    result of function [subst] applied to the substrings of the match. Uses
+(** [substitute_substrings_first ?iflags ?flags ?rex ?pat ?pos ?callout ~subst
+     subj] replaces the first substring of [subj] matching pattern [pat] when
+    given, regular expression [rex] otherwise, starting at position [pos] with
+    the result of function [subst] applied to the substrings of the match. Uses
     [flags] when given, the precompiled [iflags] otherwise. Callouts are handled
     by [callout].
 
@@ -1068,6 +1066,5 @@ val unsafe_pcre_dfa_exec :
   workspace:int array ->
   unit
 (** [unsafe_pcre_dfa_exec flags rex ~pos ~subj_start ~subj offset_vector callout
-    ~workpace].
-    You should read the C-source to know what happens. If you do not understand
-    it - {b don't use this function!} *)
+     ~workpace]. You should read the C-source to know what happens. If you do
+    not understand it - {b don't use this function!} *)

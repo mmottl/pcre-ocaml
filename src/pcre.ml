@@ -879,8 +879,10 @@ let internal_psplit flags rex max pos callout subj =
     let rec loop strs cnt pos prematch =
       let len = subj_len - pos in
       if len < 0 then strs
-      else if (* Checks termination due to max restriction *)
-              cnt = 0 then
+      else if
+        (* Checks termination due to max restriction *)
+        cnt = 0
+      then
         if
           prematch
           &&
@@ -1001,8 +1003,10 @@ let full_split ?(iflags = 0) ?flags ?(rex = def_rex) ?pat ?(pos = 0) ?(max = 0)
     let rec loop strs cnt pos prematch =
       let len = subj_len - pos in
       if len < 0 then strs
-      else if (* Checks termination due to max restriction *)
-              cnt = 0 then
+      else if
+        (* Checks termination due to max restriction *)
+        cnt = 0
+      then
         if
           prematch
           &&

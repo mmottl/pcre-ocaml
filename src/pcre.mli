@@ -1042,14 +1042,13 @@ val unsafe_pcre_exec :
   irflag ->
   regexp ->
   pos:int ->
-  subj_start:int ->
   subj:string ->
   int array ->
   callout option ->
   unit
-(** [unsafe_pcre_exec flags rex ~pos ~subj_start ~subj offset_vector callout].
-    You should read the C-source to know what happens. If you do not understand
-    it - {b don't use this function!} *)
+(** [unsafe_pcre_exec flags rex ~pos ~subj offset_vector callout]. You should
+    read the C-source to know what happens. If you do not understand it -
+    {b don't use this function!} *)
 
 val make_ovector : regexp -> int * int array
 (** [make_ovector regexp] calculates the tuple (subgroups2, ovector) which is
@@ -1059,12 +1058,11 @@ val unsafe_pcre_dfa_exec :
   irflag ->
   regexp ->
   pos:int ->
-  subj_start:int ->
   subj:string ->
   int array ->
   callout option ->
   workspace:int array ->
   unit
-(** [unsafe_pcre_dfa_exec flags rex ~pos ~subj_start ~subj offset_vector callout
-     ~workpace]. You should read the C-source to know what happens. If you do
-    not understand it - {b don't use this function!} *)
+(** [unsafe_pcre_dfa_exec flags rex ~pos ~subj offset_vector callout ~workpace].
+    You should read the C-source to know what happens. If you do not understand
+    it - {b don't use this function!} *)

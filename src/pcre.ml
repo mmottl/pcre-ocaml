@@ -409,7 +409,6 @@ external unsafe_pcre_exec :
   (irflag[@untagged]) ->
   regexp ->
   pos:(int[@untagged]) ->
-  subj_start:(int[@untagged]) ->
   subj:string ->
   int array ->
   callout option ->
@@ -424,7 +423,6 @@ external unsafe_pcre_dfa_exec :
   (irflag[@untagged]) ->
   regexp ->
   pos:(int[@untagged]) ->
-  subj_start:(int[@untagged]) ->
   subj:string ->
   int array ->
   callout option ->
@@ -436,8 +434,7 @@ let pcre_dfa_exec ?(iflags = 0) ?flags ?(rex = def_rex) ?pat ?(pos = 0) ?callout
   let rex = match pat with Some str -> regexp str | _ -> rex in
   let iflags = match flags with Some flags -> rflags flags | _ -> iflags in
   let _, ovector = make_ovector rex in
-  unsafe_pcre_dfa_exec iflags rex ~pos ~subj_start:0 ~subj ovector callout
-    ~workspace;
+  unsafe_pcre_dfa_exec iflags rex ~pos ~subj ovector callout ~workspace;
   ovector
 
 let pcre_exec ?(iflags = 0) ?flags ?(rex = def_rex) ?pat ?(pos = 0) ?callout
@@ -445,7 +442,7 @@ let pcre_exec ?(iflags = 0) ?flags ?(rex = def_rex) ?pat ?(pos = 0) ?callout
   let rex = match pat with Some str -> regexp str | _ -> rex in
   let iflags = match flags with Some flags -> rflags flags | _ -> iflags in
   let _, ovector = make_ovector rex in
-  unsafe_pcre_exec iflags rex ~pos ~subj_start:0 ~subj ovector callout;
+  unsafe_pcre_exec iflags rex ~pos ~subj ovector callout;
   ovector
 
 let exec ?iflags ?flags ?rex ?pat ?pos ?callout subj =
@@ -633,8 +630,7 @@ let replace ?(iflags = 0) ?flags ?(rex = def_rex) ?pat ?(pos = 0)
       cur_pos > subj_len
       ||
       try
-        unsafe_pcre_exec iflags rex ~pos:cur_pos ~subj_start:0 ~subj ovector
-          callout;
+        unsafe_pcre_exec iflags rex ~pos:cur_pos ~subj ovector callout;
         false
       with Not_found -> true
     then (
@@ -692,8 +688,7 @@ let qreplace ?(iflags = 0) ?flags ?(rex = def_rex) ?pat ?(pos = 0) ?(templ = "")
       cur_pos > subj_len
       ||
       try
-        unsafe_pcre_exec iflags rex ~pos:cur_pos ~subj_start:0 ~subj ovector
-          callout;
+        unsafe_pcre_exec iflags rex ~pos:cur_pos ~subj ovector callout;
         false
       with Not_found -> true
     then (
@@ -745,8 +740,7 @@ let substitute_substrings ?(iflags = 0) ?flags ?(rex = def_rex) ?pat ?(pos = 0)
       cur_pos > subj_len
       ||
       try
-        unsafe_pcre_exec iflags rex ~pos:cur_pos ~subj_start:0 ~subj ovector
-          callout;
+        unsafe_pcre_exec iflags rex ~pos:cur_pos ~subj ovector callout;
         false
       with Not_found -> true
     then (
@@ -804,7 +798,7 @@ let replace_first ?(iflags = 0) ?flags ?(rex = def_rex) ?pat ?(pos = 0)
     failwith "Pcre.replace_first: backreference denotes nonexistent subpattern";
   if with_lp && nsubs = 0 then failwith "Pcre.replace_first: no backreferences";
   try
-    unsafe_pcre_exec iflags rex ~pos ~subj_start:0 ~subj ovector callout;
+    unsafe_pcre_exec iflags rex ~pos ~subj ovector callout;
     let res_len, trans_lst =
       calc_trans_lst subgroups2 ovector subj templ subst_lst
     in
@@ -828,7 +822,7 @@ let qreplace_first ?(iflags = 0) ?flags ?(rex = def_rex) ?pat ?(pos = 0)
   let iflags = match flags with Some flags -> rflags flags | _ -> iflags in
   let _, ovector = make_ovector rex in
   try
-    unsafe_pcre_exec iflags rex ~pos ~subj_start:0 ~subj ovector callout;
+    unsafe_pcre_exec iflags rex ~pos ~subj ovector callout;
     let first = Array.unsafe_get ovector 0 in
     let last = Array.unsafe_get ovector 1 in
     let len = String.length templ in
@@ -847,7 +841,7 @@ let substitute_substrings_first ?(iflags = 0) ?flags ?(rex = def_rex) ?pat
   let iflags = match flags with Some flags -> rflags flags | _ -> iflags in
   let _, ovector = make_ovector rex in
   try
-    unsafe_pcre_exec iflags rex ~pos ~subj_start:0 ~subj ovector callout;
+    unsafe_pcre_exec iflags rex ~pos ~subj ovector callout;
     let subj_len = String.length subj in
     let prefix_len = Array.unsafe_get ovector 0 in
     let last = Array.unsafe_get ovector 1 in
@@ -909,8 +903,7 @@ let internal_psplit flags rex max pos callout subj =
           prematch
           &&
           try
-            unsafe_pcre_exec flags rex ~pos ~subj_start:pos ~subj ovector
-              callout;
+            unsafe_pcre_exec flags rex ~pos ~subj ovector callout;
             true
           with Not_found -> false
         then
@@ -921,7 +914,7 @@ let internal_psplit flags rex max pos callout subj =
           (* Calculates next accumulator state for splitting *)
       else if
         try
-          unsafe_pcre_exec flags rex ~pos ~subj_start:pos ~subj ovector callout;
+          unsafe_pcre_exec flags rex ~pos ~subj ovector callout;
           false
         with Not_found -> true
       then string_unsafe_sub subj pos len :: strs
@@ -934,8 +927,8 @@ let internal_psplit flags rex max pos callout subj =
             if len = 0 then "" :: strs
             else if
               try
-                unsafe_pcre_exec (flags lor 0x0410) rex ~pos ~subj_start:pos
-                  ~subj ovector callout;
+                unsafe_pcre_exec (flags lor 0x0410) rex ~pos ~subj ovector
+                  callout;
                 true
               with Not_found -> false
             then
@@ -1033,8 +1026,7 @@ let full_split ?(iflags = 0) ?flags ?(rex = def_rex) ?pat ?(pos = 0) ?(max = 0)
           prematch
           &&
           try
-            unsafe_pcre_exec iflags rex ~pos ~subj_start:pos ~subj ovector
-              callout;
+            unsafe_pcre_exec iflags rex ~pos ~subj ovector callout;
             true
           with Not_found -> false
         then
@@ -1048,7 +1040,7 @@ let full_split ?(iflags = 0) ?flags ?(rex = def_rex) ?pat ?(pos = 0) ?(max = 0)
           (* Calculates next accumulator state for splitting *)
       else if
         try
-          unsafe_pcre_exec iflags rex ~pos ~subj_start:pos ~subj ovector callout;
+          unsafe_pcre_exec iflags rex ~pos ~subj ovector callout;
           false
         with Not_found -> true
       then
@@ -1063,8 +1055,8 @@ let full_split ?(iflags = 0) ?flags ?(rex = def_rex) ?pat ?(pos = 0) ?(max = 0)
               let empty_groups = handle_subgroups [] in
               if
                 try
-                  unsafe_pcre_exec (iflags lor 0x0410) rex ~pos ~subj_start:pos
-                    ~subj ovector callout;
+                  unsafe_pcre_exec (iflags lor 0x0410) rex ~pos ~subj ovector
+                    callout;
                   true
                 with Not_found -> false
               then
@@ -1074,11 +1066,10 @@ let full_split ?(iflags = 0) ?flags ?(rex = def_rex) ?pat ?(pos = 0) ?(max = 0)
                   Delim (string_unsafe_sub subj first (last - first))
                 in
                 let new_strs =
-                  handle_subgroups
-                    (delim
-                    ::
-                    (if prematch then strs else empty_groups @ (Delim "" :: strs))
-                    )
+                  let delims =
+                    if prematch then strs else empty_groups @ (Delim "" :: strs)
+                  in
+                  handle_subgroups (delim :: delims)
                 in
                 loop new_strs (cnt - 1) last false
               else

@@ -1,3 +1,5 @@
+# Changelog
+
 ## 8.0.0 (2024-12-14)
 
 - Removed superfluous and buggy `subj_start` argument. This fixes a bug in

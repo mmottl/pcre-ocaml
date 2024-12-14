@@ -1,4 +1,4 @@
-## 7.6.0 (2024-12-14)
+## 8.0.0 (2024-12-14)
 
 - Removed superfluous and buggy `subj_start` argument. This fixes a bug in
   the `full_split` function where non-capturing groups are not identified

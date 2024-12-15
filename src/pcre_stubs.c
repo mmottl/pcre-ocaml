@@ -688,15 +688,15 @@ CAMLprim value pcre_exec_stub(intnat v_opt, value v_rex, intnat v_pos,
 /* Byte-code hook for pcre_exec_stub
    Needed, because there are more than 5 arguments */
 CAMLprim value pcre_exec_stub_bc(value *argv, int __unused argn) {
-  return pcre_exec_stub0(Int_val(argv[0]), argv[1], Int_val(argv[2]),
-                         Int_val(argv[3]), argv[4], argv[5], (value)NULL);
+  return pcre_exec_stub0(Int_val(argv[0]), argv[1], Int_val(argv[2]), argv[3],
+                         argv[4], argv[5], (value)NULL);
 }
 
 /* Byte-code hook for pcre_dfa_exec_stub
    Needed, because there are more than 5 arguments */
 CAMLprim value pcre_dfa_exec_stub_bc(value *argv, int __unused argn) {
-  return pcre_exec_stub0(Int_val(argv[0]), argv[1], Int_val(argv[2]),
-                         Int_val(argv[3]), argv[4], argv[5], argv[6]);
+  return pcre_exec_stub0(Int_val(argv[0]), argv[1], Int_val(argv[2]), argv[3],
+                         argv[4], argv[5], argv[6]);
 }
 
 static struct custom_operations tables_ops = {

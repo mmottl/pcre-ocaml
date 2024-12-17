@@ -181,7 +181,7 @@ static int pcre_callout_handler(pcre_callout_block *cb) {
   return 0;
 }
 
-/* Fetchs the named OCaml-values + caches them and
+/* Fetches the named OCaml-values + caches them and
    calculates + caches the variant hash values */
 CAMLprim value pcre_ocaml_init(value __unused v_unit) {
   pcre_exc_Error = caml_named_value("Pcre.Error");

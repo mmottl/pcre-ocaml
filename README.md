@@ -36,6 +36,18 @@ Reasons to choose PCRE-OCaml:
 
 ## Usage
 
+Please run:
+
+```
+$ odig odoc pcre2
+```
+
+Or (maybe?):
+
+```
+$ dune build @doc
+```
+
 Consult the [API](https://mmottl.github.io/pcre-ocaml/api/pcre) for details.
 
 Functions support two flag types:

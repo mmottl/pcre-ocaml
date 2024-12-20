@@ -38,14 +38,14 @@ Reasons to choose PCRE-OCaml:
 
 Please run:
 
-```
-$ odig odoc pcre2
+```sh
+odig odoc pcre2
 ```
 
-Or (maybe?):
+Or:
 
-```
-$ dune build @doc
+```sh
+dune build @doc
 ```
 
 Consult the [API](https://mmottl.github.io/pcre-ocaml/api/pcre) for details.
@@ -112,8 +112,7 @@ utop # let rex = regexp "12+3";;
 val rex : regexp = <abstr>
 utop # let workspace = Array.make 40 0;;
 val workspace : int array =
-  [|0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0;
-    0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0|]
+  [| ... |]
 utop # pcre_dfa_exec ~rex ~flags:[`PARTIAL] ~workspace "12222";;
 Exception: Pcre.Error Partial.
 utop # pcre_dfa_exec ~rex ~flags:[`PARTIAL; `DFA_RESTART] ~workspace "2222222";;

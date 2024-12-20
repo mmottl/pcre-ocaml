@@ -79,7 +79,7 @@ let _ =
     let try_match line =
       let matched =
         try
-          unsafe_pcre_exec rfl rex ~pos:0 ~subj:line ovector None;
+          unsafe_pcre_exec rfl rex ~pos:0 ~subj_start:0 ~subj:line ovector None;
           if !whole_lines && ovector.(1) <> String.length line then false
           else true
         with Not_found -> false

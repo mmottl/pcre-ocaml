@@ -72,6 +72,7 @@ typedef const unsigned char *chartables; /* Type of chartable sets */
 
 /* Contents of callout data */
 struct cod {
+  long subj_start;       /* Start of subject string */
   value *v_substrings_p; /* Pointer to substrings matched so far */
   value *v_cof_p;        /* Pointer to callout function */
   value v_exn;           /* Possible exception raised by callout function */
@@ -124,13 +125,21 @@ struct pcre_ocaml_tables {
    and OCaml chooses the larger possibility for representing integers when
    available (also in arrays) - not so the PCRE!
 */
-static inline void copy_ovector(const int *ovec_src, caml_int_ptr ovec_dst,
-                                int subgroups2) {
-  while (subgroups2--) {
-    *ovec_dst = Val_int(*ovec_src);
-    --ovec_src;
-    --ovec_dst;
-  }
+static inline void copy_ovector(long subj_start, const int *ovec_src,
+                                caml_int_ptr ovec_dst, int subgroups2) {
+  if (subj_start == 0)
+    while (subgroups2--) {
+      *ovec_dst = Val_int(*ovec_src);
+      --ovec_src;
+      --ovec_dst;
+    }
+  else
+    while (subgroups2--) {
+      *ovec_dst =
+          (*ovec_src == -1) ? Val_int(-1) : Val_long(*ovec_src + subj_start);
+      --ovec_src;
+      --ovec_dst;
+    }
 }
 
 /* Callout handler */
@@ -153,13 +162,14 @@ static int pcre_callout_handler(pcre_callout_block *cb) {
     const int *ovec_src = cb->offset_vector + subgroups2_1;
     caml_int_ptr ovec_dst =
         (long *)&Field(Field(v_substrings, 1), 0) + subgroups2_1;
+    long subj_start = cod->subj_start;
 
-    copy_ovector(ovec_src, ovec_dst, subgroups2);
+    copy_ovector(subj_start, ovec_src, ovec_dst, subgroups2);
 
     Field(v_callout_data, 0) = Val_int(cb->callout_number);
     Field(v_callout_data, 1) = v_substrings;
-    Field(v_callout_data, 2) = Val_int(cb->start_match);
-    Field(v_callout_data, 3) = Val_int(cb->current_position);
+    Field(v_callout_data, 2) = Val_int(cb->start_match + subj_start);
+    Field(v_callout_data, 3) = Val_int(cb->current_position + subj_start);
     Field(v_callout_data, 4) = Val_int(capture_top);
     Field(v_callout_data, 5) = Val_int(cb->capture_last);
     Field(v_callout_data, 6) = Val_int(cb->pattern_position);
@@ -538,14 +548,15 @@ static inline void handle_exec_error(char *loc, const int ret) {
 }
 
 static inline void handle_pcre_exec_result(int *ovec, value v_ovec,
-                                           long ovec_len, int ret) {
+                                           long ovec_len, long subj_start,
+                                           int ret) {
   caml_int_ptr ocaml_ovec = (caml_int_ptr)&Field(v_ovec, 0);
   const int subgroups2 = ret * 2;
   const int subgroups2_1 = subgroups2 - 1;
   const int *ovec_src = ovec + subgroups2_1;
   caml_int_ptr ovec_clear_stop = ocaml_ovec + (ovec_len * 2) / 3;
   caml_int_ptr ovec_dst = ocaml_ovec + subgroups2_1;
-  copy_ovector(ovec_src, ovec_dst, subgroups2);
+  copy_ovector(subj_start, ovec_src, ovec_dst, subgroups2);
   while (++ovec_dst < ovec_clear_stop)
     *ovec_dst = -1;
 }
@@ -556,21 +567,28 @@ static inline void handle_pcre_exec_result(int *ovec, value v_ovec,
    function */
 
 CAMLprim value pcre_exec_stub0(intnat v_opt, value v_rex, intnat v_pos,
-                               value v_subj, value v_ovec, value v_maybe_cof,
-                               value v_workspace) {
+                               intnat v_subj_start, value v_subj, value v_ovec,
+                               value v_maybe_cof, value v_workspace) {
   int ret;
   int is_dfa = v_workspace != (value)NULL;
-  long pos = v_pos, len = caml_string_length(v_subj);
+  long pos = v_pos, len = caml_string_length(v_subj), subj_start = v_subj_start;
   long ovec_len = Wosize_val(v_ovec);
 
-  if (pos > len || pos < 0)
+  if (pos > len || pos < subj_start)
     caml_invalid_argument("Pcre.pcre_exec_stub: illegal position");
 
+  if (subj_start > len || subj_start < 0)
+    caml_invalid_argument("Pcre.pcre_exec_stub: illegal subject start");
+
+  pos -= subj_start;
+  len -= subj_start;
+
   {
-    const pcre *code = get_rex(v_rex);           /* Compiled pattern */
-    const pcre_extra *extra = get_extra(v_rex);  /* Extra info */
-    const char *ocaml_subj = String_val(v_subj); /* Subject string */
-    const int opt = v_opt;                       /* Runtime options */
+    const pcre *code = get_rex(v_rex);          /* Compiled pattern */
+    const pcre_extra *extra = get_extra(v_rex); /* Extra info */
+    const char *ocaml_subj =
+        String_val(v_subj) + subj_start; /* Subject string */
+    const int opt = v_opt;               /* Runtime options */
 
     /* Special case when no callout functions specified */
     if (Is_none(v_maybe_cof)) {
@@ -587,7 +605,7 @@ CAMLprim value pcre_exec_stub0(intnat v_opt, value v_rex, intnat v_pos,
       if (ret < 0)
         handle_exec_error("pcre_exec_stub", ret);
       else
-        handle_pcre_exec_result(ovec, v_ovec, ovec_len, ret);
+        handle_pcre_exec_result(ovec, v_ovec, ovec_len, subj_start, ret);
     }
 
     /* There are callout functions */
@@ -598,7 +616,7 @@ CAMLprim value pcre_exec_stub0(intnat v_opt, value v_rex, intnat v_pos,
       int *ovec = caml_stat_alloc(sizeof(int) * ovec_len);
       int workspace_len;
       int *workspace;
-      struct cod cod = {(value *)NULL, (value *)NULL, (value)NULL};
+      struct cod cod = {0, (value *)NULL, (value *)NULL, (value)NULL};
       struct pcre_extra new_extra =
 #ifdef PCRE_EXTRA_MATCH_LIMIT_RECURSION
 #ifdef PCRE_EXTRA_MARK
@@ -614,6 +632,7 @@ CAMLprim value pcre_exec_stub0(intnat v_opt, value v_rex, intnat v_pos,
           {PCRE_EXTRA_CALLOUT_DATA, NULL, 0, NULL, NULL};
 #endif
 
+      cod.subj_start = subj_start;
       memcpy(subj, ocaml_subj, len);
 
       Begin_roots4(v_rex, v_cof, v_substrings, v_ovec);
@@ -658,7 +677,7 @@ CAMLprim value pcre_exec_stub0(intnat v_opt, value v_rex, intnat v_pos,
         else
           handle_exec_error("pcre_exec_stub(callout)", ret);
       } else {
-        handle_pcre_exec_result(ovec, v_ovec, ovec_len, ret);
+        handle_pcre_exec_result(ovec, v_ovec, ovec_len, subj_start, ret);
         if (is_dfa) {
           caml_int_ptr ocaml_workspace_dst =
               (caml_int_ptr)&Field(v_workspace, 0);
@@ -680,23 +699,25 @@ CAMLprim value pcre_exec_stub0(intnat v_opt, value v_rex, intnat v_pos,
 }
 
 CAMLprim value pcre_exec_stub(intnat v_opt, value v_rex, intnat v_pos,
-                              value v_subj, value v_ovec, value v_maybe_cof) {
-  return pcre_exec_stub0(v_opt, v_rex, v_pos, v_subj, v_ovec, v_maybe_cof,
-                         (value)NULL);
+                              intnat v_subj_start, value v_subj, value v_ovec,
+                              value v_maybe_cof) {
+  return pcre_exec_stub0(v_opt, v_rex, v_pos, v_subj_start, v_subj, v_ovec,
+                         v_maybe_cof, (value)NULL);
 }
 
 /* Byte-code hook for pcre_exec_stub
    Needed, because there are more than 5 arguments */
 CAMLprim value pcre_exec_stub_bc(value *argv, int __unused argn) {
-  return pcre_exec_stub0(Int_val(argv[0]), argv[1], Int_val(argv[2]), argv[3],
-                         argv[4], argv[5], (value)NULL);
+  return pcre_exec_stub0(Int_val(argv[0]), argv[1], Int_val(argv[2]),
+                         Int_val(argv[3]), argv[4], argv[5], argv[6],
+                         (value)NULL);
 }
 
 /* Byte-code hook for pcre_dfa_exec_stub
    Needed, because there are more than 5 arguments */
 CAMLprim value pcre_dfa_exec_stub_bc(value *argv, int __unused argn) {
-  return pcre_exec_stub0(Int_val(argv[0]), argv[1], Int_val(argv[2]), argv[3],
-                         argv[4], argv[5], argv[6]);
+  return pcre_exec_stub0(Int_val(argv[0]), argv[1], Int_val(argv[2]),
+                         Int_val(argv[3]), argv[4], argv[5], argv[6], argv[7]);
 }
 
 static struct custom_operations tables_ops = {

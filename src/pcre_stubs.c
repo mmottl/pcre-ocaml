@@ -49,6 +49,20 @@ typedef long *caml_int_ptr;
 #include <caml/fail.h>
 #include <caml/memory.h>
 #include <caml/mlvalues.h>
+#include <caml/version.h>
+
+#if (OCAML_VERSION_MAJOR == 4) && (OCAML_VERSION_MINOR < 12)
+#define Val_none (Val_long(0))
+#define Is_none(v) ((v) == Val_none)
+
+CAMLexport value caml_alloc_some(value v)
+{
+  CAMLparam1(v);
+  value some = caml_alloc_small(1, 0);
+  Field(some, 0) = v;
+  CAMLreturn(some);
+}
+#endif
 
 #include <pcre.h>
 

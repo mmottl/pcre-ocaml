@@ -492,9 +492,14 @@ let test_pcre_subst ctxt =
        ~subst:(fun __g__ -> String.concat "" ["$"]) "abcabc")
 
 
+let show_string_option =
+  function
+    None -> "None"
+  | Some s -> Printf.sprintf "Some %s" s
+
 let test_pcre_ocamlfind_bits ctxt =
   ();
-  assert_equal ~printer:[%show: string option] (Some "-syntax camlp5o ")
+  assert_equal ~printer:show_string_option (Some "-syntax camlp5o ")
     (snd
        ((let __re__ = Pcre.regexp ~flags:[] "^\\(\\*\\*pp (.*?)\\*\\)" in
          fun __subj__ ->

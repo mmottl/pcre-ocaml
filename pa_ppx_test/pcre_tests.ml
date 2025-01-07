@@ -95,9 +95,13 @@ let test_pcre_subst ctxt =
   ; assert_equal "$$"  ([%subst "A(B)C" / {|$$|} / g i pcre] "abcabc")
 
 
+let show_string_option = function
+    None -> "None"
+  | Some s -> Printf.sprintf "Some %s" s
+
 let test_pcre_ocamlfind_bits ctxt =
   ()
-  ; assert_equal ~printer:[%show: string option] (Some "-syntax camlp5o ")
+  ; assert_equal ~printer:show_string_option (Some "-syntax camlp5o ")
       (snd ([%match {|^\(\*\*pp (.*?)\*\)|} / exc strings pcre]
        {|(**pp -syntax camlp5o *)
 |}))

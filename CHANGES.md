@@ -1,5 +1,11 @@
 # Changelog
 
+## 8.0.2 (2025-01-06)
+
+- Added support for OCaml 4.08.
+
+  Thanks to Chet Murthy for this contribution.
+
 ## 8.0.1 (2024-12-20)
 
 - Fixed a bug in the `full_split` function where non-capturing groups were

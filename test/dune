@@ -1,0 +1,9 @@
+(test
+ (name pcre_tests)
+ (preprocess (pps ppx_deriving.show))
+ (libraries pcre ounit2))
+
+(env
+ (dev
+  (flags
+   (:standard -w -27))))

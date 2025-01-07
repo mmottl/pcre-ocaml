@@ -1,6 +1,5 @@
 (test
  (name pcre_tests)
- (preprocess (pps ppx_deriving.show))
  (libraries pcre ounit2))
 
 (env

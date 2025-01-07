@@ -24,6 +24,6 @@
    "pcre-ocaml offers library functions for string pattern matching and\nsubstitution, similar to the functionality offered by the Perl language.")
  (depends
   (ocaml
-   (>= 4.12))
+   (>= 4.08))
   dune-configurator
   (conf-libpcre :build)))

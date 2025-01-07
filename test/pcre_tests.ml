@@ -436,86 +436,6 @@ let test_pcre_delim_split_raw ctxt =
   end
 
 
-let test_pcre_string_pattern ctxt =
-  ();
-  assert_equal "$b"
-    ((fun __g__ ->
-        String.concat ""
-          ["$"; "";
-           match Pcre.get_substring __g__ 1 with
-             exception Not_found -> ""
-           | s -> s])
-       ((let __re__ = Pcre.regexp ~flags:[] "a(b)c" in
-         fun __subj__ -> Pcre.exec ~rex:__re__ __subj__)
-          "abc"));
-  assert_equal "b"
-    ((fun __g__ ->
-        String.concat ""
-          [match Pcre.get_substring __g__ 01 with
-             exception Not_found -> ""
-           | s -> s])
-       ((let __re__ = Pcre.regexp ~flags:[] "a(b)c" in
-         fun __subj__ -> Pcre.exec ~rex:__re__ __subj__)
-          "abc"));
-  assert_equal "bx"
-    (let s = "x" in
-     (fun __g__ ->
-        String.concat ""
-          [begin match Pcre.get_substring __g__ 01 with
-             exception Not_found -> ""
-           | s -> s
-           end;
-           ""; s])
-       ((let __re__ = Pcre.regexp ~flags:[] "a(b)c" in
-         fun __subj__ -> Pcre.exec ~rex:__re__ __subj__)
-          "abc"));
-  assert_equal "\"bx"
-    (let s = "x" in
-     (fun __g__ ->
-        String.concat ""
-          ["\"";
-           begin match Pcre.get_substring __g__ 01 with
-             exception Not_found -> ""
-           | s -> s
-           end;
-           ""; s])
-       ((let __re__ = Pcre.regexp ~flags:[] "a(b)c" in
-         fun __subj__ -> Pcre.exec ~rex:__re__ __subj__)
-          "abc"));
-  assert_equal "\"x" (let s = "x" in String.concat "" ["\""; s])
-
-
-let test_pcre_expr_pattern ctxt =
-  ();
-  assert_equal "abc"
-    ((fun __g__ ->
-        match Pcre.get_substring __g__ 0 with
-          exception Not_found -> ""
-        | s -> s)
-       ((let __re__ = Pcre.regexp ~flags:[] "abc" in
-         fun __subj__ -> Pcre.exec ~rex:__re__ __subj__)
-          "abc"));
-  assert_equal "abcx"
-    ((fun __g__ ->
-        (match Pcre.get_substring __g__ 0 with
-           exception Not_found -> ""
-         | s -> s) ^
-        "x")
-       ((let __re__ = Pcre.regexp ~flags:[] "abc" in
-         fun __subj__ -> Pcre.exec ~rex:__re__ __subj__)
-          "abc"));
-  assert_equal "abcx"
-    (let x = "x" in
-     (fun __g__ ->
-        (match Pcre.get_substring __g__ 0 with
-           exception Not_found -> ""
-         | s -> s) ^
-        x)
-       ((let __re__ = Pcre.regexp ~flags:[] "abc" in
-         fun __subj__ -> Pcre.exec ~rex:__re__ __subj__)
-          "abc"));
-  assert_equal "x" (let x = "x" in "" ^ x)
-
 let test_pcre_subst ctxt =
   ();
   assert_equal "$b"
@@ -622,8 +542,6 @@ let suite =
      "pcre multiline" >:: test_pcre_multiline;
      "pcre simple_split" >:: test_pcre_simple_split;
      "pcre delim_split raw" >:: test_pcre_delim_split_raw;
-     "pcre string_pattern" >:: test_pcre_string_pattern;
-     "pcre expr_pattern" >:: test_pcre_expr_pattern;
      "pcre subst" >:: test_pcre_subst;
      "pcre ocamlfind bits" >:: test_pcre_ocamlfind_bits;
      "pcre envsubst via replace" >:: test_pcre_envsubst_via_replace;

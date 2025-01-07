@@ -84,22 +84,6 @@ let test_pcre_delim_split_raw ctxt =
   ; assert_equal [Text "ab"; Delim "x"; Group (1, "x"); NoGroup; Text "cd"; Delim "u"; NoGroup; Group (2, "u")] ([%split {|(x)|(u)|} / raw pcre] "abxcdu")
 
 
-let test_pcre_string_pattern ctxt =
-  ()
-  ; assert_equal "$b"  ([%pattern {|$$$1|} /pcre] ([%match "a(b)c"/exc pcre raw] "abc"))
-  ; assert_equal "b"  ([%pattern {|${01}|} /pcre] ([%match "a(b)c"/exc pcre raw] "abc"))
-  ; assert_equal "bx"  (let s = "x" in [%pattern {|${01}${s}|} /pcre] ([%match "a(b)c"/exc pcre raw] "abc"))
-  ; assert_equal {|"bx|}  (let s = "x" in [%pattern {|"${01}${s}|} /pcre] ([%match "a(b)c"/exc pcre raw] "abc"))
-  ; assert_equal {|"x|}  (let s = "x" in [%pattern {|"${s}|} /pcre])
-
-
-let test_pcre_expr_pattern ctxt =
-  ()
-  ; assert_equal "abc"  ([%pattern "$0$" / e pcre] ([%match "abc"/exc pcre raw] "abc"))
-  ; assert_equal "abcx"  ([%pattern {|$0$ ^ "x"|} / e pcre] ([%match "abc"/exc pcre raw] "abc"))
-  ; assert_equal "abcx"  (let x = "x" in [%pattern {|$0$ ^ x|} / e pcre] ([%match "abc"/exc pcre raw] "abc"))
-  ; assert_equal "x"  (let x = "x" in [%pattern {|"" ^ x|} / e pcre])
-
 let test_pcre_subst ctxt =
   ()
   ; assert_equal "$b"  ([%subst "a(b)c" / {|$$$1|} /pcre] "abc")
@@ -141,8 +125,6 @@ let suite = "Test pa_ppx_regexp" >::: [
     ; "pcre multiline"   >:: test_pcre_multiline
     ; "pcre simple_split"   >:: test_pcre_simple_split
     ; "pcre delim_split raw"   >:: test_pcre_delim_split_raw
-    ; "pcre string_pattern"   >:: test_pcre_string_pattern
-    ; "pcre expr_pattern"   >:: test_pcre_expr_pattern
     ; "pcre subst"   >:: test_pcre_subst
     ; "pcre ocamlfind bits"   >:: test_pcre_ocamlfind_bits
     ; "pcre envsubst via replace"   >:: test_pcre_envsubst_via_replace

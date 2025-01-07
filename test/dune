@@ -1,0 +1,8 @@
+(test
+ (name pcre_tests)
+ (libraries pcre ounit2))
+
+(env
+ (dev
+  (flags
+   (:standard -w -27))))

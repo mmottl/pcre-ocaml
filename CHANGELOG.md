@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased]
+
+- Added OUnit2-based test suite. Thanks to Chet Murthy for this contribution.
+
 ## [8.0.2] - 2025-01-06
 
 ### Added
@@ -87,6 +91,7 @@
 ### Added
 
 - DFA support with new functions:
+
   - `pcre_dfa_exec`
   - `unsafe_pcre_dfa_exec`
 

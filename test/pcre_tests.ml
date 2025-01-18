@@ -619,6 +619,8 @@ let test_pcre_envsubst_via_replace ctxt =
 let suite =
   "Test pa_ppx_regexp"
   >::: [
+         "pcre only_regexps" >:: test_special_char_regexps;
+         "pcre simple_match" >:: test_pcre_simple_match;
          "pcre selective_match" >:: test_pcre_selective_match;
          "pcre search" >:: test_pcre_search;
          "pcre single" >:: test_pcre_single;
@@ -628,7 +630,6 @@ let suite =
          "pcre subst" >:: test_pcre_subst;
          "pcre ocamlfind bits" >:: test_pcre_ocamlfind_bits;
          "pcre envsubst via replace" >:: test_pcre_envsubst_via_replace;
-         "pcre only_regexps" >:: test_special_char_regexps;
        ]
 
 let _ = if not !Sys.interactive then run_test_tt_main suite

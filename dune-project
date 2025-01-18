@@ -26,4 +26,5 @@
   (ocaml
    (>= 4.08))
   dune-configurator
-  (conf-libpcre :build)))
+  (conf-libpcre :build)
+  (ounit2 :with-test)))

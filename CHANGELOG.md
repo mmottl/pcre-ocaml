@@ -1,18 +1,23 @@
 # Changelog
 
-## 8.0.2 (2025-01-06)
+## [8.0.2] - 2025-01-06
 
-- Added support for OCaml 4.08.
+### Added
 
-  Thanks to Chet Murthy for this contribution.
+- Support for OCaml 4.08. Thanks to Chet Murthy for this contribution.
 
-## 8.0.1 (2024-12-20)
+## [8.0.1] - 2024-12-20
+
+### Fixed
 
 - Fixed a bug in the `full_split` function where non-capturing groups were
   not identified as such.
+
+### Removed
+
 - Removed obsolete base-bytes dependency
 
-## 7.5.1 (2024-12-07)
+## [7.5.1] - 2024-12-07
 
 - Added GitHub workflow for automated CI/CD.
 - Reformatted all OCaml and C-files for consistency.
@@ -21,29 +26,29 @@
 - Fixed macro instantiation formatting and minor C preprocessing issues.
 - Corrected license typo.
 
-## 7.5.0 (2021-07-22)
+## [7.5.0] - 2021-07-22
 
 - Added support for JIT-compilation of patterns, which can greatly improve
   matching performance for most patterns. Users need to explicitly add
   the `jit_compile` flag to request JIT-compilation when creating regular
   expressions.
 
-## 7.4.6 (2020-08-04)
+## [7.4.6] - 2020-08-04
 
 - Removed mistakenly kept base library configuration dependency.
 
-## 7.4.5 (2020-08-04)
+## [7.4.5] - 2020-08-04
 
 - Removed excessive build dependency on `base` package.
 
-## 7.4.4 (2020-07-30)
+## [7.4.4] - 2020-07-30
 
 - Added missing dune-configurator dependency.
 
 - Added support for const char strings in stubs due to stricter handling
   in newer OCaml runtimes. This eliminates C-compiler warnings.
 
-## 7.4.3 (2019-10-27)
+## [7.4.3] - 2019-10-27
 
 - Switched from `caml_alloc_custom` to `caml_alloc_custom_mem`.
 
@@ -51,15 +56,15 @@
 
 - Switched to OPAM file generation via `dune-project`
 
-## 7.4.2 (2019-10-11)
+## [7.4.2] - 2019-10-11
 
 - Fixed warnings in C-stubs
 
-## 7.4.1 (2019-02-21)
+## [7.4.1] - 2019-02-21
 
 - Fixed pattern execution bug due to DFA implementation
 
-## 7.4.0 (2019-02-05)
+## [7.4.0] - 2019-02-05
 
 - Added DFA support
 
@@ -70,28 +75,28 @@
 
   Thanks to Chas Emerick <chas@cemerick.com> for this contribution.
 
-## 7.3.5 (2018-10-25)
+## [7.3.5] - 2018-10-25
 
 - Switched to dune, dune-release, and OPAM 2.0
 
-## 7.3.4 (2017-11-22)
+## [7.3.4] - 2017-11-22
 
 - Improved finalization of regular expressions and tables for better
   performance
 
-## 7.3.3 (2017-10-17)
+## [7.3.3] - 2017-10-17
 
 - Fixed external declaration bug in internal regexp compile function
 
-## 7.3.2 (2017-10-10)
+## [7.3.2] - 2017-10-10
 
 - Improved compatibility with MSVC
 
-## 7.3.1 (2017-10-08)
+## [7.3.1] - 2017-10-08
 
 - Used untagged integers when declaring external functions
 
-## 7.3.0 (2017-07-27)
+## [7.3.0] - 2017-07-27
 
 - Switched to jbuilder and topkg
 

@@ -15,61 +15,78 @@
 
 ### Removed
 
-- Removed obsolete base-bytes dependency
+- Removed obsolete base-bytes dependency.
 
 ## [7.5.1] - 2024-12-07
 
-- Added GitHub workflow for automated CI/CD.
+### Added
+
+- GitHub workflow for automated CI/CD.
+
+### Changed
+
 - Reformatted all OCaml and C-files for consistency.
 - Improved and fixed documentation.
 - Enhanced README and example README for clarity.
+
+### Fixed
+
 - Fixed macro instantiation formatting and minor C preprocessing issues.
 - Corrected license typo.
 
 ## [7.5.0] - 2021-07-22
 
-- Added support for JIT-compilation of patterns, which can greatly improve
-  matching performance for most patterns. Users need to explicitly add
-  the `jit_compile` flag to request JIT-compilation when creating regular
-  expressions.
+### Added
+
+- Support for JIT-compilation of patterns to improve matching performance.
+  Users need to add the `jit_compile` flag to request JIT-compilation when
+  creating regular expressions.
 
 ## [7.4.6] - 2020-08-04
 
-- Removed mistakenly kept base library configuration dependency.
+### Removed
+
+- Mistakenly kept base library configuration dependency.
 
 ## [7.4.5] - 2020-08-04
 
-- Removed excessive build dependency on `base` package.
+### Removed
+
+- Excessive build dependency on `base` package.
 
 ## [7.4.4] - 2020-07-30
 
-- Added missing dune-configurator dependency.
+### Added
 
-- Added support for const char strings in stubs due to stricter handling
-  in newer OCaml runtimes. This eliminates C-compiler warnings.
+- Missing dune-configurator dependency.
+- Support for const char strings in stubs due to stricter handling in newer
+  OCaml runtimes, eliminating C-compiler warnings.
 
 ## [7.4.3] - 2019-10-27
 
-- Switched from `caml_alloc_custom` to `caml_alloc_custom_mem`.
+### Changed
 
-  This should improve memory usage and GC performance.
-
-- Switched to OPAM file generation via `dune-project`
+- Switched from `caml_alloc_custom` to `caml_alloc_custom_mem` to improve
+  memory usage and GC performance.
+- Switched to OPAM file generation via `dune-project`.
 
 ## [7.4.2] - 2019-10-11
 
-- Fixed warnings in C-stubs
+### Fixed
+
+- Warnings in C-stubs.
 
 ## [7.4.1] - 2019-02-21
 
-- Fixed pattern execution bug due to DFA implementation
+### Fixed
+
+- Pattern execution bug due to DFA implementation.
 
 ## [7.4.0] - 2019-02-05
 
-- Added DFA support
+### Added
 
-  New functions:
-
+- DFA support with new functions:
   - `pcre_dfa_exec`
   - `unsafe_pcre_dfa_exec`
 
@@ -77,28 +94,39 @@
 
 ## [7.3.5] - 2018-10-25
 
-- Switched to dune, dune-release, and OPAM 2.0
+### Changed
+
+- Switched to dune, dune-release, and OPAM 2.0.
 
 ## [7.3.4] - 2017-11-22
 
-- Improved finalization of regular expressions and tables for better
-  performance
+### Improved
+
+- Finalization of regular expressions and tables for better performance.
 
 ## [7.3.3] - 2017-10-17
 
-- Fixed external declaration bug in internal regexp compile function
+### Fixed
+
+- External declaration bug in internal regexp compile function.
 
 ## [7.3.2] - 2017-10-10
 
-- Improved compatibility with MSVC
+### Improved
+
+- Compatibility with MSVC.
 
 ## [7.3.1] - 2017-10-08
 
-- Used untagged integers when declaring external functions
+### Changed
+
+- Used untagged integers when declaring external functions.
 
 ## [7.3.0] - 2017-07-27
 
-- Switched to jbuilder and topkg
+### Changed
+
+- Switched to jbuilder and topkg.
 
 ## Changes Before Version 7.3.0
 

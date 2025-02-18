@@ -1,8 +1,11 @@
 # Changelog
 
-## [Unreleased]
+## [8.0.3] - 2025-02-18
 
-- Added OUnit2-based test suite. Thanks to Chet Murthy for this contribution.
+- Removed export on `caml_alloc_some` to prevent linking issues.
+- Added OUnit2-based test suite.
+
+Thanks to Chet Murthy for these contribution.
 
 ## [8.0.2] - 2025-01-06
 
@@ -14,8 +17,8 @@
 
 ### Fixed
 
-- Fixed a bug in the `full_split` function where non-capturing groups were
-  not identified as such.
+- Fixed a bug in the `full_split` function where non-capturing groups were not
+  identified as such.
 
 ### Removed
 
@@ -42,9 +45,9 @@
 
 ### Added
 
-- Support for JIT-compilation of patterns to improve matching performance.
-  Users need to add the `jit_compile` flag to request JIT-compilation when
-  creating regular expressions.
+- Support for JIT-compilation of patterns to improve matching performance. Users
+  need to add the `jit_compile` flag to request JIT-compilation when creating
+  regular expressions.
 
 ## [7.4.6] - 2020-08-04
 
@@ -70,8 +73,8 @@
 
 ### Changed
 
-- Switched from `caml_alloc_custom` to `caml_alloc_custom_mem` to improve
-  memory usage and GC performance.
+- Switched from `caml_alloc_custom` to `caml_alloc_custom_mem` to improve memory
+  usage and GC performance.
 - Switched to OPAM file generation via `dune-project`.
 
 ## [7.4.2] - 2019-10-11

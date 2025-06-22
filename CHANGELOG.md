@@ -1,5 +1,12 @@
 # Changelog
 
+## [8.0.4] - 2025-06-22
+
+### Fixed
+
+- Squelch uninitialized-value warnings. Thanks to Nathan Taylor for the
+  contribution.
+
 ## [8.0.3] - 2025-02-18
 
 - Removed export on `caml_alloc_some` to prevent linking issues.

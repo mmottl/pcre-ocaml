@@ -627,8 +627,8 @@ CAMLprim value pcre_exec_stub0(intnat v_opt, value v_rex, intnat v_pos,
       value v_substrings;
       char *subj = caml_stat_alloc(sizeof(char) * len);
       int *ovec = caml_stat_alloc(sizeof(int) * ovec_len);
-      int workspace_len;
-      int *workspace;
+      int workspace_len = Wosize_val(v_workspace);
+      int *workspace = NULL;
       struct cod cod = {0, (value *)NULL, (value *)NULL, (value)NULL};
       struct pcre_extra new_extra =
 #ifdef PCRE_EXTRA_MATCH_LIMIT_RECURSION
@@ -671,7 +671,6 @@ CAMLprim value pcre_exec_stub0(intnat v_opt, value v_rex, intnat v_pos,
       }
 
       if (is_dfa) {
-        workspace_len = Wosize_val(v_workspace);
         workspace = caml_stat_alloc(sizeof(int) * workspace_len);
         ret = pcre_dfa_exec(code, extra, subj, len, pos, opt, ovec, ovec_len,
                             (int *)&Field(v_workspace, 0), workspace_len);

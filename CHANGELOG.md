@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+### Added
+
 - Makefile target to generate `compile_commands.json` for improved LSP support
   in editors.
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased]
+
+- Makefile target to generate `compile_commands.json` for improved LSP support
+  in editors.
+
 ## [8.0.4] - 2025-06-22
 
 ### Fixed

@@ -27,12 +27,6 @@
 #endif
 #endif
 
-#if defined(_WIN64)
-typedef long long *caml_int_ptr;
-#else
-typedef long *caml_int_ptr;
-#endif
-
 #if __GNUC__ >= 3
 #define __unused __attribute__((unused))
 #else
@@ -61,6 +55,12 @@ static value caml_alloc_some(value v) {
   Field(some, 0) = v;
   CAMLreturn(some);
 }
+#endif
+
+#if defined(_WIN64)
+typedef long long *caml_int_ptr;
+#else
+typedef long *caml_int_ptr;
 #endif
 
 #include <pcre.h>

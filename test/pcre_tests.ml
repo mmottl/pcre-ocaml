@@ -116,6 +116,13 @@ let test_pcre_simple_match ctxt =
          fun __subj__ -> Pcre.exec ~rex:__re__ __subj__)
           "abc")
        0);
+  assert_equal "abc"
+    (Pcre.get_substring
+       ((let __re__ = Pcre.regexp "abc" in
+         (* Explicitly adding a dummy callout to validate PR #36 *)
+         fun __subj__ -> Pcre.exec ~callout:(fun _ -> ()) ~rex:__re__ __subj__)
+          "abc")
+       0);
   assert_equal
     ("abc", Some "a", Some "b", Some "c")
     ((let __re__ = Pcre.regexp ~flags:[] "(a)(b)(c)" in

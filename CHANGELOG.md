@@ -1,6 +1,10 @@
 # Changelog
 
-## [Unreleased]
+## [8.0.5] - 2025-07-20
+
+### Fixed
+
+- Fix crash introduced in PR #35. Thanks to Nathan Taylor for the contribution.
 
 ### Added
 

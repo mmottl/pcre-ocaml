@@ -39,7 +39,7 @@ Reasons to choose PCRE-OCaml:
 Please run:
 
 ```sh
-odig odoc pcre2
+odig odoc pcre
 ```
 
 Or:

@@ -2,8 +2,8 @@
 
 ## `cloc`
 
-This program reads C source code from `stdin` and outputs it to `stdout`
-with comments and empty lines removed. It's useful for counting lines of code.
+This program reads C source code from `stdin` and outputs it to `stdout` with
+comments and empty lines removed. It's useful for counting lines of code.
 
 ## `count_hash`
 
@@ -12,14 +12,14 @@ separated by whitespace, and prints the result to `stdout`.
 
 ## `pcregrep`
 
-A grep-like program using Perl-compatible regular expressions. Start the
-program with the `-help` argument to see its functionality.
+A grep-like program using Perl-compatible regular expressions. Start the program
+with the `-help` argument to see its functionality.
 
 ## `subst`
 
 Substitutes text in files using Perl-compatible regular expressions and
-substitution patterns. Start the program with the `-help` argument to see
-its functionality.
+substitution patterns. Start the program with the `-help` argument to see its
+functionality.
 
 Example invocation:
 
@@ -29,9 +29,9 @@ subst '([Tt])ermcap' '$1ermCap' < /etc/termcap
 
 ## `dfa_restart`
 
-Tests the DFA matching function and its partial match restart capability.
-Given a pattern, it accepts input incrementally, restarting the prior
-partial match until the pattern either succeeds or fails.
+Tests the DFA matching function and its partial match restart capability. Given
+a pattern, it accepts input incrementally, restarting the prior partial match
+until the pattern either succeeds or fails.
 
 Example interaction:
 

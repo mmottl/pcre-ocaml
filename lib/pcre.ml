@@ -632,11 +632,11 @@ let replace ?(iflags = 0) ?flags ?(rex = def_rex) ?pat ?(pos = 0)
     if
       cur_pos > subj_len
       ||
-      try
-        unsafe_pcre_exec iflags rex ~pos:cur_pos ~subj_start:0 ~subj ovector
-          callout;
-        false
-      with Not_found -> true
+        try
+          unsafe_pcre_exec iflags rex ~pos:cur_pos ~subj_start:0 ~subj ovector
+            callout;
+          false
+        with Not_found -> true
     then (
       let postfix_len = max (subj_len - cur_pos) 0 in
       let left = pos + full_len in
@@ -691,11 +691,11 @@ let qreplace ?(iflags = 0) ?flags ?(rex = def_rex) ?pat ?(pos = 0) ?(templ = "")
     if
       cur_pos > subj_len
       ||
-      try
-        unsafe_pcre_exec iflags rex ~pos:cur_pos ~subj_start:0 ~subj ovector
-          callout;
-        false
-      with Not_found -> true
+        try
+          unsafe_pcre_exec iflags rex ~pos:cur_pos ~subj_start:0 ~subj ovector
+            callout;
+          false
+        with Not_found -> true
     then (
       let postfix_len = max (subj_len - cur_pos) 0 in
       let left = pos + full_len in
@@ -744,11 +744,11 @@ let substitute_substrings ?(iflags = 0) ?flags ?(rex = def_rex) ?pat ?(pos = 0)
     if
       cur_pos > subj_len
       ||
-      try
-        unsafe_pcre_exec iflags rex ~pos:cur_pos ~subj_start:0 ~subj ovector
-          callout;
-        false
-      with Not_found -> true
+        try
+          unsafe_pcre_exec iflags rex ~pos:cur_pos ~subj_start:0 ~subj ovector
+            callout;
+          false
+        with Not_found -> true
     then (
       let postfix_len = max (subj_len - cur_pos) 0 in
       let left = pos + full_len in
@@ -908,11 +908,11 @@ let internal_psplit flags rex max pos callout subj =
         if
           prematch
           &&
-          try
-            unsafe_pcre_exec flags rex ~pos ~subj_start:pos ~subj ovector
-              callout;
-            true
-          with Not_found -> false
+            try
+              unsafe_pcre_exec flags rex ~pos ~subj_start:pos ~subj ovector
+                callout;
+              true
+            with Not_found -> false
         then
           let last = Array.unsafe_get ovector 1 in
           let strs = handle_subgroups strs in
@@ -1032,11 +1032,11 @@ let full_split ?(iflags = 0) ?flags ?(rex = def_rex) ?pat ?(pos = 0) ?(max = 0)
         if
           prematch
           &&
-          try
-            unsafe_pcre_exec iflags rex ~pos ~subj_start:pos ~subj ovector
-              callout;
-            true
-          with Not_found -> false
+            try
+              unsafe_pcre_exec iflags rex ~pos ~subj_start:pos ~subj ovector
+                callout;
+              true
+            with Not_found -> false
         then
           let first = Array.unsafe_get ovector 0 in
           let last = Array.unsafe_get ovector 1 in
